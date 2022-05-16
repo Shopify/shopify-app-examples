@@ -100,6 +100,52 @@ export async function createServer(
 
   app.use(express.json());
 
+  /**
+   * Expect body to contain
+   * {
+   *   productId: "<product id>",
+   *   goToCheckout: "true" | "false",
+   *   discountCode: "" | "<discount code id>"
+   * }
+   */
+  // app.post("/api/qrcode/new", verifyRequest(app), async (req, res) => {
+  app.post("/api/qrcode/new", async (req, res) => {
+    try {
+      await qrCodesDB.create(
+        req.body.productId,
+        req.body.goToCheckout,
+        req.body.discountCode
+      );
+      res.status(201).send();
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  // app.get("/api/qrcode/:id", verifyRequest(app), async (req, res) => {
+  app.get("/api/qrcode/:id", async (req, res) => {
+    try {
+      const response = await qrCodesDB.read(req.params.id);
+      if (response === undefined) {
+        res.status(404).send();
+      } else {
+        res.status(200).send(response);
+      }
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  // app.delete("/api/qrcode/:id", verifyRequest(app), async (req, res) => {
+  app.delete("/api/qrcode/:id", async (req, res) => {
+    try {
+      await qrCodesDB.delete(req.params.id);
+      res.status(200).send();
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  });
+
   app.use((req, res, next) => {
     const shop = req.query.shop;
     if (Shopify.Context.IS_EMBEDDED_APP && shop) {
