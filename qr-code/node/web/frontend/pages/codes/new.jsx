@@ -46,7 +46,7 @@ export default function NewCode() {
         visible={title}
         fullWidth
       />
-      <TitleBar title="QR Code App" primaryAction={null} />
+      <TitleBar title="New code" primaryAction={null} />
       <Layout>
         <Layout.Section>
           <Form onSubmit={() => console.log('hi')}>
