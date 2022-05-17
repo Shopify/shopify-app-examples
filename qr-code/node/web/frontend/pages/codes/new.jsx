@@ -22,6 +22,31 @@ import {
   ResourcePicker,
 } from '@shopify/app-bridge-react'
 import { ImageMajor } from '@shopify/polaris-icons'
+import { useShopifyQuery } from 'hooks/useShopifyQuery'
+import { gql } from 'graphql-request'
+
+const DISCOUNTS_QUERY = gql`
+  query discounts($first: Int!) {
+    automaticDiscountNodes(first: $first) {
+      edges {
+        node {
+          id
+          automaticDiscount {
+            __typename
+            ... on DiscountAutomaticBxgy {
+              status
+              title
+            }
+            ... on DiscountAutomaticBasic {
+              status
+              title
+            }
+          }
+        }
+      }
+    }
+  }
+`
 
 export default function NewCode() {
   const [title, setTitle] = useState('')
@@ -39,8 +64,6 @@ export default function NewCode() {
     })
   }, [])
 
-  console.log({ selectedProduct })
-
   const handleDestinationChange = useCallback(
     (newDestination) => setDestination(newDestination),
     []
@@ -54,6 +77,28 @@ export default function NewCode() {
     () => setShowResourcePicker(!showResourcePicker),
     [showResourcePicker]
   )
+
+  const {
+    data: discounts,
+    isLoading: isLoadingDiscounts,
+    isError: discountsError,
+  } = useShopifyQuery({
+    key: 'discounts',
+    query: DISCOUNTS_QUERY,
+    variables: {
+      first: 25,
+    },
+  })
+
+  const discountOptions = discounts
+    ? discounts.data.automaticDiscountNodes.edges.map(
+        ({ node: { id, automaticDiscount } }) => ({
+          id,
+          key: id,
+          label: `${automaticDiscount.title} (${automaticDiscount.status})`,
+        })
+      )
+    : []
 
   return (
     <Page fullWidth>
@@ -113,7 +158,9 @@ export default function NewCode() {
                       ) : (
                         <Icon source={ImageMajor} color="base" />
                       )}
-                      <TextStyle variation="strong">{selectedProduct.title}</TextStyle>
+                      <TextStyle variation="strong">
+                        {selectedProduct.title}
+                      </TextStyle>
                     </Stack>
                   ) : (
                     <Button onClick={toggleResourcePicker}>
@@ -162,10 +209,11 @@ export default function NewCode() {
                 />
                 <Select
                   label="discount code"
-                  options={[{ label: 'sample', value: 'sample' }]}
+                  options={discountOptions}
                   onChange={handleSelectedDiscount}
                   value={selectedDiscount}
                   placeholder="discount code name"
+                  disabled={isLoadingDiscounts || discountsError}
                   labelHidden
                 />
               </Card>
