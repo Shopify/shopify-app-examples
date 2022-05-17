@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useMemo } from 'react'
 import {
   Card,
   Form,
@@ -69,7 +69,7 @@ export default function NewCode() {
       title,
       images,
       id,
-      handle
+      handle,
     })
   }, [])
 
@@ -112,6 +112,27 @@ export default function NewCode() {
       ]
     : []
 
+  const initialState = useRef({
+    title,
+    selectedProduct,
+    destination,
+    selectedDiscount,
+  })
+
+  const isDirty = useMemo(() => {
+    const initialStateString = JSON.stringify(initialState.current)
+    const currentStateString = JSON.stringify({
+      title,
+      selectedProduct,
+      destination,
+      selectedDiscount,
+    })
+
+    if (initialStateString === currentStateString) {
+      return false
+    }
+  }, [title, selectedProduct, destination, selectedDiscount])
+
   return (
     <Page fullWidth>
       <ContextualSaveBar
@@ -120,7 +141,7 @@ export default function NewCode() {
           label: 'Discard',
           onAction: () => console.log('save'),
         }}
-        visible={title}
+        visible={isDirty}
         fullWidth
       />
       <TitleBar title="New code" primaryAction={null} />
