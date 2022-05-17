@@ -1,4 +1,4 @@
-import sqlite3 from 'sqlite3';
+import sqlite3 from "sqlite3";
 
 export class QRCodesDB {
   qrCodesTableName = "qr_codes";
@@ -10,11 +10,7 @@ export class QRCodesDB {
     this.ready = this.init();
   }
 
-  async create(
-    productId,
-    goToCheckout = false,
-    discountCode = ''
-  ) {
+  async create({ productId, goToCheckout = false, discountCode = "" }) {
     await this.ready;
 
     const query = `
@@ -23,11 +19,34 @@ export class QRCodesDB {
       VALUES (?, ?, ?, 0, 0);
     `;
 
-    await this.query(
-      query,
-      [productId, goToCheckout, discountCode],
-    );
+    await this.query(query, [productId, goToCheckout, discountCode]);
     return true;
+  }
+
+  async update(id, { productId, goToCheckout = false, discountCode = "" }) {
+    await this.ready;
+
+    const query = `
+      UPDATE ${this.qrCodesTableName}
+      SET
+        productId = ?,
+        goToCheckout = ?,
+        discountCode = ?
+      WHERE
+        id = ?
+    `;
+
+    await this.query(query, [productId, goToCheckout, discountCode, id]);
+    return true;
+  }
+
+  async list() {
+    await this.ready;
+    const query = `
+      SELECT * FROM ${this.qrCodesTableName};
+    `;
+
+    return this.query(query);
   }
 
   async read(id) {
