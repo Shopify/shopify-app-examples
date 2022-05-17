@@ -80,16 +80,6 @@ export async function createServer(
   // All endpoints from this point on will require authentication, comment to disable authentication as a whole
   // app.use("/api/*", verifyRequest(app));
 
-  app.get("/api/products-count", async (req, res) => {
-    const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-    const { Product } = await import(
-      `@shopify/shopify-api/dist/rest-resources/${Shopify.Context.API_VERSION}/index.js`
-    );
-
-    const countData = await Product.count({ session });
-    res.status(200).send(countData);
-  });
-
   app.post("/api/graphql", async (req, res) => {
     try {
       const response = await Shopify.Utils.graphqlProxy(req, res);
