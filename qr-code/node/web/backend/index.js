@@ -1,5 +1,5 @@
 // @ts-check
-import { join } from "path";
+import path from 'path';
 import express from "express";
 import cookieParser from "cookie-parser";
 import { Shopify, ApiVersion } from "@shopify/shopify-api";
@@ -7,6 +7,7 @@ import { Shopify, ApiVersion } from "@shopify/shopify-api";
 import applyAuthMiddleware from "./middleware/auth.js";
 import verifyRequest from "./middleware/verify-request.js";
 import { setupGDPRWebHooks } from "./gdpr.js";
+import { QRCodesDB } from './qr-codes-db.js';
 
 const USE_ONLINE_TOKENS = true;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
@@ -18,6 +19,9 @@ const isTest = process.env.NODE_ENV === "test" || !!process.env.VITE_TEST_BUILD;
 const DEV_INDEX_PATH = `${process.cwd()}/frontend/`;
 const PROD_INDEX_PATH = `${process.cwd()}/dist/`;
 
+const sessionDbFile = path.join(process.cwd(), 'session_db.sqlite');
+const qrCodesDbFile = path.join(process.cwd(), 'qr_codes_db.sqlite');
+
 Shopify.Context.initialize({
   API_KEY: process.env.SHOPIFY_API_KEY,
   API_SECRET_KEY: process.env.SHOPIFY_API_SECRET,
@@ -27,8 +31,10 @@ Shopify.Context.initialize({
   API_VERSION: ApiVersion.April22,
   IS_EMBEDDED_APP: true,
   // This should be replaced with your preferred storage strategy
-  SESSION_STORAGE: new Shopify.Session.MemorySessionStorage(),
+  SESSION_STORAGE: new Shopify.Session.SQLiteSessionStorage(sessionDbFile),
 });
+
+const qrCodesDB = new QRCodesDB(qrCodesDbFile);
 
 // Storing the currently active shops in memory will force them to re-login when your server restarts. You should
 // persist this object in your app.
@@ -128,7 +134,7 @@ export async function createServer(
     } else {
       // res.set('X-Shopify-App-Nothing-To-See-Here', '1');
       const fs = await import("fs");
-      const fallbackFile = join(
+      const fallbackFile = path.join(
         isProd ? PROD_INDEX_PATH : DEV_INDEX_PATH,
         "index.html"
       );

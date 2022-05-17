@@ -25,3 +25,6 @@ dist/
 # Without this, they may get a warning if using a different package manager to us
 yarn.lock
 package-lock.json
+
+# default database files
+*.sqlite
