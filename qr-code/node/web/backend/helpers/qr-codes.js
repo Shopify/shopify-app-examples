@@ -31,20 +31,30 @@ export async function getShopUrlFromSession(req, res) {
  * {
  *   productId: number,
  *   goToCheckout: boolean,
- *   discountCode: number | null
+ *   discountCodeId: number | null
  * }
  */
 export async function parseQrCodeBody(req, res) {
   const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-  const { Product } = await import(
+  const { Product, DiscountCode } = await import(
     `@shopify/shopify-api/dist/rest-resources/${Shopify.Context.API_VERSION}/index.js`
   );
 
   const product = await Product.find({ session, id: req.body.productId });
 
+  let discountCode = null;
+  if (req.body.discountCodeId) {
+    const discount = await DiscountCode.find({
+      session,
+      id: req.body.discountCodeId,
+    });
+    discountCode = discount.code;
+  }
+
   return {
     productHandle: product.handle,
+    variantId: product.variants[0].id,
     goToCheckout: !!req.body.goToCheckout,
-    discountCode: req.body.discountCode,
+    discountCode,
   };
 }
