@@ -1,5 +1,5 @@
 # This file stores configurations for your Shopify app.
 
-name = "Test App"
-id = "8d796e39b66b3a14e34f84a9f09b63c0"
-scopes = "write_products"
+name = "bfsorderprinterprototypev1"
+id = "af9aca58e0bce5a5f6c534f174e0b3e0"
+scopes = "write_products,read_discounts"
