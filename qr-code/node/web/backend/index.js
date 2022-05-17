@@ -81,7 +81,7 @@ export async function createServer(
   });
 
   // All endpoints from this point on will require authentication, comment to disable authentication as a whole
-  // app.use("/api/*", verifyRequest(app));
+  app.use("/api/*", verifyRequest(app));
 
   app.post("/api/graphql", async (req, res) => {
     try {
