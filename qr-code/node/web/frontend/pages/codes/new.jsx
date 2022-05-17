@@ -11,13 +11,17 @@ import {
   Checkbox,
   Select,
   EmptyState,
-  Thumbnail
+  Thumbnail,
+  Icon,
+  Stack,
+  TextStyle,
 } from '@shopify/polaris'
 import {
   ContextualSaveBar,
   TitleBar,
   ResourcePicker,
 } from '@shopify/app-bridge-react'
+import { ImageMajor } from '@shopify/polaris-icons'
 
 export default function NewCode() {
   const [title, setTitle] = useState('')
@@ -77,11 +81,14 @@ export default function NewCode() {
                   helpText="Only store staff can see this title"
                 />
               </Card>
+
               <Card
                 title="Product"
                 actions={[
                   {
-                    content: 'Select product',
+                    content: selectedProduct.title
+                      ? 'Change product'
+                      : 'Select product',
                     onAction: toggleResourcePicker,
                   },
                 ]}
@@ -97,13 +104,17 @@ export default function NewCode() {
                     />
                   )}
                   {selectedProduct.title ? (
-                    <>
-                    <Thumbnail 
-                      source={selectedProduct.images[0].originalSrc}
-                      alt={selectedProduct.images[0].alt}
-                    />
-                    <div>{selectedProduct.title}</div>
-                    </>
+                    <Stack alignment="center">
+                      {selectedProduct.images[0] ? (
+                        <Thumbnail
+                          source={selectedProduct.images[0].originalSrc}
+                          alt={selectedProduct.images[0].altText}
+                        />
+                      ) : (
+                        <Icon source={ImageMajor} color="base" />
+                      )}
+                      <TextStyle variation="strong">{selectedProduct.title}</TextStyle>
+                    </Stack>
                   ) : (
                     <Button onClick={toggleResourcePicker}>
                       Select product
