@@ -116,7 +116,9 @@ export const QRCodesDB = {
 
   __init: async function () {
     const hasQrCodesTable = await this.__hasQrCodesTable();
-    if (!hasQrCodesTable) {
+    if (hasQrCodesTable) {
+      this.ready = Promise.resolve();
+    } else {
       const query = `
         CREATE TABLE ${this.qrCodesTableName} (
           id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -128,7 +130,7 @@ export const QRCodesDB = {
           conversions INTEGER
         )
       `;
-      await this.__query(query);
+      this.ready = this.__query(query);
     }
   },
 
