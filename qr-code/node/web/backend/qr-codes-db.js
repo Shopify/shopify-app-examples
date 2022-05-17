@@ -2,16 +2,18 @@ import sqlite3 from "sqlite3";
 import path from "path";
 import { Shopify } from "@shopify/shopify-api";
 
-const qrCodesDbFile = path.join(process.cwd(), "qr_codes_db.sqlite");
+const QR_CODES_DB_FILE = path.join(process.cwd(), "qr_codes_db.sqlite");
+const DEFAULT_PURCHASE_QUANTITY = 1;
 
 export const QRCodesDB = {
   qrCodesTableName: "qr_codes",
-  db: new sqlite3.Database(qrCodesDbFile),
+  db: new sqlite3.Database(QR_CODES_DB_FILE),
   ready: null,
 
   create: async function ({
     shopDomain,
     productHandle,
+    variantId,
     goToCheckout = false,
     discountCode = "",
   }) {
@@ -19,14 +21,15 @@ export const QRCodesDB = {
 
     const query = `
       INSERT INTO ${this.qrCodesTableName}
-      (shopDomain, productHandle, goToCheckout, discountCode, hits, conversions)
-      VALUES (?, ?, ?, ?, 0, 0)
+      (shopDomain, productHandle, variantId, goToCheckout, discountCode, hits, conversions)
+      VALUES (?, ?, ?, ?, ?, 0, 0)
       RETURNING id;
     `;
 
     const rawResults = await this.__query(query, [
       shopDomain,
       productHandle,
+      variantId,
       goToCheckout,
       discountCode || "",
     ]);
@@ -36,7 +39,7 @@ export const QRCodesDB = {
 
   update: async function (
     id,
-    { productHandle, goToCheckout = false, discountCode = "" }
+    { productHandle, variantId, goToCheckout = false, discountCode = "" }
   ) {
     await this.ready;
 
@@ -44,6 +47,7 @@ export const QRCodesDB = {
       UPDATE ${this.qrCodesTableName}
       SET
         productHandle = ?,
+        variantId = ?,
         goToCheckout = ?,
         discountCode = ?
       WHERE
@@ -52,6 +56,7 @@ export const QRCodesDB = {
 
     await this.__query(query, [
       productHandle,
+      variantId,
       goToCheckout,
       discountCode || "",
       id,
@@ -97,8 +102,15 @@ export const QRCodesDB = {
     return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcode/${qrcode.id}`;
   },
 
-  productUrlFromQrcode: function (qrcode) {
-    return `${qrcode.shopDomain}/products/${qrcode.productHandle}`;
+  handleCodeScan: async function (qrcode) {
+    await this.__increaseHitCount(qrcode);
+
+    const url = new URL(qrcode.shopDomain);
+    if (qrcode.goToCheckout) {
+      return this.__goToProductCheckout(url, qrcode);
+    } else {
+      return this.__goToProductView(url, qrcode);
+    }
   },
 
   // Private
@@ -124,6 +136,7 @@ export const QRCodesDB = {
           id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           shopDomain VARCHAR(511) NOT NULL,
           productHandle VARCHAR(255) NOT NULL,
+          variantId VARCHAR(255) NOT NULL,
           goToCheckout TINYINT NOT NULL,
           discountCode VARCHAR(255) NOT NULL,
           hits INTEGER,
@@ -158,6 +171,38 @@ export const QRCodesDB = {
 
   __generateQrcodeImageUrl: function (qrcode) {
     return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/api/qrcode/${qrcode.id}/image`;
+  },
+
+  __increaseHitCount: async function (qrcode) {
+    const query = `
+      UPDATE ${this.qrCodesTableName}
+      SET hits = hits + 1
+      WHERE id = ?
+    `;
+    await this.__query(query, [qrcode.id]);
+  },
+
+  __goToProductView: function (url, qrcode) {
+    const productPath = `/products/${qrcode.productHandle}`;
+
+    if (qrcode.discountCode) {
+      url.pathname = `/discount/${qrcode.discountCode}`;
+      url.searchParams.append("redirect", productPath);
+    } else {
+      url.pathname = productPath;
+    }
+
+    return url.toString();
+  },
+
+  __goToProductCheckout: function (url, qrcode) {
+    url.pathname = `/cart/${qrcode.variantId}:${DEFAULT_PURCHASE_QUANTITY}`;
+
+    if (qrcode.discountCode) {
+      url.searchParams.append("discount", qrcode.discountCode);
+    }
+
+    return url.toString();
   },
 };
 

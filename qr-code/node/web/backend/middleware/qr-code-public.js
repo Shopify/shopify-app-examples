@@ -8,7 +8,7 @@ export default function applyQrCodePublicEndpoints(app) {
     const qrcode = await getQrCodeOr404(req, res, false);
 
     if (qrcode) {
-      res.redirect(QRCodesDB.productUrlFromQrcode(qrcode));
+      res.redirect(await QRCodesDB.handleCodeScan(qrcode));
     }
   });
 }
