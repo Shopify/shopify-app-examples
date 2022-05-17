@@ -56,13 +56,19 @@ export default function NewCode() {
   const {
     fields: { title, product, destination, discount },
     dirty,
-    reset
+    reset,
+    submitting,
+    submit,
   } = useForm({
     fields: {
       title: useField(''),
       product: useField({}),
       destination: useField(['product']),
       discount: useField(NO_DISCOUNT_OPTION.value),
+    },
+    onSubmit: async () => {
+      // TODO: Mocking the submit request for now
+      return new Promise((resolve) => setTimeout(resolve, 4000))
     },
   })
 
@@ -113,10 +119,17 @@ export default function NewCode() {
   return (
     <Page fullWidth>
       <ContextualSaveBar
-        saveAction={{ label: 'Save', onAction: () => console.log('save') }}
+        saveAction={{
+          label: 'Save',
+          onAction: submit,
+          loading: submitting,
+          disabled: submitting,
+        }}
         discardAction={{
           label: 'Discard',
           onAction: reset,
+          loading: submitting,
+          disabled: submitting,
         }}
         visible={dirty}
         fullWidth
