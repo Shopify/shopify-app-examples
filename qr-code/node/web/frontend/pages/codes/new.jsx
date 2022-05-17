@@ -56,6 +56,7 @@ export default function NewCode() {
   const {
     fields: { title, product, destination, discount },
     dirty,
+    reset
   } = useForm({
     fields: {
       title: useField(''),
@@ -115,7 +116,7 @@ export default function NewCode() {
         saveAction={{ label: 'Save', onAction: () => console.log('save') }}
         discardAction={{
           label: 'Discard',
-          onAction: () => console.log('save'),
+          onAction: reset,
         }}
         visible={dirty}
         fullWidth
