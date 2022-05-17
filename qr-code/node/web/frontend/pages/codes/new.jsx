@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react'
+import { useState, useCallback } from 'react'
 import {
   Card,
   Form,
@@ -25,6 +25,7 @@ import {
 import { ImageMajor } from '@shopify/polaris-icons'
 import { useShopifyQuery } from 'hooks/useShopifyQuery'
 import { gql } from 'graphql-request'
+import { useForm, useField } from '@shopify/react-form'
 
 const NO_DISCOUNT_OPTION = { label: 'No discount', value: 'no-discount' }
 
@@ -52,12 +53,18 @@ const DISCOUNTS_QUERY = gql`
 `
 
 export default function NewCode() {
-  const [title, setTitle] = useState('')
-  const [selectedProduct, setSelectedProduct] = useState({})
-  const [destination, setDestination] = useState(['product'])
-  const [selectedDiscount, setSelectedDiscount] = useState(
-    NO_DISCOUNT_OPTION.value
-  )
+  const {
+    fields: { title, product, destination, discount },
+    dirty,
+  } = useForm({
+    fields: {
+      title: useField(''),
+      product: useField({}),
+      destination: useField(['product']),
+      discount: useField(NO_DISCOUNT_OPTION.value),
+    },
+  })
+
   const [showResourcePicker, setShowResourcePicker] = useState(false)
 
   const navigate = useNavigate()
@@ -65,23 +72,13 @@ export default function NewCode() {
 
   const handleProductChange = useCallback(({ id, selection }) => {
     const [{ title, images, handle }] = selection
-    setSelectedProduct({
+    product.onChange({
       title,
       images,
       id,
       handle,
     })
   }, [])
-
-  const handleDestinationChange = useCallback(
-    (newDestination) => setDestination(newDestination),
-    []
-  )
-
-  const handleSelectedDiscount = useCallback(
-    (selected) => setSelectedDiscount(selected),
-    []
-  )
 
   const toggleResourcePicker = useCallback(
     () => setShowResourcePicker(!showResourcePicker),
@@ -112,27 +109,6 @@ export default function NewCode() {
       ]
     : []
 
-  const initialState = useRef({
-    title,
-    selectedProduct,
-    destination,
-    selectedDiscount,
-  })
-
-  const isDirty = useMemo(() => {
-    const initialStateString = JSON.stringify(initialState.current)
-    const currentStateString = JSON.stringify({
-      title,
-      selectedProduct,
-      destination,
-      selectedDiscount,
-    })
-
-    if (initialStateString === currentStateString) {
-      return false
-    }
-  }, [title, selectedProduct, destination, selectedDiscount])
-
   return (
     <Page fullWidth>
       <ContextualSaveBar
@@ -141,7 +117,7 @@ export default function NewCode() {
           label: 'Discard',
           onAction: () => console.log('save'),
         }}
-        visible={isDirty}
+        visible={dirty}
         fullWidth
       />
       <TitleBar title="New code" primaryAction={null} />
@@ -151,9 +127,7 @@ export default function NewCode() {
             <FormLayout>
               <Card sectioned title="Title">
                 <TextField
-                  value={title}
-                  onChange={(value) => setTitle(value)}
-                  type="text"
+                  {...title}
                   label="Title"
                   labelHidden
                   helpText="Only store staff can see this title"
@@ -164,7 +138,7 @@ export default function NewCode() {
                 title="Product"
                 actions={[
                   {
-                    content: selectedProduct.title
+                    content: product.value.title
                       ? 'Change product'
                       : 'Select product',
                     onAction: toggleResourcePicker,
@@ -181,18 +155,18 @@ export default function NewCode() {
                       open
                     />
                   )}
-                  {selectedProduct.title ? (
+                  {product.value.title ? (
                     <Stack alignment="center">
-                      {selectedProduct.images[0] ? (
+                      {product.value.images[0] ? (
                         <Thumbnail
-                          source={selectedProduct.images[0].originalSrc}
-                          alt={selectedProduct.images[0].altText}
+                          source={product.value.images[0].originalSrc}
+                          alt={product.value.images[0].altText}
                         />
                       ) : (
                         <Icon source={ImageMajor} color="base" />
                       )}
                       <TextStyle variation="strong">
-                        {selectedProduct.title}
+                        {product.value.title}
                       </TextStyle>
                     </Stack>
                   ) : (
@@ -220,8 +194,8 @@ export default function NewCode() {
                         value: 'checkout',
                       },
                     ]}
-                    selected={destination}
-                    onChange={handleDestinationChange}
+                    selected={destination.value}
+                    onChange={destination.onChange}
                   />
                 </Card.Section>
               </Card>
@@ -239,8 +213,8 @@ export default function NewCode() {
                 <Select
                   label="discount code"
                   options={discountOptions}
-                  onChange={handleSelectedDiscount}
-                  value={selectedDiscount}
+                  onChange={discount.onChange}
+                  value={discount.value}
                   disabled={isLoadingDiscounts || discountsError}
                   labelHidden
                 />
