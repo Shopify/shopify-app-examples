@@ -22,10 +22,10 @@ import {
   useNavigate,
   useAppBridge,
 } from '@shopify/app-bridge-react'
-import { ImageMajor } from '@shopify/polaris-icons'
+import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
 import { useShopifyQuery } from 'hooks/useShopifyQuery'
 import { gql } from 'graphql-request'
-import { useForm, useField } from '@shopify/react-form'
+import { useForm, useField, notEmptyString } from '@shopify/react-form'
 
 const NO_DISCOUNT_OPTION = { label: 'No discount', value: 'no-discount' }
 
@@ -53,16 +53,25 @@ const DISCOUNTS_QUERY = gql`
 `
 
 export default function NewCode() {
+  const [showResourcePicker, setShowResourcePicker] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState({})
+
   const {
-    fields: { title, product, destination, discount },
+    fields: { title, selectedProductId, destination, discount },
     dirty,
     reset,
     submitting,
     submit,
   } = useForm({
     fields: {
-      title: useField(''),
-      product: useField({}),
+      title: useField({
+        value: '',
+        validates: [notEmptyString('Please name your QR code')],
+      }),
+      selectedProductId: useField({
+        value: '',
+        validates: [notEmptyString('Please select a product')],
+      }),
       destination: useField(['product']),
       discount: useField(NO_DISCOUNT_OPTION.value),
     },
@@ -72,19 +81,19 @@ export default function NewCode() {
     },
   })
 
-  const [showResourcePicker, setShowResourcePicker] = useState(false)
-
   const navigate = useNavigate()
   const app = useAppBridge()
 
   const handleProductChange = useCallback(({ id, selection }) => {
-    const [{ title, images, handle }] = selection
-    product.onChange({
-      title,
-      images,
-      id,
-      handle,
+    // TODO: Storing product details, and product ID seperately is a hack
+    // This will be fixed when this form queries the product data
+    setSelectedProduct({
+      title: selection[0].title,
+      images: selection[0].images,
+      handle: selection[0].handle,
     })
+    selectedProductId.onChange(id)
+    setShowResourcePicker(false)
   }, [])
 
   const toggleResourcePicker = useCallback(
@@ -152,7 +161,7 @@ export default function NewCode() {
                 title="Product"
                 actions={[
                   {
-                    content: product.value.title
+                    content: selectedProductId.value
                       ? 'Change product'
                       : 'Select product',
                     onAction: toggleResourcePicker,
@@ -169,24 +178,34 @@ export default function NewCode() {
                       open
                     />
                   )}
-                  {product.value.title ? (
+                  {selectedProductId.value ? (
                     <Stack alignment="center">
-                      {product.value.images[0] ? (
+                      {selectedProduct.images[0] ? (
                         <Thumbnail
-                          source={product.value.images[0].originalSrc}
-                          alt={product.value.images[0].altText}
+                          source={selectedProduct.images[0].originalSrc}
+                          alt={selectedProduct.images[0].altText}
                         />
                       ) : (
                         <Icon source={ImageMajor} color="base" />
                       )}
                       <TextStyle variation="strong">
-                        {product.value.title}
+                        {selectedProduct.title}
                       </TextStyle>
                     </Stack>
                   ) : (
-                    <Button onClick={toggleResourcePicker}>
-                      Select product
-                    </Button>
+                    <Stack vertical spacing="extraTight">
+                      <Button onClick={toggleResourcePicker}>
+                        Select product
+                      </Button>
+                      {selectedProductId.error && (
+                        <Stack spacing="tight">
+                          <Icon source={AlertMinor} color="critical" />
+                          <TextStyle variation="negative">
+                            {selectedProductId.error}
+                          </TextStyle>
+                        </Stack>
+                      )}
+                    </Stack>
                   )}
                 </Card.Section>
                 <Card.Section
