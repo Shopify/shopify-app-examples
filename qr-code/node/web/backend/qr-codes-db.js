@@ -1,106 +1,140 @@
 import sqlite3 from "sqlite3";
+import path from "path";
+import { Shopify } from "@shopify/shopify-api";
 
-export class QRCodesDB {
-  qrCodesTableName = "qr_codes";
-  db = null;
-  ready = null;
+const qrCodesDbFile = path.join(process.cwd(), "qr_codes_db.sqlite");
 
-  constructor(filename) {
-    this.db = new sqlite3.Database(filename);
-    this.ready = this.init();
-  }
+export const QRCodesDB = {
+  qrCodesTableName: "qr_codes",
+  db: new sqlite3.Database(qrCodesDbFile),
+  ready: null,
 
-  async create({ productId, goToCheckout = false, discountCode = "" }) {
+  create: async function ({
+    shopDomain,
+    productHandle,
+    goToCheckout = false,
+    discountCode = "",
+  }) {
     await this.ready;
 
     const query = `
       INSERT INTO ${this.qrCodesTableName}
-      (productId, goToCheckout, discountCode, hits, conversions)
-      VALUES (?, ?, ?, 0, 0);
+      (shopDomain, productHandle, goToCheckout, discountCode, hits, conversions)
+      VALUES (?, ?, ?, ?, 0, 0)
+      RETURNING id;
     `;
 
-    await this.query(query, [productId, goToCheckout, discountCode]);
-    return true;
-  }
+    const rawResults = await this.__query(query, [
+      shopDomain,
+      productHandle,
+      goToCheckout,
+      discountCode || "",
+    ]);
 
-  async update(id, { productId, goToCheckout = false, discountCode = "" }) {
+    return rawResults[0].id;
+  },
+
+  update: async function (
+    id,
+    { productHandle, goToCheckout = false, discountCode = "" }
+  ) {
     await this.ready;
 
     const query = `
       UPDATE ${this.qrCodesTableName}
       SET
-        productId = ?,
+        productHandle = ?,
         goToCheckout = ?,
         discountCode = ?
       WHERE
-        id = ?
+        id = ?;
     `;
 
-    await this.query(query, [productId, goToCheckout, discountCode, id]);
+    await this.__query(query, [
+      productHandle,
+      goToCheckout,
+      discountCode || "",
+      id,
+    ]);
     return true;
-  }
+  },
 
-  async list() {
+  list: async function (shopDomain) {
     await this.ready;
     const query = `
-      SELECT * FROM ${this.qrCodesTableName};
+      SELECT * FROM ${this.qrCodesTableName}
+      WHERE shopDomain = ?;
     `;
 
-    return this.query(query);
-  }
+    const results = await this.__query(query, [shopDomain]);
 
-  async read(id) {
+    return results.map((qrcode) => this.__addImageUrl(qrcode));
+  },
+
+  read: async function (id) {
     await this.ready;
     const query = `
       SELECT * FROM ${this.qrCodesTableName}
       WHERE id = ?;
     `;
-    const rows = await this.query(query, [id]);
+    const rows = await this.__query(query, [id]);
     if (!Array.isArray(rows) || rows?.length !== 1) return undefined;
-    const rawResult = rows[0];
 
-    return rawResult;
-  }
+    return this.__addImageUrl(rows[0]);
+  },
 
-  async delete(id) {
+  delete: async function (id) {
     await this.ready;
     const query = `
       DELETE FROM ${this.qrCodesTableName}
       WHERE id = ?;
     `;
-    await this.query(query, [id]);
+    await this.__query(query, [id]);
     return true;
-  }
+  },
 
-  async hasQrCodesTable() {
+  generateQrcodeDestinationUrl: function (qrcode) {
+    return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcode/${qrcode.id}`;
+  },
+
+  productUrlFromQrcode: function (qrcode) {
+    return `${qrcode.shopDomain}/products/${qrcode.productHandle}`;
+  },
+
+  // Private
+
+  __hasQrCodesTable: async function () {
     const query = `
       SELECT name FROM sqlite_schema
       WHERE
         type = 'table' AND
         name = ?;
     `;
-    const rows = await this.query(query, [this.qrCodesTableName]);
+    const rows = await this.__query(query, [this.qrCodesTableName]);
     return rows.length === 1;
-  }
+  },
 
-  async init() {
-    const hasQrCodesTable = await this.hasQrCodesTable();
-    if (!hasQrCodesTable) {
+  __init: async function () {
+    const hasQrCodesTable = await this.__hasQrCodesTable();
+    if (hasQrCodesTable) {
+      this.ready = Promise.resolve();
+    } else {
       const query = `
         CREATE TABLE ${this.qrCodesTableName} (
           id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          productId VARCHAR(255) NOT NULL,
+          shopDomain VARCHAR(511) NOT NULL,
+          productHandle VARCHAR(255) NOT NULL,
           goToCheckout TINYINT NOT NULL,
           discountCode VARCHAR(255) NOT NULL,
           hits INTEGER,
           conversions INTEGER
         )
       `;
-      await this.query(query);
+      this.ready = this.__query(query);
     }
-  }
+  },
 
-  query(sql, params = []) {
+  __query: function (sql, params = []) {
     return new Promise((resolve, reject) => {
       this.db.all(sql, params, (err, result) => {
         if (err) {
@@ -110,5 +144,21 @@ export class QRCodesDB {
         resolve(result);
       });
     });
-  }
-}
+  },
+
+  __addImageUrl: function (qrcode) {
+    try {
+      qrcode.imageUrl = this.__generateQrcodeImageUrl(qrcode);
+    } catch (err) {
+      console.error(err);
+    }
+
+    return qrcode;
+  },
+
+  __generateQrcodeImageUrl: function (qrcode) {
+    return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/api/qrcode/${qrcode.id}/image`;
+  },
+};
+
+QRCodesDB.__init();

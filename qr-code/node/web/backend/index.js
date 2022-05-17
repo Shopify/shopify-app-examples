@@ -6,8 +6,9 @@ import { Shopify, ApiVersion } from "@shopify/shopify-api";
 
 import applyAuthMiddleware from "./middleware/auth.js";
 import verifyRequest from "./middleware/verify-request.js";
+import applyQrCodeApiEndpoints from "./middleware/qr-code-api.js";
+import applyQrCodePublicEndpoints from "./middleware/qr-code-public.js";
 import { setupGDPRWebHooks } from "./gdpr.js";
-import { QRCodesDB } from "./qr-codes-db.js";
 
 const USE_ONLINE_TOKENS = true;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
@@ -20,7 +21,6 @@ const DEV_INDEX_PATH = `${process.cwd()}/frontend/`;
 const PROD_INDEX_PATH = `${process.cwd()}/dist/`;
 
 const sessionDbFile = path.join(process.cwd(), "session_db.sqlite");
-const qrCodesDbFile = path.join(process.cwd(), "qr_codes_db.sqlite");
 
 Shopify.Context.initialize({
   API_KEY: process.env.SHOPIFY_API_KEY,
@@ -34,8 +34,6 @@ Shopify.Context.initialize({
   SESSION_STORAGE: new Shopify.Session.MemorySessionStorage(),
   // SESSION_STORAGE: new Shopify.Session.SQLiteSessionStorage(sessionDbFile),
 });
-
-const qrCodesDB = new QRCodesDB(qrCodesDbFile);
 
 // Storing the currently active shops in memory will force them to re-login when your server restarts. You should
 // persist this object in your app.
@@ -68,6 +66,8 @@ export async function createServer(
 
   applyAuthMiddleware(app);
 
+  applyQrCodePublicEndpoints(app);
+
   app.post("/api/webhooks", async (req, res) => {
     try {
       await Shopify.Webhooks.Registry.process(req, res);
@@ -81,17 +81,7 @@ export async function createServer(
   });
 
   // All endpoints from this point on will require authentication, comment to disable authentication as a whole
-  // app.use("/api/*", verifyRequest(app));
-
-  app.get("/api/products-count", async (req, res) => {
-    const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-    const { Product } = await import(
-      `@shopify/shopify-api/dist/rest-resources/${Shopify.Context.API_VERSION}/index.js`
-    );
-
-    const countData = await Product.count({ session });
-    res.status(200).send(countData);
-  });
+  app.use("/api/*", verifyRequest(app));
 
   app.post("/api/graphql", async (req, res) => {
     try {
@@ -104,53 +94,7 @@ export async function createServer(
 
   app.use(express.json());
 
-  app.post("/api/qrcode", async (req, res) => {
-    try {
-      await qrCodesDB.create(parseQrCodeBody(req));
-      res.status(201).send();
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
-  });
-
-  app.put("/api/qrcode/:id", async (req, res) => {
-    const qrCode = await getQrCodeOr404(req, res);
-
-    if (qrCode) {
-      try {
-        await qrCodesDB.update(req.params.id, parseQrCodeBody(req));
-        res.status(200).send();
-      } catch (error) {
-        res.status(500).send(error.message);
-      }
-    }
-  });
-
-  app.get("/api/qrcode", async (req, res) => {
-    try {
-      const response = await qrCodesDB.list();
-      res.status(200).send(response);
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
-  });
-
-  app.get("/api/qrcode/:id", async (req, res) => {
-    const qrCode = await getQrCodeOr404(req, res);
-
-    if (qrCode) {
-      res.status(200).send(qrCode);
-    }
-  });
-
-  app.delete("/api/qrcode/:id", async (req, res) => {
-    const qrCode = await getQrCodeOr404(req, res);
-
-    if (qrCode) {
-      await qrCodesDB.delete(req.params.id);
-      res.status(200).send();
-    }
-  });
+  applyQrCodeApiEndpoints(app);
 
   app.use((req, res, next) => {
     const shop = req.query.shop;
@@ -202,35 +146,4 @@ export async function createServer(
 
 if (!isTest) {
   createServer().then(({ app }) => app.listen(PORT));
-}
-
-/**
- * Expect body to contain
- * {
- *   productId: "<product id>",
- *   goToCheckout: "true" | "false",
- *   discountCode: "" | "<discount code id>"
- * }
- */
-function parseQrCodeBody(req) {
-  return {
-    productId: req.body.productId,
-    goToCheckout: !!req.body.goToCheckout,
-    discountCode: req.body.discountCode,
-  };
-}
-
-async function getQrCodeOr404(req, res) {
-  try {
-    const response = await qrCodesDB.read(req.params.id);
-    if (response === undefined) {
-      res.status(404).send();
-    } else {
-      return response;
-    }
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-
-  return undefined;
 }
