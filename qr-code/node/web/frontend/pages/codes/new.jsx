@@ -11,20 +11,32 @@ import {
   Checkbox,
   Select,
   EmptyState,
+  Thumbnail
 } from '@shopify/polaris'
-import { ContextualSaveBar, TitleBar } from '@shopify/app-bridge-react'
+import {
+  ContextualSaveBar,
+  TitleBar,
+  ResourcePicker,
+} from '@shopify/app-bridge-react'
 
 export default function NewCode() {
-  const [title, setTitle] = useState("")
-  const [selectedProduct, setSelectedProduct] = useState()
+  const [title, setTitle] = useState('')
+  const [selectedProduct, setSelectedProduct] = useState({})
   const [destination, setDestination] = useState(['product'])
   const [discount, setDiscount] = useState(false)
   const [selectedDiscount, setSelectedDiscount] = useState('')
+  const [showResourcePicker, setShowResourcePicker] = useState(false)
 
-  const handleProductChange = useCallback(
-    (value) => setSelectedProduct(value),
-    []
-  )
+  const handleProductChange = useCallback(({ id, selection }) => {
+    const [{ title, images }] = selection
+    setSelectedProduct({
+      title,
+      images,
+    })
+  }, [])
+
+  console.log({ selectedProduct })
+
   const handleDestinationChange = useCallback(
     (newDestination) => setDestination(newDestination),
     []
@@ -33,6 +45,10 @@ export default function NewCode() {
   const handleSelectedDiscount = useCallback(
     (value) => setSelectedDiscount(value),
     []
+  )
+  const toggleResourcePicker = useCallback(
+    () => setShowResourcePicker(!showResourcePicker),
+    [showResourcePicker]
   )
 
   return (
@@ -66,12 +82,33 @@ export default function NewCode() {
                 actions={[
                   {
                     content: 'Select product',
-                    onAction: () => console.log('select product link'),
+                    onAction: toggleResourcePicker,
                   },
                 ]}
               >
                 <Card.Section>
-                  <Button>Select product</Button>
+                  {showResourcePicker && (
+                    <ResourcePicker
+                      resourceType="Product"
+                      selectMultiple={false}
+                      onCancel={toggleResourcePicker}
+                      onSelection={handleProductChange}
+                      open
+                    />
+                  )}
+                  {selectedProduct.title ? (
+                    <>
+                    <Thumbnail 
+                      source={selectedProduct.images[0].originalSrc}
+                      alt={selectedProduct.images[0].alt}
+                    />
+                    <div>{selectedProduct.title}</div>
+                    </>
+                  ) : (
+                    <Button onClick={toggleResourcePicker}>
+                      Select product
+                    </Button>
+                  )}
                 </Card.Section>
                 <Card.Section
                   title="Scan Destination"
