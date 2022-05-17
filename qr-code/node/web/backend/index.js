@@ -7,6 +7,7 @@ import { Shopify, ApiVersion } from "@shopify/shopify-api";
 import applyAuthMiddleware from "./middleware/auth.js";
 import verifyRequest from "./middleware/verify-request.js";
 import applyQrCodeApiEndpoints from "./middleware/qr-code-api.js";
+import applyQrCodePublicEndpoints from "./middleware/qr-code-public.js";
 import { setupGDPRWebHooks } from "./gdpr.js";
 
 const USE_ONLINE_TOKENS = true;
@@ -64,6 +65,8 @@ export async function createServer(
   app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
 
   applyAuthMiddleware(app);
+
+  applyQrCodePublicEndpoints(app);
 
   app.post("/api/webhooks", async (req, res) => {
     try {

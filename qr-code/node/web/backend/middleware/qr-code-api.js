@@ -1,4 +1,5 @@
 import path from "path";
+import QRCode from "qrcode";
 
 import { QRCodesDB } from "../qr-codes-db.js";
 
@@ -8,20 +9,20 @@ const qrCodesDB = new QRCodesDB(qrCodesDbFile);
 export default function applyQrCodeApiEndpoints(app) {
   app.post("/api/qrcode", async (req, res) => {
     try {
-      await qrCodesDB.create(parseQrCodeBody(req));
-      res.status(201).send();
+      const id = await qrCodesDB.create(parseQrCodeBody(req));
+      res.status(201).send(await qrCodesDB.read(id));
     } catch (error) {
       res.status(500).send(error.message);
     }
   });
 
   app.put("/api/qrcode/:id", async (req, res) => {
-    const qrCode = await getQrCodeOr404(req, res);
+    const qrcode = await getQrCodeOr404(req, res);
 
-    if (qrCode) {
+    if (qrcode) {
       try {
         await qrCodesDB.update(req.params.id, parseQrCodeBody(req));
-        res.status(200).send();
+        res.status(200).send(await qrCodesDB.read(req.params.id));
       } catch (error) {
         res.status(500).send(error.message);
       }
@@ -38,19 +39,31 @@ export default function applyQrCodeApiEndpoints(app) {
   });
 
   app.get("/api/qrcode/:id", async (req, res) => {
-    const qrCode = await getQrCodeOr404(req, res);
+    const qrcode = await getQrCodeOr404(req, res);
 
-    if (qrCode) {
-      res.status(200).send(qrCode);
+    if (qrcode) {
+      res.status(200).send(qrcode);
     }
   });
 
   app.delete("/api/qrcode/:id", async (req, res) => {
-    const qrCode = await getQrCodeOr404(req, res);
+    const qrcode = await getQrCodeOr404(req, res);
 
-    if (qrCode) {
+    if (qrcode) {
       await qrCodesDB.delete(req.params.id);
       res.status(200).send();
+    }
+  });
+
+  app.get("/api/qrcode/:id/image", async (req, res) => {
+    const qrcode = await getQrCodeOr404(req, res);
+
+    if (qrcode) {
+      const destinationUrl = qrCodesDB.generateQrcodeDestinationUrl(qrcode);
+      res
+        .status(200)
+        .set("Content-Type", "image/png")
+        .send(await QRCode.toBuffer(destinationUrl));
     }
   });
 }

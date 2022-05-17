@@ -1,4 +1,5 @@
 import sqlite3 from "sqlite3";
+import { Shopify } from "@shopify/shopify-api";
 
 export class QRCodesDB {
   qrCodesTableName = "qr_codes";
@@ -16,11 +17,17 @@ export class QRCodesDB {
     const query = `
       INSERT INTO ${this.qrCodesTableName}
       (productId, goToCheckout, discountCode, hits, conversions)
-      VALUES (?, ?, ?, 0, 0);
+      VALUES (?, ?, ?, 0, 0)
+      RETURNING id;
     `;
 
-    await this.query(query, [productId, goToCheckout, discountCode]);
-    return true;
+    const rawResults = await this.query(query, [
+      productId,
+      goToCheckout,
+      discountCode,
+    ]);
+
+    return rawResults[0].id;
   }
 
   async update(id, { productId, goToCheckout = false, discountCode = "" }) {
@@ -33,7 +40,7 @@ export class QRCodesDB {
         goToCheckout = ?,
         discountCode = ?
       WHERE
-        id = ?
+        id = ?;
     `;
 
     await this.query(query, [productId, goToCheckout, discountCode, id]);
@@ -46,7 +53,9 @@ export class QRCodesDB {
       SELECT * FROM ${this.qrCodesTableName};
     `;
 
-    return this.query(query);
+    const results = await this.query(query);
+
+    return results.map((qrcode) => this.addImageUrl(qrcode));
   }
 
   async read(id) {
@@ -57,9 +66,8 @@ export class QRCodesDB {
     `;
     const rows = await this.query(query, [id]);
     if (!Array.isArray(rows) || rows?.length !== 1) return undefined;
-    const rawResult = rows[0];
 
-    return rawResult;
+    return this.addImageUrl(rows[0]);
   }
 
   async delete(id) {
@@ -71,6 +79,16 @@ export class QRCodesDB {
     await this.query(query, [id]);
     return true;
   }
+
+  generateQrcodeDestinationUrl(qrcode) {
+    return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcode/${qrcode.id}`;
+  }
+
+  productUrlFromQrcode(qrcode) {
+    return ``;
+  }
+
+  // Private
 
   async hasQrCodesTable() {
     const query = `
@@ -110,5 +128,19 @@ export class QRCodesDB {
         resolve(result);
       });
     });
+  }
+
+  addImageUrl(qrcode) {
+    try {
+      qrcode.imageUrl = this.generateQrcodeImageUrl(qrcode);
+    } catch (err) {
+      console.error(err);
+    }
+
+    return qrcode;
+  }
+
+  generateQrcodeImageUrl(qrcode) {
+    return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/api/qrcode/${qrcode.id}/image`;
   }
 }
