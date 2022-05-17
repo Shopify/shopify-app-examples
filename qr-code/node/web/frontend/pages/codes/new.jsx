@@ -8,7 +8,6 @@ import {
   TextField,
   Button,
   ChoiceList,
-  Checkbox,
   Select,
   EmptyState,
   Thumbnail,
@@ -20,10 +19,14 @@ import {
   ContextualSaveBar,
   TitleBar,
   ResourcePicker,
+  useNavigate,
+  useAppBridge,
 } from '@shopify/app-bridge-react'
 import { ImageMajor } from '@shopify/polaris-icons'
 import { useShopifyQuery } from 'hooks/useShopifyQuery'
 import { gql } from 'graphql-request'
+
+const NO_DISCOUNT_OPTION = { label: 'No discount', value: 'no-discount' }
 
 const DISCOUNTS_QUERY = gql`
   query discounts($first: Int!) {
@@ -52,15 +55,21 @@ export default function NewCode() {
   const [title, setTitle] = useState('')
   const [selectedProduct, setSelectedProduct] = useState({})
   const [destination, setDestination] = useState(['product'])
-  const [discount, setDiscount] = useState(false)
-  const [selectedDiscount, setSelectedDiscount] = useState('')
+  const [selectedDiscount, setSelectedDiscount] = useState(
+    NO_DISCOUNT_OPTION.value
+  )
   const [showResourcePicker, setShowResourcePicker] = useState(false)
 
+  const navigate = useNavigate()
+  const app = useAppBridge()
+
   const handleProductChange = useCallback(({ id, selection }) => {
-    const [{ title, images }] = selection
+    const [{ title, images, handle }] = selection
     setSelectedProduct({
       title,
       images,
+      id,
+      handle
     })
   }, [])
 
@@ -68,11 +77,12 @@ export default function NewCode() {
     (newDestination) => setDestination(newDestination),
     []
   )
-  const handleDiscountChange = useCallback((value) => setDiscount(value), [])
+
   const handleSelectedDiscount = useCallback(
-    (value) => setSelectedDiscount(value),
+    (selected) => setSelectedDiscount(selected),
     []
   )
+
   const toggleResourcePicker = useCallback(
     () => setShowResourcePicker(!showResourcePicker),
     [showResourcePicker]
@@ -91,13 +101,15 @@ export default function NewCode() {
   })
 
   const discountOptions = discounts
-    ? discounts.data.automaticDiscountNodes.edges.map(
-        ({ node: { id, automaticDiscount } }) => ({
-          id,
-          key: id,
-          label: `${automaticDiscount.title} (${automaticDiscount.status})`,
-        })
-      )
+    ? [
+        NO_DISCOUNT_OPTION,
+        ...discounts.data.automaticDiscountNodes.edges.map(
+          ({ node: { id, automaticDiscount } }) => ({
+            label: `${automaticDiscount.title} (${automaticDiscount.status})`,
+            value: id,
+          })
+        ),
+      ]
     : []
 
   return (
@@ -173,7 +185,7 @@ export default function NewCode() {
                   actions={[
                     {
                       content: 'Preview',
-                      onAction: () => console.log('scan destination'),
+                      onAction: () => console.log('preview'),
                     },
                   ]}
                 >
@@ -198,21 +210,16 @@ export default function NewCode() {
                 actions={[
                   {
                     content: 'Create discount',
-                    onAction: () => console.log('discount'),
+                    onAction: () =>
+                      navigate(`${app.hostOrigin}/admin/discounts`),
                   },
                 ]}
               >
-                <Checkbox
-                  label="Apply a discount code"
-                  checked={discount}
-                  onChange={handleDiscountChange}
-                />
                 <Select
                   label="discount code"
                   options={discountOptions}
                   onChange={handleSelectedDiscount}
                   value={selectedDiscount}
-                  placeholder="discount code name"
                   disabled={isLoadingDiscounts || discountsError}
                   labelHidden
                 />
