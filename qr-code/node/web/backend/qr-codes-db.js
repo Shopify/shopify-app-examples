@@ -119,7 +119,7 @@ export const QRCodesDB = {
   },
 
   generateQrcodeDestinationUrl: function (qrcode) {
-    return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcode/${qrcode.id}`;
+    return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcodes/${qrcode.id}`;
   },
 
   handleCodeScan: async function (qrcode) {
@@ -132,7 +132,7 @@ export const QRCodesDB = {
       case "checkout":
         return this.__goToProductCheckout(url, qrcode);
       default:
-        throw `Unrecognized destination "${destination}"`;
+        throw `Unrecognized destination "${qrcode.destination}"`;
     }
   },
 
@@ -197,7 +197,7 @@ export const QRCodesDB = {
   },
 
   __generateQrcodeImageUrl: function (qrcode) {
-    return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/api/qrcode/${qrcode.id}/image`;
+    return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcodes/${qrcode.id}/image`;
   },
 
   __increaseScanCount: async function (qrcode) {
