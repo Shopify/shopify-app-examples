@@ -28,6 +28,7 @@ export default defineConfig({
       components: path.resolve(root, './components'),
       pages: path.resolve(root, './pages'),
       test: path.resolve(root, './test'),
+      hooks: path.resolve(root, './hooks'),
     },
   },
   server: {

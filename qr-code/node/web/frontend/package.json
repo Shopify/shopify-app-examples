@@ -17,6 +17,7 @@
     "@shopify/app-bridge-react": "^2.0.25",
     "@shopify/app-bridge-utils": "^2.0.25",
     "@shopify/polaris": "^9.2.2",
+    "@shopify/react-form": "^1.1.19",
     "@vitejs/plugin-react": "1.2.0",
     "cross-env": "^7.0.3",
     "express": "^4.17.3",
@@ -41,5 +42,5 @@
     "tabWidth": 2,
     "semi": false,
     "singleQuote": true
-  } 
+  }
 }
