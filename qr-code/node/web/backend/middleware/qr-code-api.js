@@ -1,16 +1,15 @@
-import path from "path";
 import QRCode from "qrcode";
-import { Shopify } from "@shopify/shopify-api";
 
 import { QRCodesDB } from "../qr-codes-db.js";
 import {
   getQrCodeOr404,
   getShopUrlFromSession,
   parseQrCodeBody,
+  formatQrCodeResponse,
 } from "../helpers/qr-codes.js";
 
 export default function applyQrCodeApiEndpoints(app) {
-  app.post("/api/qrcode", async (req, res) => {
+  app.post("/api/qrcodes", async (req, res) => {
     try {
       const id = await QRCodesDB.create({
         ...(await parseQrCodeBody(req)),
@@ -22,7 +21,7 @@ export default function applyQrCodeApiEndpoints(app) {
     }
   });
 
-  app.put("/api/qrcode/:id", async (req, res) => {
+  app.put("/api/qrcodes/:id", async (req, res) => {
     const qrcode = await getQrCodeOr404(req, res);
 
     if (qrcode) {
@@ -35,18 +34,21 @@ export default function applyQrCodeApiEndpoints(app) {
     }
   });
 
-  app.get("/api/qrcode", async (req, res) => {
+  app.get("/api/qrcodes", async (req, res) => {
     try {
-      const response = await QRCodesDB.list(
+      const rawCodeData = await QRCodesDB.list(
         await getShopUrlFromSession(req, res)
       );
+
+      const response = await formatQrCodeResponse(req, res, rawCodeData);
+      console.log("response in API", response);
       res.status(200).send(response);
     } catch (error) {
       res.status(500).send(error.message);
     }
   });
 
-  app.get("/api/qrcode/:id", async (req, res) => {
+  app.get("/api/qrcodes/:id", async (req, res) => {
     const qrcode = await getQrCodeOr404(req, res);
 
     if (qrcode) {
@@ -54,7 +56,7 @@ export default function applyQrCodeApiEndpoints(app) {
     }
   });
 
-  app.delete("/api/qrcode/:id", async (req, res) => {
+  app.delete("/api/qrcodes/:id", async (req, res) => {
     const qrcode = await getQrCodeOr404(req, res);
 
     if (qrcode) {
@@ -63,7 +65,7 @@ export default function applyQrCodeApiEndpoints(app) {
     }
   });
 
-  app.get("/api/qrcode/:id/image", async (req, res) => {
+  app.get("/api/qrcodes/:id/image", async (req, res) => {
     const qrcode = await getQrCodeOr404(req, res);
 
     if (qrcode) {

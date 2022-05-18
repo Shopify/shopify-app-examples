@@ -12,26 +12,30 @@ export const QRCodesDB = {
 
   create: async function ({
     shopDomain,
-    productHandle,
+    title,
+    productId,
+    discountId,
     variantId,
+    handle,
     goToCheckout = false,
-    discountCode = "",
   }) {
     await this.ready;
 
     const query = `
       INSERT INTO ${this.qrCodesTableName}
-      (shopDomain, productHandle, variantId, goToCheckout, discountCode, hits, conversions)
-      VALUES (?, ?, ?, ?, ?, 0, 0)
+      (shopDomain, title, productId, discountId, variantId, handle, goToCheckout, scans, conversions)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0)
       RETURNING id;
     `;
 
     const rawResults = await this.__query(query, [
       shopDomain,
-      productHandle,
+      title,
+      productId,
+      discountId,
       variantId,
+      handle,
       goToCheckout,
-      discountCode || "",
     ]);
 
     return rawResults[0].id;
@@ -39,26 +43,30 @@ export const QRCodesDB = {
 
   update: async function (
     id,
-    { productHandle, variantId, goToCheckout = false, discountCode = "" }
+    { title, productId, discountId, variantId, handle, goToCheckout = false }
   ) {
     await this.ready;
 
     const query = `
       UPDATE ${this.qrCodesTableName}
       SET
-        productHandle = ?,
-        variantId = ?,
-        goToCheckout = ?,
-        discountCode = ?
+        title = ?,
+        productId = ?,
+        discountId = ?,
+        variantId = ?
+        handle = ?
+        goToCheckout = ?
       WHERE
         id = ?;
     `;
 
     await this.__query(query, [
-      productHandle,
+      title,
+      productId,
+      discountId,
       variantId,
+      handle,
       goToCheckout,
-      discountCode || "",
       id,
     ]);
     return true;
@@ -103,7 +111,7 @@ export const QRCodesDB = {
   },
 
   handleCodeScan: async function (qrcode) {
-    await this.__increaseHitCount(qrcode);
+    await this.__increaseScanCount(qrcode);
 
     const url = new URL(qrcode.shopDomain);
     if (qrcode.goToCheckout) {
@@ -135,11 +143,13 @@ export const QRCodesDB = {
         CREATE TABLE ${this.qrCodesTableName} (
           id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           shopDomain VARCHAR(511) NOT NULL,
-          productHandle VARCHAR(255) NOT NULL,
+          title VARCHAR(511) NOT NULL,
+          productId VARCHAR(255) NOT NULL,
+          discountId VARCHAR(255) NOT NULL,
           variantId VARCHAR(255) NOT NULL,
+          handle VARCHAR(255) NOT NULL,
           goToCheckout TINYINT NOT NULL,
-          discountCode VARCHAR(255) NOT NULL,
-          hits INTEGER,
+          scans INTEGER,
           conversions INTEGER,
           createdAt DATETIME NOT NULL DEFAULT (datetime(CURRENT_TIMESTAMP, 'localtime'))
         )
@@ -174,10 +184,10 @@ export const QRCodesDB = {
     return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/api/qrcode/${qrcode.id}/image`;
   },
 
-  __increaseHitCount: async function (qrcode) {
+  __increaseScanCount: async function (qrcode) {
     const query = `
       UPDATE ${this.qrCodesTableName}
-      SET hits = hits + 1
+      SET scans = scans + 1
       WHERE id = ?
     `;
     await this.__query(query, [qrcode.id]);
