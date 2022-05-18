@@ -234,7 +234,7 @@ export default function NewCode() {
               </Card>
               <Card
                 sectioned
-                title="Discount"
+                title="Discount code"
                 actions={[
                   {
                     content: 'Create discount',
