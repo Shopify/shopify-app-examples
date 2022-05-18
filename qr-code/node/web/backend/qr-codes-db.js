@@ -140,7 +140,8 @@ export const QRCodesDB = {
           goToCheckout TINYINT NOT NULL,
           discountCode VARCHAR(255) NOT NULL,
           hits INTEGER,
-          conversions INTEGER
+          conversions INTEGER,
+          createdAt DATETIME NOT NULL DEFAULT (datetime(CURRENT_TIMESTAMP, 'localtime'))
         )
       `;
       this.ready = this.__query(query);
