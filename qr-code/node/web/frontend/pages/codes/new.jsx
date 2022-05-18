@@ -258,7 +258,7 @@ export default function NewCode() {
         <Layout.Section secondary>
           <Card sectioned title="QR Code">
             <EmptyState>
-              <p>A preview of your Shopcode will show here after you save.</p>
+              <p>Your QR code will appear here after you save.</p>
             </EmptyState>
             <Button fullWidth primary disabled>
               Download
