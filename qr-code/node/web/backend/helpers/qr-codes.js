@@ -20,38 +20,6 @@ const QR_CODE_ADMIN_QUERY = `
       ... on ProductVariant {
         id
       }
-      ... on DiscountCodeNode {
-        id
-        codeDiscount {
-          ...on DiscountCodeBasic {
-            codes(first: 1) {
-              edges {
-                node {
-                  code
-                }
-              }
-            }
-          }
-          ...on DiscountCodeBxgy {
-            codes(first: 1)  {
-              edges {
-                node {
-                  code
-                }
-              }
-            }
-          }
-          ...on DiscountCodeFreeShipping {
-            codes(first: 1)  {
-              edges {
-                node {
-                  code
-                }
-              }
-            }
-          }
-        }
-      }
     }
   }
 `;
@@ -83,33 +51,24 @@ export async function getShopUrlFromSession(req, res) {
 /**
  * Expect body to contain
  * {
- *   productId: number,
- *   goToCheckout: boolean,
- *   discountCodeId: number | null
+ *   title: string
+ *   productId: number
+ *   variantId: number
+ *   handle: string
+ *   discountId: number | null
+ *   discountCode: string
+ *   destination: string
  * }
  */
 export async function parseQrCodeBody(req, res) {
-  const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-  const { Product, DiscountCode } = await import(
-    `@shopify/shopify-api/dist/rest-resources/${Shopify.Context.API_VERSION}/index.js`
-  );
-
-  const product = await Product.find({ session, id: req.body.productId });
-
-  let discountCode = null;
-  if (req.body.discountCodeId) {
-    const discount = await DiscountCode.find({
-      session,
-      id: req.body.discountCodeId,
-    });
-    discountCode = discount.code;
-  }
-
   return {
-    productHandle: product.handle,
-    variantId: product.variants[0].id,
-    goToCheckout: !!req.body.goToCheckout,
-    discountCode,
+    title: req.body.title,
+    productId: req.body.productId,
+    variantId: req.body.variantId,
+    handle: req.body.handle,
+    discountId: req.body.discountId,
+    discountCode: req.body.discountCode,
+    destination: req.body.destination,
   };
 }
 
@@ -140,14 +99,9 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
       (node) => qrCode.productId == node.id
     );
 
-    const discount = adminData.body.data.nodes.find(
-      (node) => qrCode.discountId == node.id
-    );
-
-    const formattedQRCode = { ...qrCode, product, discount };
+    const formattedQRCode = { ...qrCode, product };
 
     delete formattedQRCode.productId;
-    delete formattedQRCode.discountId;
 
     return formattedQRCode;
   });

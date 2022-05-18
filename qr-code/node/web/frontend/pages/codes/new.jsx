@@ -27,23 +27,43 @@ import { useShopifyQuery } from 'hooks/useShopifyQuery'
 import { gql } from 'graphql-request'
 import { useForm, useField, notEmptyString } from '@shopify/react-form'
 
-const NO_DISCOUNT_OPTION = { label: 'No discount', value: 'no-discount' }
+import { useAuthenticatedFetch } from 'hooks/useAuthenticatedFetch'
+
+const NO_DISCOUNT_OPTION = { label: 'No discount', value: '' }
 
 const DISCOUNTS_QUERY = gql`
   query discounts($first: Int!) {
-    automaticDiscountNodes(first: $first) {
+    codeDiscountNodes(first: $first) {
       edges {
         node {
           id
-          automaticDiscount {
-            __typename
-            ... on DiscountAutomaticBxgy {
-              status
-              title
+          codeDiscount {
+            ... on DiscountCodeBasic {
+              codes(first: 1) {
+                edges {
+                  node {
+                    code
+                  }
+                }
+              }
             }
-            ... on DiscountAutomaticBasic {
-              status
-              title
+            ... on DiscountCodeBxgy {
+              codes(first: 1) {
+                edges {
+                  node {
+                    code
+                  }
+                }
+              }
+            }
+            ... on DiscountCodeFreeShipping {
+              codes(first: 1) {
+                edges {
+                  node {
+                    code
+                  }
+                }
+              }
             }
           }
         }
@@ -52,12 +72,23 @@ const DISCOUNTS_QUERY = gql`
   }
 `
 
+const DISCOUNT_CODES = {}
+
 export default function NewCode() {
   const [showResourcePicker, setShowResourcePicker] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState({})
+  const fetch = useAuthenticatedFetch()
 
   const {
-    fields: { title, selectedProductId, destination, discount },
+    fields: {
+      title,
+      productId,
+      variantId,
+      handle,
+      discountId,
+      discountCode,
+      destination,
+    },
     dirty,
     reset,
     submitting,
@@ -68,16 +99,25 @@ export default function NewCode() {
         value: '',
         validates: [notEmptyString('Please name your QR code')],
       }),
-      selectedProductId: useField({
+      productId: useField({
         value: '',
         validates: [notEmptyString('Please select a product')],
       }),
+      variantId: useField(''),
+      handle: useField(''),
       destination: useField(['product']),
-      discount: useField(NO_DISCOUNT_OPTION.value),
+      discountId: useField(NO_DISCOUNT_OPTION.value),
+      discountCode: useField(''),
     },
-    onSubmit: async () => {
-      // TODO: Mocking the submit request for now
-      return new Promise((resolve) => setTimeout(resolve, 4000))
+    onSubmit: async (body) => {
+      const parsedBody = body
+      parsedBody.destination = parsedBody.destination[0]
+
+      return fetch('/api/qrcodes', {
+        method: 'POST',
+        body: JSON.stringify(parsedBody),
+        headers: { 'Content-Type': 'application/json' },
+      })
     },
   })
 
@@ -92,8 +132,15 @@ export default function NewCode() {
       images: selection[0].images,
       handle: selection[0].handle,
     })
-    selectedProductId.onChange(id)
+    productId.onChange(selection[0].id)
+    variantId.onChange(selection[0].variants[0].id)
+    handle.onChange(selection[0].handle)
     setShowResourcePicker(false)
+  }, [])
+
+  const handleDiscountChange = useCallback((id) => {
+    discountId.onChange(id)
+    discountCode.onChange(DISCOUNT_CODES[id])
   }, [])
 
   const toggleResourcePicker = useCallback(
@@ -116,11 +163,15 @@ export default function NewCode() {
   const discountOptions = discounts
     ? [
         NO_DISCOUNT_OPTION,
-        ...discounts.data.automaticDiscountNodes.edges.map(
-          ({ node: { id, automaticDiscount } }) => ({
-            label: `${automaticDiscount.title} (${automaticDiscount.status})`,
-            value: id,
-          })
+        ...discounts.data.codeDiscountNodes.edges.map(
+          ({ node: { id, codeDiscount } }) => {
+            DISCOUNT_CODES[id] = codeDiscount.codes.edges[0].node.code
+
+            return {
+              label: codeDiscount.codes.edges[0].node.code,
+              value: id,
+            }
+          }
         ),
       ]
     : []
@@ -161,7 +212,7 @@ export default function NewCode() {
                 title="Product"
                 actions={[
                   {
-                    content: selectedProductId.value
+                    content: productId.value
                       ? 'Change product'
                       : 'Select product',
                     onAction: toggleResourcePicker,
@@ -178,7 +229,7 @@ export default function NewCode() {
                       open
                     />
                   )}
-                  {selectedProductId.value ? (
+                  {productId.value ? (
                     <Stack alignment="center">
                       {selectedProduct.images[0] ? (
                         <Thumbnail
@@ -197,11 +248,11 @@ export default function NewCode() {
                       <Button onClick={toggleResourcePicker}>
                         Select product
                       </Button>
-                      {selectedProductId.error && (
+                      {productId.error && (
                         <Stack spacing="tight">
                           <Icon source={AlertMinor} color="critical" />
                           <TextStyle variation="negative">
-                            {selectedProductId.error}
+                            {productId.error}
                           </TextStyle>
                         </Stack>
                       )}
@@ -246,8 +297,8 @@ export default function NewCode() {
                 <Select
                   label="discount code"
                   options={discountOptions}
-                  onChange={discount.onChange}
-                  value={discount.value}
+                  onChange={handleDiscountChange}
+                  value={discountId.value}
                   disabled={isLoadingDiscounts || discountsError}
                   labelHidden
                 />
