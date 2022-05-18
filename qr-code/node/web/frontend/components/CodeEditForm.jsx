@@ -319,7 +319,7 @@ export function CodeEditForm({ id, initialValues }) {
               imageContained={true}
               largeImage={initialValues.imageUrl}
             />
-            <Button fullWidth primary disabled>
+            <Button fullWidth primary download url={initialValues.imageUrl}>
               Download
             </Button>
           </Card>
