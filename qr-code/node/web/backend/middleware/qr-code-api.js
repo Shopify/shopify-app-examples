@@ -1,5 +1,3 @@
-import QRCode from "qrcode";
-
 import { QRCodesDB } from "../qr-codes-db.js";
 import {
   getQrCodeOr404,
@@ -21,7 +19,7 @@ export default function applyQrCodeApiEndpoints(app) {
     }
   });
 
-  app.put("/api/qrcodes/:id", async (req, res) => {
+  app.patch("/api/qrcodes/:id", async (req, res) => {
     const qrcode = await getQrCodeOr404(req, res);
 
     if (qrcode) {
@@ -51,7 +49,8 @@ export default function applyQrCodeApiEndpoints(app) {
     const qrcode = await getQrCodeOr404(req, res);
 
     if (qrcode) {
-      res.status(200).send(qrcode);
+      const formattedQrCode = await formatQrCodeResponse(req, res, [qrcode]);
+      res.status(200).send(formattedQrCode[0]);
     }
   });
 
@@ -61,18 +60,6 @@ export default function applyQrCodeApiEndpoints(app) {
     if (qrcode) {
       await QRCodesDB.delete(req.params.id);
       res.status(200).send();
-    }
-  });
-
-  app.get("/api/qrcodes/:id/image", async (req, res) => {
-    const qrcode = await getQrCodeOr404(req, res);
-
-    if (qrcode) {
-      const destinationUrl = QRCodesDB.generateQrcodeDestinationUrl(qrcode);
-      res
-        .status(200)
-        .set("Content-Type", "image/png")
-        .send(await QRCode.toBuffer(destinationUrl));
     }
   });
 }

@@ -14,6 +14,7 @@ import {
   Icon,
   Stack,
   TextStyle,
+  Image,
 } from '@shopify/polaris'
 import {
   ContextualSaveBar,
@@ -74,9 +75,9 @@ const DISCOUNTS_QUERY = gql`
 
 const DISCOUNT_CODES = {}
 
-export default function NewCode() {
+export function CodeEditForm({ id, initialValues }) {
   const [showResourcePicker, setShowResourcePicker] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState({})
+  const [selectedProduct, setSelectedProduct] = useState(initialValues.product)
   const navigate = useNavigate()
   const fetch = useAuthenticatedFetch()
 
@@ -97,34 +98,33 @@ export default function NewCode() {
   } = useForm({
     fields: {
       title: useField({
-        value: '',
+        value: initialValues.title || '',
         validates: [notEmptyString('Please name your QR code')],
       }),
       productId: useField({
-        value: '',
+        value: initialValues.product.id || '',
         validates: [notEmptyString('Please select a product')],
       }),
-      variantId: useField(''),
-      handle: useField(''),
-      destination: useField(['product']),
-      discountId: useField(NO_DISCOUNT_OPTION.value),
-      discountCode: useField(''),
+      variantId: useField(initialValues.variantId || ''),
+      handle: useField(initialValues.handle || ''),
+      destination: useField([initialValues.destination] || ['product']),
+      discountId: useField(
+        initialValues.discountId || NO_DISCOUNT_OPTION.value
+      ),
+      discountCode: useField(initialValues.discountCode || ''),
     },
     onSubmit: async (body) => {
       const parsedBody = body
       parsedBody.destination = parsedBody.destination[0]
 
-      const response = await fetch('/api/qrcodes', {
-        method: 'POST',
+      const response = await fetch(`/api/qrcodes/${id}`, {
+        method: 'PATCH',
         body: JSON.stringify(parsedBody),
         headers: { 'Content-Type': 'application/json' },
       })
 
       if (response.ok) {
-        const responseBody = await response.json()
-
-        reset()
-        navigate(`/codes/edit/${responseBody.id}`)
+        // What to do, what to do?
       }
     },
   })
@@ -292,7 +292,7 @@ export default function NewCode() {
               </Card>
               <Card
                 sectioned
-                title="Discount code"
+                title="Discount"
                 actions={[
                   {
                     content: 'Create discount',
@@ -315,9 +315,10 @@ export default function NewCode() {
         </Layout.Section>
         <Layout.Section secondary>
           <Card sectioned title="QR Code">
-            <EmptyState>
-              <p>Your QR code will appear here after you save.</p>
-            </EmptyState>
+            <EmptyState
+              imageContained={true}
+              largeImage={initialValues.imageUrl}
+            />
             <Button fullWidth primary disabled>
               Download
             </Button>
