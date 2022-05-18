@@ -20,38 +20,6 @@ const QR_CODE_ADMIN_QUERY = `
       ... on ProductVariant {
         id
       }
-      ... on DiscountCodeNode {
-        id
-        codeDiscount {
-          ...on DiscountCodeBasic {
-            codes(first: 1) {
-              edges {
-                node {
-                  code
-                }
-              }
-            }
-          }
-          ...on DiscountCodeBxgy {
-            codes(first: 1)  {
-              edges {
-                node {
-                  code
-                }
-              }
-            }
-          }
-          ...on DiscountCodeFreeShipping {
-            codes(first: 1)  {
-              edges {
-                node {
-                  code
-                }
-              }
-            }
-          }
-        }
-      }
     }
   }
 `;
@@ -131,14 +99,9 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
       (node) => qrCode.productId == node.id
     );
 
-    const discount = adminData.body.data.nodes.find(
-      (node) => qrCode.discountId == node.id
-    );
-
-    const formattedQRCode = { ...qrCode, product, discount };
+    const formattedQRCode = { ...qrCode, product };
 
     delete formattedQRCode.productId;
-    delete formattedQRCode.discountId;
 
     return formattedQRCode;
   });

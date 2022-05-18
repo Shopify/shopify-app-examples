@@ -20,7 +20,16 @@ export function CodeIndex() {
 
   const rowMarkup = QRCodes.map(
     (
-      { id, title, product, discount, scans, conversions, createdAt },
+      {
+        id,
+        title,
+        product,
+        discountId,
+        discountCode,
+        scans,
+        conversions,
+        createdAt,
+      },
       index
     ) => (
       <IndexTable.Row id={id} key={id} position={index}>
@@ -33,9 +42,7 @@ export function CodeIndex() {
         </IndexTable.Cell>
         <IndexTable.Cell>{title}</IndexTable.Cell>
         <IndexTable.Cell>{product.title}</IndexTable.Cell>
-        <IndexTable.Cell>
-          {discount?.codeDiscount.codes.edges[0].node.code}
-        </IndexTable.Cell>
+        <IndexTable.Cell>{discountCode}</IndexTable.Cell>
         <IndexTable.Cell>
           {dayjs(createdAt).format('MMMM D, YYYY')}
         </IndexTable.Cell>
