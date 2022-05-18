@@ -13,6 +13,10 @@ export default function applyQrCodePublicEndpoints(app) {
       res
         .status(200)
         .set("Content-Type", "image/png")
+        .set(
+          "Content-Disposition",
+          `inline; filename="qr_code_${qrcode.id}.png"`
+        )
         .send(await QRCode.toBuffer(destinationUrl));
     }
   });
