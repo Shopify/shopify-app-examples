@@ -14,17 +14,18 @@ export const QRCodesDB = {
     shopDomain,
     title,
     productId,
-    discountId,
     variantId,
     handle,
-    goToCheckout = false,
+    discountId,
+    discountCode,
+    destination,
   }) {
     await this.ready;
 
     const query = `
       INSERT INTO ${this.qrCodesTableName}
-      (shopDomain, title, productId, discountId, variantId, handle, goToCheckout, scans, conversions)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0)
+      (shopDomain, title, productId, variantId, handle, discountId, discountCode, destination, scans, conversions)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0)
       RETURNING id;
     `;
 
@@ -32,10 +33,11 @@ export const QRCodesDB = {
       shopDomain,
       title,
       productId,
-      discountId,
       variantId,
       handle,
-      goToCheckout,
+      discountId,
+      discountCode,
+      destination,
     ]);
 
     return rawResults[0].id;
@@ -43,7 +45,15 @@ export const QRCodesDB = {
 
   update: async function (
     id,
-    { title, productId, discountId, variantId, handle, goToCheckout = false }
+    {
+      title,
+      productId,
+      variantId,
+      handle,
+      discountId,
+      discountCode,
+      destination,
+    }
   ) {
     await this.ready;
 
@@ -52,10 +62,11 @@ export const QRCodesDB = {
       SET
         title = ?,
         productId = ?,
+        variantId = ?,
+        handle = ?,
         discountId = ?,
-        variantId = ?
-        handle = ?
-        goToCheckout = ?
+        discountCode = ?,
+        destination = ?
       WHERE
         id = ?;
     `;
@@ -63,10 +74,11 @@ export const QRCodesDB = {
     await this.__query(query, [
       title,
       productId,
-      discountId,
       variantId,
       handle,
-      goToCheckout,
+      discountId,
+      discountCode,
+      destination,
       id,
     ]);
     return true;
@@ -114,10 +126,13 @@ export const QRCodesDB = {
     await this.__increaseScanCount(qrcode);
 
     const url = new URL(qrcode.shopDomain);
-    if (qrcode.goToCheckout) {
-      return this.__goToProductCheckout(url, qrcode);
-    } else {
-      return this.__goToProductView(url, qrcode);
+    switch (qrcode.destination) {
+      case "product":
+        return this.__goToProductView(url, qrcode);
+      case "checkout":
+        return this.__goToProductCheckout(url, qrcode);
+      default:
+        throw `Unrecognized destination "${destination}"`;
     }
   },
 
@@ -145,10 +160,11 @@ export const QRCodesDB = {
           shopDomain VARCHAR(511) NOT NULL,
           title VARCHAR(511) NOT NULL,
           productId VARCHAR(255) NOT NULL,
-          discountId VARCHAR(255) NOT NULL,
           variantId VARCHAR(255) NOT NULL,
           handle VARCHAR(255) NOT NULL,
-          goToCheckout TINYINT NOT NULL,
+          discountId VARCHAR(255) NOT NULL,
+          discountCode VARCHAR(255) NOT NULL,
+          destination VARCHAR(255) NOT NULL,
           scans INTEGER,
           conversions INTEGER,
           createdAt DATETIME NOT NULL DEFAULT (datetime(CURRENT_TIMESTAMP, 'localtime'))
