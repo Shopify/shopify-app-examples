@@ -52,10 +52,10 @@ export async function getShopUrlFromSession(req, res) {
  * Expect body to contain
  * {
  *   title: string
- *   productId: number
- *   variantId: number
+ *   productId: string
+ *   variantId: string
  *   handle: string
- *   discountId: number | null
+ *   discountId: string
  *   discountCode: string
  *   destination: string
  * }

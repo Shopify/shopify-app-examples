@@ -147,7 +147,7 @@ export function CodeEditForm({ id, initialValues }) {
 
   const handleDiscountChange = useCallback((id) => {
     discountId.onChange(id)
-    discountCode.onChange(DISCOUNT_CODES[id])
+    discountCode.onChange(DISCOUNT_CODES[id] || '')
   }, [])
 
   const toggleResourcePicker = useCallback(
