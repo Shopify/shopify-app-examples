@@ -210,7 +210,7 @@ export const QRCodesDB = {
   },
 
   __goToProductView: function (url, qrcode) {
-    const productPath = `/products/${qrcode.productHandle}`;
+    const productPath = `/products/${qrcode.handle}`;
 
     if (qrcode.discountCode) {
       url.pathname = `/discount/${qrcode.discountCode}`;
@@ -223,7 +223,12 @@ export const QRCodesDB = {
   },
 
   __goToProductCheckout: function (url, qrcode) {
-    url.pathname = `/cart/${qrcode.variantId}:${DEFAULT_PURCHASE_QUANTITY}`;
+    const variantId = qrcode.variantId.replace(
+      /gid:\/\/shopify\/ProductVariant\/([0-9]+)/,
+      "$1"
+    );
+
+    url.pathname = `/cart/${variantId}:${DEFAULT_PURCHASE_QUANTITY}`;
 
     if (qrcode.discountCode) {
       url.searchParams.append("discount", qrcode.discountCode);
