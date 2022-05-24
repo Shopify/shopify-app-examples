@@ -230,6 +230,7 @@ export function CodeEditForm({ id, initialValues }) {
                   {showResourcePicker && (
                     <ResourcePicker
                       resourceType="Product"
+                      showVariants={false}
                       selectMultiple={false}
                       onCancel={toggleResourcePicker}
                       onSelection={handleProductChange}
