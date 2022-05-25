@@ -299,7 +299,7 @@ export default function NewCode() {
                         resource: {
                           create: true,
                         }
-                      })
+                      }, {target: 'new'})
                   },
                 ]}
               >
