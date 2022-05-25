@@ -191,7 +191,7 @@ export function CodeEditForm({ id, initialValues }) {
     : []
 
   return (
-    <Page fullWidth>
+    <Page>
       <ContextualSaveBar
         saveAction={{
           label: 'Save',
@@ -208,7 +208,7 @@ export function CodeEditForm({ id, initialValues }) {
         visible={dirty}
         fullWidth
       />
-      <TitleBar title="New code" primaryAction={null} />
+      <TitleBar title="Edit QR code" primaryAction={null} />
       <Layout>
         <Layout.Section>
           <Form>
