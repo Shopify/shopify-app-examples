@@ -20,7 +20,6 @@ import {
   TitleBar,
   ResourcePicker,
   useNavigate,
-  useAppBridge,
 } from '@shopify/app-bridge-react'
 import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
 import { useShopifyQuery } from 'hooks/useShopifyQuery'
@@ -128,8 +127,6 @@ export default function NewCode() {
       }
     },
   })
-
-  const app = useAppBridge()
 
   const handleProductChange = useCallback(({ id, selection }) => {
     // TODO: Storing product details, and product ID seperately is a hack
@@ -297,7 +294,12 @@ export default function NewCode() {
                   {
                     content: 'Create discount',
                     onAction: () =>
-                      navigate(`${app.hostOrigin}/admin/discounts`),
+                      navigate({
+                        name: 'Discount',
+                        resource: {
+                          create: true,
+                        }
+                      })
                   },
                 ]}
               >
