@@ -227,6 +227,7 @@ export default function NewCode() {
                   {showResourcePicker && (
                     <ResourcePicker
                       resourceType="Product"
+                      showVariants={false}
                       selectMultiple={false}
                       onCancel={toggleResourcePicker}
                       onSelection={handleProductChange}
