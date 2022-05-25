@@ -14,14 +14,12 @@ import {
   Icon,
   Stack,
   TextStyle,
-  Image,
 } from '@shopify/polaris'
 import {
   ContextualSaveBar,
   TitleBar,
   ResourcePicker,
   useNavigate,
-  useAppBridge,
 } from '@shopify/app-bridge-react'
 import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
 import { useShopifyQuery } from 'hooks/useShopifyQuery'
@@ -129,8 +127,6 @@ export function CodeEditForm({ id, initialValues }) {
     },
   })
 
-  const app = useAppBridge()
-
   const handleProductChange = useCallback(({ id, selection }) => {
     // TODO: Storing product details, and product ID seperately is a hack
     // This will be fixed when this form queries the product data
@@ -166,6 +162,17 @@ export function CodeEditForm({ id, initialValues }) {
       first: 25,
     },
   })
+
+  async function deleteQRCode() {
+    const response = await fetch(`/api/qrcodes/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    if (response.ok) {
+      navigate(`/`)
+    }
+  }
 
   const discountOptions = discounts
     ? [
@@ -204,7 +211,7 @@ export function CodeEditForm({ id, initialValues }) {
       <TitleBar title="New code" primaryAction={null} />
       <Layout>
         <Layout.Section>
-          <Form onSubmit={() => console.log('hi')}>
+          <Form>
             <FormLayout>
               <Card sectioned title="Title">
                 <TextField
@@ -298,7 +305,12 @@ export function CodeEditForm({ id, initialValues }) {
                   {
                     content: 'Create discount',
                     onAction: () =>
-                      navigate(`${app.hostOrigin}/admin/discounts`),
+                    navigate({
+                      name: 'Discount',
+                      resource: {
+                        create: true,
+                      }
+                    }, {target: 'new'})
                   },
                 ]}
               >
@@ -311,6 +323,9 @@ export function CodeEditForm({ id, initialValues }) {
                   labelHidden
                 />
               </Card>
+              <Button outline destructive onClick={deleteQRCode}>
+                Delete QR code
+              </Button>
             </FormLayout>
           </Form>
         </Layout.Section>
