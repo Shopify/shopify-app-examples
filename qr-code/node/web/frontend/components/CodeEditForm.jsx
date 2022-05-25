@@ -184,6 +184,11 @@ export function CodeEditForm({ id, initialValues }) {
       ]
     : []
 
+  const goToDestination = useCallback(() => {
+    const targetURL = new URL(`/qrcodes/${id}`, location.toString());
+    window.open(targetURL.toString(), "_blank", "noreferrer,noopener");
+  }, [id]);
+
   return (
     <Page fullWidth>
       <ContextualSaveBar
@@ -315,7 +320,7 @@ export function CodeEditForm({ id, initialValues }) {
               largeImage={initialValues.imageUrl}
             />
             <ButtonGroup fullWidth>
-              <Button fullWidth onClick={() => console.log("Preview")}>
+              <Button fullWidth onClick={goToDestination}>
                 Go to destination
               </Button>
               <Button fullWidth primary download url={initialValues.imageUrl}>
