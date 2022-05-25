@@ -14,6 +14,7 @@ import {
   Icon,
   Stack,
   TextStyle,
+  ButtonGroup,
 } from '@shopify/polaris'
 import {
   ContextualSaveBar,
@@ -266,15 +267,7 @@ export default function NewCode() {
                     </Stack>
                   )}
                 </Card.Section>
-                <Card.Section
-                  title="Scan Destination"
-                  actions={[
-                    {
-                      content: 'Preview',
-                      onAction: () => console.log('preview'),
-                    },
-                  ]}
-                >
+                <Card.Section>
                   <ChoiceList
                     title="Scan destination"
                     titleHidden
@@ -318,9 +311,14 @@ export default function NewCode() {
             <EmptyState>
               <p>Your QR code will appear here after you save.</p>
             </EmptyState>
-            <Button fullWidth primary disabled>
-              Download
-            </Button>
+            <ButtonGroup fullWidth>
+              <Button fullWidth disabled>
+                Go to destination
+              </Button>
+              <Button fullWidth primary disabled>
+                Download
+              </Button>
+            </ButtonGroup>
           </Card>
         </Layout.Section>
       </Layout>
