@@ -181,7 +181,7 @@ export default function NewCode() {
     : []
 
   return (
-    <Page fullWidth>
+    <Page>
       <ContextualSaveBar
         saveAction={{
           label: 'Save',
@@ -198,10 +198,10 @@ export default function NewCode() {
         visible={dirty}
         fullWidth
       />
-      <TitleBar title="New code" primaryAction={null} />
+      <TitleBar title="New QR code" primaryAction={null} />
       <Layout>
         <Layout.Section>
-          <Form onSubmit={() => console.log('hi')}>
+          <Form>
             <FormLayout>
               <Card sectioned title="Title">
                 <TextField

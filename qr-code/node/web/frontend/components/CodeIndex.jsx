@@ -1,18 +1,8 @@
-import { useEffect, useState } from 'react'
 import { Card, IndexTable, Thumbnail } from '@shopify/polaris'
 import dayjs from 'dayjs'
 
-import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch'
 
-export function CodeIndex() {
-  const fetch = useAuthenticatedFetch()
-  const [QRCodes, setQRCodes] = useState([])
-
-  useEffect(async () => {
-    const codes = await fetch('/api/qrcodes').then((res) => res.json())
-    setQRCodes(codes)
-  }, [])
-
+export function CodeIndex({QRCodes}) {
   const resourceName = {
     singular: 'code',
     plural: 'codes',
