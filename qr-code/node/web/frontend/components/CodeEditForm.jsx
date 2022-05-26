@@ -14,6 +14,8 @@ import {
   Icon,
   Stack,
   TextStyle,
+  Image,
+  ButtonGroup,
 } from '@shopify/polaris'
 import {
   ContextualSaveBar,
@@ -190,6 +192,11 @@ export function CodeEditForm({ id, initialValues }) {
       ]
     : []
 
+  const goToDestination = useCallback(() => {
+    const targetURL = new URL(`/qrcodes/${id}`, location.toString());
+    window.open(targetURL.toString(), "_blank", "noreferrer,noopener");
+  }, [id]);
+
   return (
     <Page>
       <ContextualSaveBar
@@ -276,12 +283,6 @@ export function CodeEditForm({ id, initialValues }) {
                 </Card.Section>
                 <Card.Section
                   title="Scan Destination"
-                  actions={[
-                    {
-                      content: 'Preview',
-                      onAction: () => console.log('preview'),
-                    },
-                  ]}
                 >
                   <ChoiceList
                     title="Scan destination"
@@ -335,9 +336,14 @@ export function CodeEditForm({ id, initialValues }) {
               imageContained={true}
               largeImage={initialValues.imageUrl}
             />
-            <Button fullWidth primary download url={initialValues.imageUrl}>
-              Download
-            </Button>
+            <ButtonGroup fullWidth>
+              <Button fullWidth onClick={goToDestination}>
+                Go to destination
+              </Button>
+              <Button fullWidth primary download url={initialValues.imageUrl}>
+                Download
+              </Button>
+            </ButtonGroup>
           </Card>
         </Layout.Section>
       </Layout>
