@@ -1,13 +1,23 @@
+import { useEffect, useState } from 'react'
 import { useNavigate, TitleBar } from '@shopify/app-bridge-react'
 import { Card, EmptyState, Layout, Page } from '@shopify/polaris'
+
+import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch'
 
 import { CodeIndex } from '../components/CodeIndex'
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const fetch = useAuthenticatedFetch()
+  const [QRCodes, setQRCodes] = useState([])
+
+  useEffect(async () => {
+    const codes = await fetch('/api/qrcodes').then((res) => res.json())
+    setQRCodes(codes)
+  }, [])
 
   return (
-    <Page fullWidth>
+    <Page>
       <TitleBar
         primaryAction={{
           content: 'Create QR code',
@@ -16,7 +26,7 @@ export default function HomePage() {
       />
       <Layout>
         <Layout.Section>
-          {true ? <CodeIndex /> : (
+          {QRCodes.length ? <CodeIndex QRCodes={QRCodes} /> : (
             <Card sectioned>
               <EmptyState
                 heading="Create unique QR codes for your product"

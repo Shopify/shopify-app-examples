@@ -21,7 +21,6 @@ import {
   TitleBar,
   ResourcePicker,
   useNavigate,
-  useAppBridge,
 } from '@shopify/app-bridge-react'
 import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
 import { useShopifyQuery } from 'hooks/useShopifyQuery'
@@ -130,8 +129,6 @@ export default function NewCode() {
     },
   })
 
-  const app = useAppBridge()
-
   const handleProductChange = useCallback(({ id, selection }) => {
     // TODO: Storing product details, and product ID seperately is a hack
     // This will be fixed when this form queries the product data
@@ -185,7 +182,7 @@ export default function NewCode() {
     : []
 
   return (
-    <Page fullWidth>
+    <Page>
       <ContextualSaveBar
         saveAction={{
           label: 'Save',
@@ -202,10 +199,10 @@ export default function NewCode() {
         visible={dirty}
         fullWidth
       />
-      <TitleBar title="New code" primaryAction={null} />
+      <TitleBar title="New QR code" primaryAction={null} />
       <Layout>
         <Layout.Section>
-          <Form onSubmit={() => console.log('hi')}>
+          <Form>
             <FormLayout>
               <Card sectioned title="Title">
                 <TextField
@@ -231,6 +228,7 @@ export default function NewCode() {
                   {showResourcePicker && (
                     <ResourcePicker
                       resourceType="Product"
+                      showVariants={false}
                       selectMultiple={false}
                       onCancel={toggleResourcePicker}
                       onSelection={handleProductChange}
@@ -290,7 +288,12 @@ export default function NewCode() {
                   {
                     content: 'Create discount',
                     onAction: () =>
-                      navigate(`${app.hostOrigin}/admin/discounts`),
+                      navigate({
+                        name: 'Discount',
+                        resource: {
+                          create: true,
+                        }
+                      }, {target: 'new'})
                   },
                 ]}
               >
