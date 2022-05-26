@@ -21,7 +21,7 @@ export default function HomePage() {
       <TitleBar
         primaryAction={{
           content: 'Create QR code',
-          onAction: () => navigate('/codes/new'),
+          onAction: () => navigate('/codes'),
         }}
       />
       <Layout>
@@ -32,7 +32,7 @@ export default function HomePage() {
                 heading="Create unique QR codes for your product"
                 action={{
                   content: 'Create QR code',
-                  onAction: () => navigate('/codes/new'),
+                  onAction: () => navigate('/codes'),
                 }}
                 image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
               >

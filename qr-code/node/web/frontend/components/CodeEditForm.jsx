@@ -3,13 +3,10 @@ import {
   Card,
   Form,
   FormLayout,
-  Page,
-  Layout,
   TextField,
   Button,
   ChoiceList,
   Select,
-  EmptyState,
   Thumbnail,
   Icon,
   Stack,
@@ -17,7 +14,6 @@ import {
 } from '@shopify/polaris'
 import {
   ContextualSaveBar,
-  TitleBar,
   ResourcePicker,
   useNavigate,
 } from '@shopify/app-bridge-react'
@@ -73,11 +69,40 @@ const DISCOUNTS_QUERY = gql`
 
 const DISCOUNT_CODES = {}
 
-export function CodeEditForm({ id, initialValues }) {
+export function CodeEditForm({QRCode, setQRCode}) {
   const [showResourcePicker, setShowResourcePicker] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState(initialValues.product)
+  const [selectedProduct, setSelectedProduct] = useState(QRCode?.product)
   const navigate = useNavigate()
   const fetch = useAuthenticatedFetch()
+
+  const onSubmit = (body) => {
+    const status = {status: null}
+    setQRCode(currentQRCode => {
+      (async () => {
+        const parsedBody = body
+        parsedBody.destination = parsedBody.destination[0]
+
+        const codeId = currentQRCode?.id;
+        const url = codeId ? `/api/qrcodes/${codeId}` : '/api/qrcodes'
+        const method = codeId ? 'PATCH' : 'POST'
+
+        const response = await fetch(url, {
+          method,
+          body: JSON.stringify(parsedBody),
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        if (response.ok) {
+          setQRCode(await response.json())
+          status.status = 'success'
+          navigate(`/edit/${codeId}`)
+        }
+      })();
+      return currentQRCode;
+    })
+
+    return status
+  }
 
   const {
     fields: {
@@ -96,38 +121,25 @@ export function CodeEditForm({ id, initialValues }) {
   } = useForm({
     fields: {
       title: useField({
-        value: initialValues.title || '',
+        value: QRCode?.title || '',
         validates: [notEmptyString('Please name your QR code')],
       }),
       productId: useField({
-        value: initialValues.product.id || '',
+        value: QRCode?.product?.id || '',
         validates: [notEmptyString('Please select a product')],
       }),
-      variantId: useField(initialValues.variantId || ''),
-      handle: useField(initialValues.handle || ''),
-      destination: useField([initialValues.destination] || ['product']),
+      variantId: useField(QRCode?.variantId || ''),
+      handle: useField(QRCode?.handle || ''),
+      destination: useField(QRCode?.destination ? [QRCode.destination] : ['product']),
       discountId: useField(
-        initialValues.discountId || NO_DISCOUNT_OPTION.value
+        QRCode?.discountId || NO_DISCOUNT_OPTION.value
       ),
-      discountCode: useField(initialValues.discountCode || ''),
+      discountCode: useField(QRCode?.discountCode || ''),
     },
-    onSubmit: async (body) => {
-      const parsedBody = body
-      parsedBody.destination = parsedBody.destination[0]
-
-      const response = await fetch(`/api/qrcodes/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(parsedBody),
-        headers: { 'Content-Type': 'application/json' },
-      })
-
-      if (response.ok) {
-        // What to do, what to do?
-      }
-    },
+    onSubmit,
   })
 
-  const handleProductChange = useCallback(({ id, selection }) => {
+  const handleProductChange = useCallback(({ selection }) => {
     // TODO: Storing product details, and product ID seperately is a hack
     // This will be fixed when this form queries the product data
     setSelectedProduct({
@@ -164,7 +176,7 @@ export function CodeEditForm({ id, initialValues }) {
   })
 
   async function deleteQRCode() {
-    const response = await fetch(`/api/qrcodes/${id}`, {
+    const response = await fetch(`/api/qrcodes/${QRCode.id}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -191,7 +203,7 @@ export function CodeEditForm({ id, initialValues }) {
     : []
 
   return (
-    <Page>
+    <Form>
       <ContextualSaveBar
         saveAction={{
           label: 'Save',
@@ -208,139 +220,123 @@ export function CodeEditForm({ id, initialValues }) {
         visible={dirty}
         fullWidth
       />
-      <TitleBar title="Edit QR code" primaryAction={null} />
-      <Layout>
-        <Layout.Section>
-          <Form>
-            <FormLayout>
-              <Card sectioned title="Title">
-                <TextField
-                  {...title}
-                  label="Title"
-                  labelHidden
-                  helpText="Only store staff can see this title"
-                />
-              </Card>
+      <FormLayout>
+        <Card sectioned title="Title">
+          <TextField
+            {...title}
+            label="Title"
+            labelHidden
+            helpText="Only store staff can see this title"
+          />
+        </Card>
 
-              <Card
-                title="Product"
-                actions={[
-                  {
-                    content: productId.value
-                      ? 'Change product'
-                      : 'Select product',
-                    onAction: toggleResourcePicker,
-                  },
-                ]}
-              >
-                <Card.Section>
-                  {showResourcePicker && (
-                    <ResourcePicker
-                      resourceType="Product"
-                      showVariants={false}
-                      selectMultiple={false}
-                      onCancel={toggleResourcePicker}
-                      onSelection={handleProductChange}
-                      open
-                    />
-                  )}
-                  {productId.value ? (
-                    <Stack alignment="center">
-                      {selectedProduct.images[0] ? (
-                        <Thumbnail
-                          source={selectedProduct.images[0].originalSrc}
-                          alt={selectedProduct.images[0].altText}
-                        />
-                      ) : (
-                        <Icon source={ImageMajor} color="base" />
-                      )}
-                      <TextStyle variation="strong">
-                        {selectedProduct.title}
-                      </TextStyle>
-                    </Stack>
-                  ) : (
-                    <Stack vertical spacing="extraTight">
-                      <Button onClick={toggleResourcePicker}>
-                        Select product
-                      </Button>
-                      {productId.error && (
-                        <Stack spacing="tight">
-                          <Icon source={AlertMinor} color="critical" />
-                          <TextStyle variation="negative">
-                            {productId.error}
-                          </TextStyle>
-                        </Stack>
-                      )}
-                    </Stack>
-                  )}
-                </Card.Section>
-                <Card.Section
-                  title="Scan Destination"
-                  actions={[
-                    {
-                      content: 'Preview',
-                      onAction: () => console.log('preview'),
-                    },
-                  ]}
-                >
-                  <ChoiceList
-                    title="Scan destination"
-                    titleHidden
-                    choices={[
-                      { label: 'Link to product page', value: 'product' },
-                      {
-                        label: 'Link to checkout page with product in the card',
-                        value: 'checkout',
-                      },
-                    ]}
-                    selected={destination.value}
-                    onChange={destination.onChange}
+        <Card
+          title="Product"
+          actions={[
+            {
+              content: productId.value
+                ? 'Change product'
+                : 'Select product',
+              onAction: toggleResourcePicker,
+            },
+          ]}
+        >
+          <Card.Section>
+            {showResourcePicker && (
+              <ResourcePicker
+                resourceType="Product"
+                showVariants={false}
+                selectMultiple={false}
+                onCancel={toggleResourcePicker}
+                onSelection={handleProductChange}
+                open
+              />
+            )}
+            {productId.value ? (
+              <Stack alignment="center">
+                {selectedProduct.images[0] ? (
+                  <Thumbnail
+                    source={selectedProduct.images[0].originalSrc}
+                    alt={selectedProduct.images[0].altText}
                   />
-                </Card.Section>
-              </Card>
-              <Card
-                sectioned
-                title="Discount"
-                actions={[
-                  {
-                    content: 'Create discount',
-                    onAction: () =>
-                    navigate({
-                      name: 'Discount',
-                      resource: {
-                        create: true,
-                      }
-                    }, {target: 'new'})
-                  },
-                ]}
-              >
-                <Select
-                  label="discount code"
-                  options={discountOptions}
-                  onChange={handleDiscountChange}
-                  value={discountId.value}
-                  disabled={isLoadingDiscounts || discountsError}
-                  labelHidden
-                />
-              </Card>
-              <Button outline destructive onClick={deleteQRCode}>
-                Delete QR code
-              </Button>
-            </FormLayout>
-          </Form>
-        </Layout.Section>
-        <Layout.Section secondary>
-          <Card sectioned title="QR Code">
-            <EmptyState
-              imageContained={true}
-              largeImage={initialValues.imageUrl}
+                ) : (
+                  <Icon source={ImageMajor} color="base" />
+                )}
+                <TextStyle variation="strong">
+                  {selectedProduct.title}
+                </TextStyle>
+              </Stack>
+            ) : (
+              <Stack vertical spacing="extraTight">
+                <Button onClick={toggleResourcePicker}>
+                  Select product
+                </Button>
+                {productId.error && (
+                  <Stack spacing="tight">
+                    <Icon source={AlertMinor} color="critical" />
+                    <TextStyle variation="negative">
+                      {productId.error}
+                    </TextStyle>
+                  </Stack>
+                )}
+              </Stack>
+            )}
+          </Card.Section>
+          <Card.Section
+            title="Scan Destination"
+            actions={[
+              {
+                content: 'Preview',
+                onAction: () => console.log('preview'),
+              },
+            ]}
+          >
+            <ChoiceList
+              title="Scan destination"
+              titleHidden
+              choices={[
+                { label: 'Link to product page', value: 'product' },
+                {
+                  label: 'Link to checkout page with product in the card',
+                  value: 'checkout',
+                },
+              ]}
+              selected={destination.value}
+              onChange={destination.onChange}
             />
-            <Button fullWidth primary download url={initialValues.imageUrl}>
-              Download
-            </Button>
-          </Card>
-        </Layout.Section>
-      </Layout>
-    </Page>
+          </Card.Section>
+        </Card>
+        <Card
+          sectioned
+          title="Discount"
+          actions={[
+            {
+              content: 'Create discount',
+              onAction: () =>
+              navigate({
+                name: 'Discount',
+                resource: {
+                  create: true,
+                }
+              }, {target: 'new'})
+            },
+          ]}
+        >
+          <Select
+            label="discount code"
+            options={discountOptions}
+            onChange={handleDiscountChange}
+            value={discountId.value}
+            disabled={isLoadingDiscounts || discountsError}
+            labelHidden
+          />
+        </Card>
+        {QRCode?.id && (
+          <Button outline destructive onClick={deleteQRCode}>
+            Delete QR code
+          </Button>
+        )}
+      </FormLayout>
+    </Form>
   )
 }
