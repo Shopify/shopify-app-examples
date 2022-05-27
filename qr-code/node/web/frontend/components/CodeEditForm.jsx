@@ -77,6 +77,19 @@ export function CodeEditForm({QRCode, setQRCode}) {
 
   const onSubmit = (body) => {
     const status = {status: null}
+    /**
+     * This is a workaround.
+     * We think we found a bug in `useForm()`, but on the current timeline
+     * we don’t have enough time to investigate a bug in a library.
+     *
+     * The bug is that `useForm()` doesn’t react
+     * to changing the `onSubmit` prop we pass in. When the user clicks “save”,
+     * an outdated `onSubmit` function gets called where `QRCode` is
+     * still `undefined`, and ends up creating a new QR code rather than
+     * updating the existing one. As a workaround, we are using the
+     * callback version `setQRCode()` to receive the most recent value of
+     * `QRCode`. Looks bad, but works.
+     */
     setQRCode(currentQRCode => {
       (async () => {
         const parsedBody = body
