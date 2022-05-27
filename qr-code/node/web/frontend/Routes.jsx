@@ -1,12 +1,18 @@
 import { Routes as ReactRouterRoutes, Route } from 'react-router-dom'
 
+import NotFound from './pages/NotFound'
+
 export default function Routes({ pages }) {
   const routes = useRoutes(pages)
   const routeComponents = routes.map(({ path, component: Component }) => (
     <Route key={path} path={path} element={<Component />} />
   ))
 
-  return <ReactRouterRoutes>{routeComponents}</ReactRouterRoutes>
+  return (
+    <ReactRouterRoutes>
+      {routeComponents}
+      <Route path="*" element={<NotFound />} />
+    </ReactRouterRoutes>)
 }
 
 function useRoutes(pages) {
