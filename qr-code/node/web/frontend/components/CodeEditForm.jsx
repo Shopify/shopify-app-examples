@@ -19,7 +19,6 @@ import {
   ContextualSaveBar,
   ResourcePicker,
   useAppBridge,
-  useNavigate,
 } from '@shopify/app-bridge-react'
 import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
 import { useShopifyQuery } from 'hooks/useShopifyQuery'
@@ -28,6 +27,7 @@ import { useForm, useField, notEmptyString } from '@shopify/react-form'
 
 import { useAuthenticatedFetch } from 'hooks/useAuthenticatedFetch'
 import { productCheckoutURL, productViewURL } from '../../common/product-urls'
+import {useNavigate} from "hooks/location-with-state.js";
 
 const NO_DISCOUNT_OPTION = { label: 'No discount', value: '' }
 
@@ -99,8 +99,7 @@ export function CodeEditForm({QRCode, setQRCode}) {
       if (response.ok) {
         const QRCode = await response.json();
         if(!codeId) {
-          localStorage.setItem("navigation_state", JSON.stringify(QRCode));
-          navigate(`/codes/edit/${QRCode.id}`)
+          navigate(`/codes/edit/${QRCode.id}`, {state: QRCode})
         }
       }
     })();

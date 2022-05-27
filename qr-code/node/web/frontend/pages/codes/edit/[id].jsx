@@ -13,13 +13,11 @@ import {
 import { CodeEditForm } from 'components/CodeEditForm'
 import { useAuthenticatedFetch } from 'hooks/useAuthenticatedFetch'
 import { TitleBar } from '@shopify/app-bridge-react'
+import { useLocation } from 'hooks/location-with-state'
 
 export default function CodeEdit() {
-  const [QRCode, setQRCode] = useState(() => {
-    const state = localStorage.getItem("navigation_state");
-    localStorage.removeItem("navigation_state");
-    return JSON.parse(state);
-  })
+  const {state} = useLocation();
+  const [QRCode, setQRCode] = useState(state);
   const fetch = useAuthenticatedFetch()
   const { id } = useParams()
 
