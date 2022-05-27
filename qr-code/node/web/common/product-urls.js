@@ -1,5 +1,5 @@
 export function productViewURL({host, productHandle, discountCode}) {
-	const url = new URL(`https://${host}`);
+	const url = new URL(host);
 	const productPath = `/products/${productHandle}`;
 
 	if (discountCode) {
@@ -13,7 +13,7 @@ export function productViewURL({host, productHandle, discountCode}) {
 }
 
 export function productCheckoutURL({host, variantId, quantity = 1, discountCode}) {
-	const url = new URL(`https://${host}`);
+	const url = new URL(host);
 	const id = variantId.replace(
 		/gid:\/\/shopify\/ProductVariant\/([0-9]+)/,
 		"$1"

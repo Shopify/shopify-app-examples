@@ -13,7 +13,7 @@ import { CodeEditForm } from 'components/CodeEditForm'
 import { useAuthenticatedFetch } from 'hooks/useAuthenticatedFetch'
 
 export default function CodeEdit() {
-  const [initialValues, setInitialValues] = useState(null)
+  const [QRCode, setQRCode] = useState(null)
   const fetch = useAuthenticatedFetch()
   const { id } = useParams()
 
@@ -22,11 +22,11 @@ export default function CodeEdit() {
 
     if (response.ok) {
       const body = await response.json()
-      setInitialValues(body)
+      setQRCode(body)
     }
   }, [])
 
-  if (initialValues === null) {
+  if (QRCode === null) {
     return (
       <SkeletonPage>
         <Layout>
@@ -62,5 +62,5 @@ export default function CodeEdit() {
     )
   }
 
-  return <CodeEditForm id={id} initialValues={initialValues} />
+  return <CodeEditForm {...{QRCode, setQRCode}} />
 }

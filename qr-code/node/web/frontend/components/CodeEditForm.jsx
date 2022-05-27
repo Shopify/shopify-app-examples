@@ -11,10 +11,14 @@ import {
   Icon,
   Stack,
   TextStyle,
+  Layout,
+  ButtonGroup,
+  EmptyState,
 } from '@shopify/polaris'
 import {
   ContextualSaveBar,
   ResourcePicker,
+  useAppBridge,
   useNavigate,
 } from '@shopify/app-bridge-react'
 import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
@@ -23,6 +27,7 @@ import { gql } from 'graphql-request'
 import { useForm, useField, notEmptyString } from '@shopify/react-form'
 
 import { useAuthenticatedFetch } from 'hooks/useAuthenticatedFetch'
+import { productCheckoutURL, productViewURL } from '../../common/product-urls'
 
 const NO_DISCOUNT_OPTION = { label: 'No discount', value: '' }
 
@@ -73,9 +78,10 @@ export function CodeEditForm({QRCode, setQRCode}) {
   const [showResourcePicker, setShowResourcePicker] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState(QRCode?.product)
   const navigate = useNavigate()
+  const appBridge = useAppBridge();
   const fetch = useAuthenticatedFetch()
 
-  const onSubmit = (body) => {
+  const onSubmit = useCallback((body) => {
     const status = {status: null}
     /**
      * This is a workaround.
@@ -108,14 +114,14 @@ export function CodeEditForm({QRCode, setQRCode}) {
         if (response.ok) {
           setQRCode(await response.json())
           status.status = 'success'
-          navigate(`/edit/${codeId}`)
+          navigate(`codes/edit/${codeId}`)
         }
       })();
       return currentQRCode;
     })
 
     return status
-  }
+  });
 
   const {
     fields: {
@@ -188,7 +194,7 @@ export function CodeEditForm({QRCode, setQRCode}) {
     },
   })
 
-  async function deleteQRCode() {
+  const deleteQRCode = useCallback(async () => {
     const response = await fetch(`/api/qrcodes/${QRCode.id}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -197,7 +203,22 @@ export function CodeEditForm({QRCode, setQRCode}) {
     if (response.ok) {
       navigate(`/`)
     }
-  }
+  }, [QRCode]);
+
+  const goToDestination = useCallback(() => {
+    if(!selectedProduct) return;
+    const data = {
+      host: appBridge.hostOrigin,
+      productHandle: handle.value,
+      discountCount: discountCode.value || undefined,
+      variantId: variantId.value,
+    };
+    const targetURL = destination === 'product'
+      ? productViewURL(data)
+      : productCheckoutURL(data);
+
+    window.open(targetURL, "_blank", "noreferrer,noopener");
+  }, [QRCode, selectedProduct, destination]);
 
   const discountOptions = discounts
     ? [
@@ -216,6 +237,8 @@ export function CodeEditForm({QRCode, setQRCode}) {
     : []
 
   return (
+    <Layout>
+        <Layout.Section>
     <Form>
       <ContextualSaveBar
         saveAction={{
@@ -297,12 +320,6 @@ export function CodeEditForm({QRCode, setQRCode}) {
           </Card.Section>
           <Card.Section
             title="Scan Destination"
-            actions={[
-              {
-                content: 'Preview',
-                onAction: () => console.log('preview'),
-              },
-            ]}
           >
             <ChoiceList
               title="Scan destination"
@@ -351,5 +368,28 @@ export function CodeEditForm({QRCode, setQRCode}) {
         )}
       </FormLayout>
     </Form>
+    </Layout.Section>
+    <Layout.Section secondary>
+    <Card sectioned title="QR Code">
+      {QRCode?.id
+        ?  <EmptyState
+          imageContained={true}
+          largeImage={new URL(`/qrcodes/${QRCode.id}/image`, location.toString()).toString()}
+        />
+        : <EmptyState>
+            <p>Your QR code will appear here after you save.</p>
+          </EmptyState>
+      }
+      <ButtonGroup>
+        <Button onClick={goToDestination} disabled={!handle.value}>
+          Go To Destination
+        </Button>
+        <Button primary>
+          Download
+        </Button>
+      </ButtonGroup>
+    </Card>
+  </Layout.Section>
+  </Layout>
   )
 }
