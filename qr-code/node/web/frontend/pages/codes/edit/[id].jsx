@@ -15,11 +15,18 @@ import { useAuthenticatedFetch } from 'hooks/useAuthenticatedFetch'
 import { TitleBar } from '@shopify/app-bridge-react'
 
 export default function CodeEdit() {
-  const [QRCode, setQRCode] = useState(null)
+  const [QRCode, setQRCode] = useState(() => {
+    const state = localStorage.getItem("navigation_state");
+    localStorage.removeItem("navigation_state");
+    return JSON.parse(state);
+  })
   const fetch = useAuthenticatedFetch()
   const { id } = useParams()
 
+  console.log({QRCode});
+
   useEffect(async () => {
+    if(QRCode) return;
     const response = await fetch(`/api/qrcodes/${id}`, { method: 'GET' })
 
     if (response.ok) {

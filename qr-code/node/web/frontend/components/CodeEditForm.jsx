@@ -82,45 +82,30 @@ export function CodeEditForm({QRCode, setQRCode}) {
   const fetch = useAuthenticatedFetch()
 
   const onSubmit = useCallback((body) => {
-    const status = {status: null}
-    /**
-     * This is a workaround.
-     * We think we found a bug in `useForm()`, but on the current timeline
-     * we don’t have enough time to investigate a bug in a library.
-     *
-     * The bug is that `useForm()` doesn’t react
-     * to changing the `onSubmit` prop we pass in. When the user clicks “save”,
-     * an outdated `onSubmit` function gets called where `QRCode` is
-     * still `undefined`, and ends up creating a new QR code rather than
-     * updating the existing one. As a workaround, we are using the
-     * callback version `setQRCode()` to receive the most recent value of
-     * `QRCode`. Looks bad, but works.
-     */
-    setQRCode(currentQRCode => {
-      (async () => {
-        const parsedBody = body
-        parsedBody.destination = parsedBody.destination[0]
+    (async () => {
+      const parsedBody = body
+      parsedBody.destination = parsedBody.destination[0]
 
-        const codeId = currentQRCode?.id;
-        const url = codeId ? `/api/qrcodes/${codeId}` : '/api/qrcodes'
-        const method = codeId ? 'PATCH' : 'POST'
+      const codeId = QRCode?.id;
+      const url = codeId ? `/api/qrcodes/${codeId}` : '/api/qrcodes'
+      const method = codeId ? 'PATCH' : 'POST'
 
-        const response = await fetch(url, {
-          method,
-          body: JSON.stringify(parsedBody),
-          headers: { 'Content-Type': 'application/json' },
-        })
+      const response = await fetch(url, {
+        method,
+        body: JSON.stringify(parsedBody),
+        headers: { 'Content-Type': 'application/json' },
+      })
 
-        if (response.ok) {
-          const QRCode = await response.json();
-          status.status = 'success'
+      if (response.ok) {
+        const QRCode = await response.json();
+        if(!codeId) {
+          localStorage.setItem("navigation_state", JSON.stringify(QRCode));
           navigate(`/codes/edit/${QRCode.id}`)
         }
-      })();
-      return currentQRCode;
-    })
+      }
+    })();
 
-    return status
+    return {status: 'success'};
   });
 
   const {
