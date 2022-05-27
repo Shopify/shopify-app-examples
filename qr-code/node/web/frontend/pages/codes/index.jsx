@@ -15,25 +15,8 @@ export default function ManageCode () {
 
   return (
     <Page>
-      <TitleBar title="Edit QR code" primaryAction={null} />
-      <Layout>
-        <Layout.Section>
-          <CodeEditForm QRCode={QRCode} setQRCode={setQRCode} />
-        </Layout.Section>
-        <Layout.Section secondary>
-          <Card sectioned title="QR Code">
-            <EmptyState
-              imageContained={true}
-              largeImage={QRCode?.imageUrl}
-            >
-              {!QRCode?.imageUrl && <p>Your QR code will appear here after you save.</p>}
-            </EmptyState>
-            <Button fullWidth primary download url={QRCode?.imageUrl}>
-              Download
-            </Button>
-          </Card>
-        </Layout.Section>
-      </Layout>
+      <TitleBar title="Create new QR code" primaryAction={null} />
+      <CodeEditForm QRCode={QRCode} setQRCode={setQRCode} />
     </Page>
   )
 }

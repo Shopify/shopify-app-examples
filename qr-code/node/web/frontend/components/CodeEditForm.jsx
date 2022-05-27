@@ -112,9 +112,9 @@ export function CodeEditForm({QRCode, setQRCode}) {
         })
 
         if (response.ok) {
-          setQRCode(await response.json())
+          const QRCode = await response.json();
           status.status = 'success'
-          navigate(`codes/edit/${codeId}`)
+          navigate(`/codes/edit/${QRCode.id}`)
         }
       })();
       return currentQRCode;

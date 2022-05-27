@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import {
   Card,
   Layout,
+  Page,
   SkeletonBodyText,
   SkeletonDisplayText,
   SkeletonPage,
@@ -11,6 +12,7 @@ import {
 
 import { CodeEditForm } from 'components/CodeEditForm'
 import { useAuthenticatedFetch } from 'hooks/useAuthenticatedFetch'
+import { TitleBar } from '@shopify/app-bridge-react'
 
 export default function CodeEdit() {
   const [QRCode, setQRCode] = useState(null)
@@ -62,5 +64,8 @@ export default function CodeEdit() {
     )
   }
 
-  return <CodeEditForm {...{QRCode, setQRCode}} />
+  return <Page>
+      <TitleBar title="Edit QR code" primaryAction={null} />
+    <CodeEditForm {...{QRCode, setQRCode}} />
+    </Page>
 }
