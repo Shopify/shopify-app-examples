@@ -21,8 +21,6 @@ export default function CodeEdit() {
   const fetch = useAuthenticatedFetch()
   const { id } = useParams()
 
-  console.log({QRCode});
-
   useEffect(async () => {
     if(QRCode) return;
     const response = await fetch(`/api/qrcodes/${id}`, { method: 'GET' })
@@ -33,7 +31,7 @@ export default function CodeEdit() {
     }
   }, [])
 
-  if (QRCode === null) {
+  if (!QRCode) {
     return (
       <SkeletonPage>
         <Layout>
