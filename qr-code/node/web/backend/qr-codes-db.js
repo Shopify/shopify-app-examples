@@ -213,7 +213,7 @@ export const QRCodesDB = {
   __goToProductView: function (url, qrcode) {
     return productViewURL({
       discountCode: qrcode.discountCode,
-      host: url.host,
+      host: url.toString(),
       productHandle: qrcode.handle
     });
   },
@@ -221,7 +221,7 @@ export const QRCodesDB = {
   __goToProductCheckout: function (url, qrcode) {
     return productCheckoutURL({
       discountCode: qrcode.discountCode,
-      host: url.host,
+      host: url.toString(),
       variantId: qrcode.variantId,
       quantity: DEFAULT_PURCHASE_QUANTITY
     });
