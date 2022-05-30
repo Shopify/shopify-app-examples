@@ -20,9 +20,11 @@ function checkHeadersForReauthorization(headers, app) {
       `/api/auth`;
 
     const redirect = Redirect.create(app);
-    const redirectType = authUrlHeader.startsWith("/")
-      ? Redirect.Action.APP
-      : Redirect.Action.REMOTE;
-    redirect.dispatch(redirectType, authUrlHeader);
+    redirect.dispatch(
+      Redirect.Action.REMOTE,
+      authUrlHeader.startsWith('/')
+        ? `https://${window.location.host}${authUrlHeader}`
+        : authUrlHeader
+    );
   }
 }
