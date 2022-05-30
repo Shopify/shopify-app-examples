@@ -1,8 +1,3 @@
 # This file stores configurations for your Shopify app.
 
-<<<<<<< HEAD
-name = "anothertestapp"
-id = "d5825c046b93bc7bb82c3ad09bc30847"
-=======
->>>>>>> origin/main
 scopes = "write_products,read_discounts"
