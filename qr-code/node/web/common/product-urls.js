@@ -25,6 +25,5 @@ export function productCheckoutURL({host, variantId, quantity = 1, discountCode}
 		url.searchParams.append("discount", discountCode);
 	}
 
-
 	return url.toString();
 }

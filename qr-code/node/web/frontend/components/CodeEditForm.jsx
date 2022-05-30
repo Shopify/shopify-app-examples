@@ -200,7 +200,7 @@ export function CodeEditForm({QRCode, setQRCode}) {
       discountCount: discountCode.value || undefined,
       variantId: variantId.value,
     };
-    const targetURL = destination === 'product'
+    const targetURL = destination.value[0] === 'product'
       ? productViewURL(data)
       : productCheckoutURL(data);
 
@@ -368,10 +368,10 @@ export function CodeEditForm({QRCode, setQRCode}) {
           </EmptyState>
       }
       <ButtonGroup>
-        <Button onClick={goToDestination} disabled={!handle.value}>
+        <Button fullWidth onClick={goToDestination} disabled={!handle.value}>
           Go To Destination
         </Button>
-        <Button primary>
+        <Button fullWidth primary>
           Download
         </Button>
       </ButtonGroup>
