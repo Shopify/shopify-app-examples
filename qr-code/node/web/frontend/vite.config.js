@@ -23,15 +23,6 @@ export default defineConfig({
   esbuild: {
     jsxInject: `import React from 'react'`,
   },
-  resolve: {
-    alias: {
-      assets: path.resolve(root, './assets'),
-      components: path.resolve(root, './components'),
-      pages: path.resolve(root, './pages'),
-      test: path.resolve(root, './test'),
-      hooks: path.resolve(root, './hooks'),
-    },
-  },
   server: {
     port: process.env.FRONTEND_PORT,
     middlewareMode: 'html',
