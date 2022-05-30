@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, TitleBar } from '@shopify/app-bridge-react'
-import { Card, EmptyState, Layout, Page } from '@shopify/polaris'
+import {
+  Card,
+  EmptyState,
+  Frame,
+  Layout,
+  Loading,
+  Page,
+} from '@shopify/polaris'
 
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch'
 
@@ -9,14 +16,18 @@ import { CodeIndex } from '../components/CodeIndex'
 export default function HomePage() {
   const navigate = useNavigate()
   const fetch = useAuthenticatedFetch()
+  const [loading, setLoading] = useState(true)
   const [QRCodes, setQRCodes] = useState([])
 
   useEffect(async () => {
     const codes = await fetch('/api/qrcodes').then((res) => res.json())
+    setLoading(false)
     setQRCodes(codes)
   }, [])
 
   return (
+    <Frame>
+      {loading && <Loading />}
     <Page>
       <TitleBar
         primaryAction={{
@@ -48,5 +59,6 @@ export default function HomePage() {
         </Layout.Section>
       </Layout>
     </Page>
+    </Frame>
   )
 }
