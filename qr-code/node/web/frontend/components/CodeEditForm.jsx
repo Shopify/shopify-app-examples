@@ -367,14 +367,14 @@ export function CodeEditForm({QRCode, setQRCode}) {
             <p>Your QR code will appear here after you save.</p>
           </EmptyState>
       }
-      <ButtonGroup>
-        <Button fullWidth onClick={goToDestination} disabled={!handle.value}>
-          Go To Destination
-        </Button>
+      <Stack vertical>
         <Button fullWidth primary>
           Download
         </Button>
-      </ButtonGroup>
+        <Button fullWidth onClick={goToDestination} disabled={!handle.value}>
+          Go To Destination
+        </Button>
+      </Stack>
     </Card>
   </Layout.Section>
   </Layout>
