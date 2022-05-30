@@ -81,31 +81,29 @@ export function CodeEditForm({ QRCode, setQRCode }) {
   const fetch = useAuthenticatedFetch()
 
   const onSubmit = useCallback(
-    (body) => {
-      ;(async () => {
-        const parsedBody = body
-        parsedBody.destination = parsedBody.destination[0]
+    async (body) => {
+      const parsedBody = body
+      parsedBody.destination = parsedBody.destination[0]
 
-        const codeId = QRCode?.id
-        const url = codeId ? `/api/qrcodes/${codeId}` : '/api/qrcodes'
-        const method = codeId ? 'PATCH' : 'POST'
+      const codeId = QRCode?.id
+      const url = codeId ? `/api/qrcodes/${codeId}` : '/api/qrcodes'
+      const method = codeId ? 'PATCH' : 'POST'
 
-        const response = await fetch(url, {
-          method,
-          body: JSON.stringify(parsedBody),
-          headers: { 'Content-Type': 'application/json' },
-        })
+      const response = await fetch(url, {
+        method,
+        body: JSON.stringify(parsedBody),
+        headers: { 'Content-Type': 'application/json' },
+      })
 
-        if (response.ok) {
-          const QRCode = await response.json()
-          // If there is no codeId, this is a new QR Code being saved.
-          if (!codeId) {
-            navigate(`/codes/edit/${QRCode.id}`, { state: QRCode })
-          } else {
-            setQRCode(QRCode)
-          }
+      if (response.ok) {
+        const QRCode = await response.json()
+        // If there is no codeId, this is a new QR Code being saved.
+        if (!codeId) {
+          navigate(`/codes/edit/${QRCode.id}`, { state: QRCode })
+        } else {
+          setQRCode(QRCode)
         }
-      })()
+      }
 
       return { status: 'success' }
     },
