@@ -1,6 +1,7 @@
 import sqlite3 from "sqlite3";
 import path from "path";
 import { Shopify } from "@shopify/shopify-api";
+import { productCheckoutURL, productViewURL } from "../common/product-urls.js";
 
 const QR_CODES_DB_FILE = path.join(process.cwd(), "qr_codes_db.sqlite");
 const DEFAULT_PURCHASE_QUANTITY = 1;
@@ -210,31 +211,20 @@ export const QRCodesDB = {
   },
 
   __goToProductView: function (url, qrcode) {
-    const productPath = `/products/${qrcode.handle}`;
-
-    if (qrcode.discountCode) {
-      url.pathname = `/discount/${qrcode.discountCode}`;
-      url.searchParams.append("redirect", productPath);
-    } else {
-      url.pathname = productPath;
-    }
-
-    return url.toString();
+    return productViewURL({
+      discountCode: qrcode.discountCode,
+      host: url.toString(),
+      productHandle: qrcode.handle
+    });
   },
 
   __goToProductCheckout: function (url, qrcode) {
-    const variantId = qrcode.variantId.replace(
-      /gid:\/\/shopify\/ProductVariant\/([0-9]+)/,
-      "$1"
-    );
-
-    url.pathname = `/cart/${variantId}:${DEFAULT_PURCHASE_QUANTITY}`;
-
-    if (qrcode.discountCode) {
-      url.searchParams.append("discount", qrcode.discountCode);
-    }
-
-    return url.toString();
+    return productCheckoutURL({
+      discountCode: qrcode.discountCode,
+      host: url.toString(),
+      variantId: qrcode.variantId,
+      quantity: DEFAULT_PURCHASE_QUANTITY
+    });
   },
 };
 

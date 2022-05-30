@@ -1,8 +1,10 @@
-import { Card, IndexTable, Thumbnail } from '@shopify/polaris'
+import { useNavigate } from '@shopify/app-bridge-react'
+import { Button, Card, IndexTable, Thumbnail } from '@shopify/polaris'
 import dayjs from 'dayjs'
 
 
 export function CodeIndex({QRCodes}) {
+  const navigate = useNavigate();
   const resourceName = {
     singular: 'code',
     plural: 'codes',
@@ -38,6 +40,9 @@ export function CodeIndex({QRCodes}) {
         </IndexTable.Cell>
         <IndexTable.Cell>{scans}</IndexTable.Cell>
         <IndexTable.Cell>{conversions}</IndexTable.Cell>
+        <IndexTable.Cell>
+          <Button onClick={() => navigate(`/codes/edit/${id}`)}>Edit</Button>
+        </IndexTable.Cell>
       </IndexTable.Row>
     )
   )

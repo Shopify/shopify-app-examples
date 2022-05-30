@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import {
   Card,
   Layout,
+  Page,
   SkeletonBodyText,
   SkeletonDisplayText,
   SkeletonPage,
@@ -11,22 +12,26 @@ import {
 
 import { CodeEditForm } from 'components/CodeEditForm'
 import { useAuthenticatedFetch } from 'hooks/useAuthenticatedFetch'
+import { TitleBar } from '@shopify/app-bridge-react'
+import { useLocation } from 'hooks/location-with-state'
 
 export default function CodeEdit() {
-  const [initialValues, setInitialValues] = useState(null)
+  const {state} = useLocation();
+  const [QRCode, setQRCode] = useState(state);
   const fetch = useAuthenticatedFetch()
   const { id } = useParams()
 
   useEffect(async () => {
+    if(QRCode) return;
     const response = await fetch(`/api/qrcodes/${id}`, { method: 'GET' })
 
     if (response.ok) {
       const body = await response.json()
-      setInitialValues(body)
+      setQRCode(body)
     }
   }, [])
 
-  if (initialValues === null) {
+  if (!QRCode) {
     return (
       <SkeletonPage>
         <Layout>
@@ -62,5 +67,8 @@ export default function CodeEdit() {
     )
   }
 
-  return <CodeEditForm id={id} initialValues={initialValues} />
+  return <Page>
+      <TitleBar title="Edit QR code" primaryAction={null} />
+    <CodeEditForm {...{QRCode, setQRCode}} />
+    </Page>
 }

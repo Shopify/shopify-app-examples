@@ -1,36 +1,34 @@
-import { useState, useCallback } from 'react'
+import {useState, useCallback} from 'react';
 import {
   Card,
   Form,
   FormLayout,
-  Page,
-  Layout,
   TextField,
   Button,
   ChoiceList,
   Select,
-  EmptyState,
   Thumbnail,
   Icon,
   Stack,
   TextStyle,
-  Image,
-  ButtonGroup,
-} from '@shopify/polaris'
+  Layout,
+  EmptyState,
+} from '@shopify/polaris';
 import {
   ContextualSaveBar,
-  TitleBar,
   ResourcePicker,
-  useNavigate,
-} from '@shopify/app-bridge-react'
-import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
-import { useShopifyQuery } from 'hooks/useShopifyQuery'
-import { gql } from 'graphql-request'
-import { useForm, useField, notEmptyString } from '@shopify/react-form'
+  useAppBridge,
+} from '@shopify/app-bridge-react';
+import {ImageMajor, AlertMinor} from '@shopify/polaris-icons';
+import {useShopifyQuery} from 'hooks/useShopifyQuery';
+import {gql} from 'graphql-request';
+import {useForm, useField, notEmptyString} from '@shopify/react-form';
 
-import { useAuthenticatedFetch } from 'hooks/useAuthenticatedFetch'
+import {useAuthenticatedFetch} from 'hooks/useAuthenticatedFetch';
+import {productCheckoutURL, productViewURL} from '../../common/product-urls';
+import {useNavigate} from 'hooks/location-with-state.js';
 
-const NO_DISCOUNT_OPTION = { label: 'No discount', value: '' }
+const NO_DISCOUNT_OPTION = {label: 'No discount', value: ''};
 
 const DISCOUNTS_QUERY = gql`
   query discounts($first: Int!) {
@@ -71,15 +69,45 @@ const DISCOUNTS_QUERY = gql`
       }
     }
   }
-`
+`;
 
-const DISCOUNT_CODES = {}
+const DISCOUNT_CODES = {};
 
-export function CodeEditForm({ id, initialValues }) {
-  const [showResourcePicker, setShowResourcePicker] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState(initialValues.product)
-  const navigate = useNavigate()
-  const fetch = useAuthenticatedFetch()
+export function CodeEditForm({QRCode, setQRCode}) {
+  const [showResourcePicker, setShowResourcePicker] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(QRCode?.product);
+  const navigate = useNavigate();
+  const appBridge = useAppBridge();
+  const fetch = useAuthenticatedFetch();
+
+  const onSubmit = useCallback((body) => {
+    (async () => {
+      const parsedBody = body;
+      parsedBody.destination = parsedBody.destination[0];
+
+      const codeId = QRCode?.id;
+      const url = codeId ? `/api/qrcodes/${codeId}` : '/api/qrcodes';
+      const method = codeId ? 'PATCH' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        body: JSON.stringify(parsedBody),
+        headers: {'Content-Type': 'application/json'},
+      });
+
+      if (response.ok) {
+        const QRCode = await response.json();
+        // If there is no codeId, this is a new QR Code being saved.
+        if (!codeId) {
+          navigate(`/codes/edit/${QRCode.id}`, {state: QRCode});
+        } else {
+          setQRCode(QRCode);
+        }
+      }
+    })();
+
+    return {status: 'success'};
+  });
 
   const {
     fields: {
@@ -98,60 +126,47 @@ export function CodeEditForm({ id, initialValues }) {
   } = useForm({
     fields: {
       title: useField({
-        value: initialValues.title || '',
+        value: QRCode?.title || '',
         validates: [notEmptyString('Please name your QR code')],
       }),
       productId: useField({
-        value: initialValues.product.id || '',
+        value: QRCode?.product?.id || '',
         validates: [notEmptyString('Please select a product')],
       }),
-      variantId: useField(initialValues.variantId || ''),
-      handle: useField(initialValues.handle || ''),
-      destination: useField([initialValues.destination] || ['product']),
-      discountId: useField(
-        initialValues.discountId || NO_DISCOUNT_OPTION.value
+      variantId: useField(QRCode?.variantId || ''),
+      handle: useField(QRCode?.handle || ''),
+      destination: useField(
+        QRCode?.destination ? [QRCode.destination] : ['product'],
       ),
-      discountCode: useField(initialValues.discountCode || ''),
+      discountId: useField(QRCode?.discountId || NO_DISCOUNT_OPTION.value),
+      discountCode: useField(QRCode?.discountCode || ''),
     },
-    onSubmit: async (body) => {
-      const parsedBody = body
-      parsedBody.destination = parsedBody.destination[0]
+    onSubmit,
+  });
 
-      const response = await fetch(`/api/qrcodes/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(parsedBody),
-        headers: { 'Content-Type': 'application/json' },
-      })
-
-      if (response.ok) {
-        // What to do, what to do?
-      }
-    },
-  })
-
-  const handleProductChange = useCallback(({ id, selection }) => {
+  const handleProductChange = useCallback(({selection}) => {
     // TODO: Storing product details, and product ID seperately is a hack
     // This will be fixed when this form queries the product data
     setSelectedProduct({
       title: selection[0].title,
       images: selection[0].images,
       handle: selection[0].handle,
-    })
-    productId.onChange(selection[0].id)
-    variantId.onChange(selection[0].variants[0].id)
-    handle.onChange(selection[0].handle)
-    setShowResourcePicker(false)
-  }, [])
+    });
+    productId.onChange(selection[0].id);
+    variantId.onChange(selection[0].variants[0].id);
+    handle.onChange(selection[0].handle);
+    setShowResourcePicker(false);
+  }, []);
 
   const handleDiscountChange = useCallback((id) => {
-    discountId.onChange(id)
-    discountCode.onChange(DISCOUNT_CODES[id] || '')
-  }, [])
+    discountId.onChange(id);
+    discountCode.onChange(DISCOUNT_CODES[id] || '');
+  }, []);
 
   const toggleResourcePicker = useCallback(
     () => setShowResourcePicker(!showResourcePicker),
-    [showResourcePicker]
-  )
+    [showResourcePicker],
+  );
 
   const {
     data: discounts,
@@ -163,190 +178,214 @@ export function CodeEditForm({ id, initialValues }) {
     variables: {
       first: 25,
     },
-  })
+  });
 
-  async function deleteQRCode() {
-    const response = await fetch(`/api/qrcodes/${id}`, {
+  const deleteQRCode = useCallback(async () => {
+    const response = await fetch(`/api/qrcodes/${QRCode.id}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-    })
+      headers: {'Content-Type': 'application/json'},
+    });
 
     if (response.ok) {
-      navigate(`/`)
+      navigate(`/`);
     }
-  }
+  }, [QRCode]);
+
+  const goToDestination = useCallback(() => {
+    if (!selectedProduct) return;
+    const data = {
+      host: appBridge.hostOrigin,
+      productHandle: handle.value,
+      discountCount: discountCode.value || undefined,
+      variantId: variantId.value,
+    };
+    const targetURL =
+      destination.value[0] === 'product'
+        ? productViewURL(data)
+        : productCheckoutURL(data);
+
+    window.open(targetURL, '_blank', 'noreferrer,noopener');
+  }, [QRCode, selectedProduct, destination]);
 
   const discountOptions = discounts
     ? [
         NO_DISCOUNT_OPTION,
         ...discounts.data.codeDiscountNodes.edges.map(
-          ({ node: { id, codeDiscount } }) => {
-            DISCOUNT_CODES[id] = codeDiscount.codes.edges[0].node.code
+          ({node: {id, codeDiscount}}) => {
+            DISCOUNT_CODES[id] = codeDiscount.codes.edges[0].node.code;
 
             return {
               label: codeDiscount.codes.edges[0].node.code,
               value: id,
-            }
-          }
+            };
+          },
         ),
       ]
-    : []
-
-  const goToDestination = useCallback(() => {
-    const targetURL = new URL(`/qrcodes/${id}`, location.toString());
-    window.open(targetURL.toString(), "_blank", "noreferrer,noopener");
-  }, [id]);
+    : [];
 
   return (
-    <Page>
-      <ContextualSaveBar
-        saveAction={{
-          label: 'Save',
-          onAction: submit,
-          loading: submitting,
-          disabled: submitting,
-        }}
-        discardAction={{
-          label: 'Discard',
-          onAction: reset,
-          loading: submitting,
-          disabled: submitting,
-        }}
-        visible={dirty}
-        fullWidth
-      />
-      <TitleBar title="Edit QR code" primaryAction={null} />
-      <Layout>
-        <Layout.Section>
-          <Form>
-            <FormLayout>
-              <Card sectioned title="Title">
-                <TextField
-                  {...title}
-                  label="Title"
-                  labelHidden
-                  helpText="Only store staff can see this title"
-                />
-              </Card>
+    <Layout>
+      <Layout.Section>
+        <Form>
+          <ContextualSaveBar
+            saveAction={{
+              label: 'Save',
+              onAction: submit,
+              loading: submitting,
+              disabled: submitting,
+            }}
+            discardAction={{
+              label: 'Discard',
+              onAction: reset,
+              loading: submitting,
+              disabled: submitting,
+            }}
+            visible={dirty}
+            fullWidth
+          />
+          <FormLayout>
+            <Card sectioned title="Title">
+              <TextField
+                {...title}
+                label="Title"
+                labelHidden
+                helpText="Only store staff can see this title"
+              />
+            </Card>
 
-              <Card
-                title="Product"
-                actions={[
-                  {
-                    content: productId.value
-                      ? 'Change product'
-                      : 'Select product',
-                    onAction: toggleResourcePicker,
-                  },
-                ]}
-              >
-                <Card.Section>
-                  {showResourcePicker && (
-                    <ResourcePicker
-                      resourceType="Product"
-                      showVariants={false}
-                      selectMultiple={false}
-                      onCancel={toggleResourcePicker}
-                      onSelection={handleProductChange}
-                      open
-                    />
-                  )}
-                  {productId.value ? (
-                    <Stack alignment="center">
-                      {selectedProduct.images[0] ? (
-                        <Thumbnail
-                          source={selectedProduct.images[0].originalSrc}
-                          alt={selectedProduct.images[0].altText}
-                        />
-                      ) : (
-                        <Icon source={ImageMajor} color="base" />
-                      )}
-                      <TextStyle variation="strong">
-                        {selectedProduct.title}
-                      </TextStyle>
-                    </Stack>
-                  ) : (
-                    <Stack vertical spacing="extraTight">
-                      <Button onClick={toggleResourcePicker}>
-                        Select product
-                      </Button>
-                      {productId.error && (
-                        <Stack spacing="tight">
-                          <Icon source={AlertMinor} color="critical" />
-                          <TextStyle variation="negative">
-                            {productId.error}
-                          </TextStyle>
-                        </Stack>
-                      )}
-                    </Stack>
-                  )}
-                </Card.Section>
-                <Card.Section
-                  title="Scan Destination"
-                >
-                  <ChoiceList
-                    title="Scan destination"
-                    titleHidden
-                    choices={[
-                      { label: 'Link to product page', value: 'product' },
-                      {
-                        label: 'Link to checkout page with product in the card',
-                        value: 'checkout',
-                      },
-                    ]}
-                    selected={destination.value}
-                    onChange={destination.onChange}
+            <Card
+              title="Product"
+              actions={[
+                {
+                  content: productId.value
+                    ? 'Change product'
+                    : 'Select product',
+                  onAction: toggleResourcePicker,
+                },
+              ]}
+            >
+              <Card.Section>
+                {showResourcePicker && (
+                  <ResourcePicker
+                    resourceType="Product"
+                    showVariants={false}
+                    selectMultiple={false}
+                    onCancel={toggleResourcePicker}
+                    onSelection={handleProductChange}
+                    open
                   />
-                </Card.Section>
-              </Card>
-              <Card
-                sectioned
-                title="Discount"
-                actions={[
-                  {
-                    content: 'Create discount',
-                    onAction: () =>
-                    navigate({
-                      name: 'Discount',
-                      resource: {
-                        create: true,
-                      }
-                    }, {target: 'new'})
-                  },
-                ]}
-              >
-                <Select
-                  label="discount code"
-                  options={discountOptions}
-                  onChange={handleDiscountChange}
-                  value={discountId.value}
-                  disabled={isLoadingDiscounts || discountsError}
-                  labelHidden
+                )}
+                {productId.value ? (
+                  <Stack alignment="center">
+                    {selectedProduct.images[0] ? (
+                      <Thumbnail
+                        source={selectedProduct.images[0].originalSrc}
+                        alt={selectedProduct.images[0].altText}
+                      />
+                    ) : (
+                      <Icon source={ImageMajor} color="base" />
+                    )}
+                    <TextStyle variation="strong">
+                      {selectedProduct.title}
+                    </TextStyle>
+                  </Stack>
+                ) : (
+                  <Stack vertical spacing="extraTight">
+                    <Button onClick={toggleResourcePicker}>
+                      Select product
+                    </Button>
+                    {productId.error && (
+                      <Stack spacing="tight">
+                        <Icon source={AlertMinor} color="critical" />
+                        <TextStyle variation="negative">
+                          {productId.error}
+                        </TextStyle>
+                      </Stack>
+                    )}
+                  </Stack>
+                )}
+              </Card.Section>
+              <Card.Section title="Scan Destination">
+                <ChoiceList
+                  title="Scan destination"
+                  titleHidden
+                  choices={[
+                    {label: 'Link to product page', value: 'product'},
+                    {
+                      label: 'Link to checkout page with product in the card',
+                      value: 'checkout',
+                    },
+                  ]}
+                  selected={destination.value}
+                  onChange={destination.onChange}
                 />
-              </Card>
+              </Card.Section>
+            </Card>
+            <Card
+              sectioned
+              title="Discount"
+              actions={[
+                {
+                  content: 'Create discount',
+                  onAction: () =>
+                    navigate(
+                      {
+                        name: 'Discount',
+                        resource: {
+                          create: true,
+                        },
+                      },
+                      {target: 'new'},
+                    ),
+                },
+              ]}
+            >
+              <Select
+                label="discount code"
+                options={discountOptions}
+                onChange={handleDiscountChange}
+                value={discountId.value}
+                disabled={isLoadingDiscounts || discountsError}
+                labelHidden
+              />
+            </Card>
+            {QRCode?.id && (
               <Button outline destructive onClick={deleteQRCode}>
                 Delete QR code
               </Button>
-            </FormLayout>
-          </Form>
-        </Layout.Section>
-        <Layout.Section secondary>
-          <Card sectioned title="QR Code">
+            )}
+          </FormLayout>
+        </Form>
+      </Layout.Section>
+      <Layout.Section secondary>
+        <Card sectioned title="QR Code">
+          {QRCode?.id ? (
             <EmptyState
               imageContained={true}
-              largeImage={initialValues.imageUrl}
+              largeImage={new URL(
+                `/qrcodes/${QRCode.id}/image`,
+                location.toString(),
+              ).toString()}
             />
-            <ButtonGroup fullWidth>
-              <Button fullWidth onClick={goToDestination}>
-                Go to destination
-              </Button>
-              <Button fullWidth primary download url={initialValues.imageUrl}>
-                Download
-              </Button>
-            </ButtonGroup>
-          </Card>
-        </Layout.Section>
-      </Layout>
-    </Page>
-  )
+          ) : (
+            <EmptyState>
+              <p>Your QR code will appear here after you save.</p>
+            </EmptyState>
+          )}
+          <Stack vertical>
+            <Button fullWidth primary>
+              Download
+            </Button>
+            <Button
+              fullWidth
+              onClick={goToDestination}
+              disabled={!handle.value}
+            >
+              Go To Destination
+            </Button>
+          </Stack>
+        </Card>
+      </Layout.Section>
+    </Layout>
+  );
 }
