@@ -22,14 +22,14 @@ export default function CodeEdit() {
   const { id } = useParams()
 
   useEffect(async () => {
-    if(QRCode) return;
-    const response = await fetch(`/api/qrcodes/${id}`, { method: 'GET' })
+    if (QRCode) return
+    const response = await fetch(`/api/qrcodes/${id}`)
 
     if (response.ok) {
       const body = await response.json()
       setQRCode(body)
     }
-  }, [])
+  }, [id, QRCode])
 
   if (!QRCode) {
     return (
