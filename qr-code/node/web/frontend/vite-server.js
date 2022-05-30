@@ -1,15 +1,15 @@
-import express from "express";
+import express from 'express'
 
-import config from "./vite.config.js";
+import config from './vite.config.js'
 
 async function createServer() {
-  const app = express();
+  const app = express()
 
-  const vite = await import("vite").then(({ createServer }) => createServer());
+  const vite = await import('vite').then(({ createServer }) => createServer())
 
-  app.use(vite.middlewares);
+  app.use(vite.middlewares)
 
-  return { app };
+  return { app }
 }
 
-createServer().then(({ app }) => app.listen(config.server.port));
+createServer().then(({ app }) => app.listen(config.server.port))

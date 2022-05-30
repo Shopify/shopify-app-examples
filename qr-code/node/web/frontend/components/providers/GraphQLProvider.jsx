@@ -1,6 +1,11 @@
-import {QueryClient, QueryClientProvider, QueryCache, MutationCache} from 'react-query'
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryCache,
+  MutationCache,
+} from 'react-query'
 
-export function GraphQLProvider({children}) {
+export function GraphQLProvider({ children }) {
   const client = new QueryClient({
     queryCache: new QueryCache(),
     mutationCache: new MutationCache(),

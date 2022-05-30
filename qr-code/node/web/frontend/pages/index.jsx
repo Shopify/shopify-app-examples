@@ -26,7 +26,9 @@ export default function HomePage() {
       />
       <Layout>
         <Layout.Section>
-          {QRCodes.length ? <CodeIndex QRCodes={QRCodes} /> : (
+          {QRCodes.length ? (
+            <CodeIndex QRCodes={QRCodes} />
+          ) : (
             <Card sectioned>
               <EmptyState
                 heading="Create unique QR codes for your product"

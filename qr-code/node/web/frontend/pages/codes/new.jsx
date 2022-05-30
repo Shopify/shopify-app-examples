@@ -23,11 +23,11 @@ import {
   useNavigate,
 } from '@shopify/app-bridge-react'
 import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
-import { useShopifyQuery } from 'hooks/useShopifyQuery'
+import { useShopifyQuery } from '../../hooks/useShopifyQuery'
 import { gql } from 'graphql-request'
 import { useForm, useField, notEmptyString } from '@shopify/react-form'
 
-import { useAuthenticatedFetch } from 'hooks/useAuthenticatedFetch'
+import { useAuthenticatedFetch } from '../../hooks/useAuthenticatedFetch'
 
 const NO_DISCOUNT_OPTION = { label: 'No discount', value: '' }
 
@@ -288,12 +288,15 @@ export default function NewCode() {
                   {
                     content: 'Create discount',
                     onAction: () =>
-                      navigate({
-                        name: 'Discount',
-                        resource: {
-                          create: true,
-                        }
-                      }, {target: 'new'})
+                      navigate(
+                        {
+                          name: 'Discount',
+                          resource: {
+                            create: true,
+                          },
+                        },
+                        { target: 'new' }
+                      ),
                   },
                 ]}
               >

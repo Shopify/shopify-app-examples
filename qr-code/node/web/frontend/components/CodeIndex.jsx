@@ -2,9 +2,8 @@ import { useNavigate } from '@shopify/app-bridge-react'
 import { Button, Card, IndexTable, Thumbnail } from '@shopify/polaris'
 import dayjs from 'dayjs'
 
-
-export function CodeIndex({QRCodes}) {
-  const navigate = useNavigate();
+export function CodeIndex({ QRCodes }) {
+  const navigate = useNavigate()
   const resourceName = {
     singular: 'code',
     plural: 'codes',
