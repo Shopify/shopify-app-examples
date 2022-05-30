@@ -12,7 +12,6 @@ import {
   Stack,
   TextStyle,
   Layout,
-  ButtonGroup,
   EmptyState,
 } from '@shopify/polaris'
 import {
@@ -223,6 +222,7 @@ export function CodeEditForm({QRCode, setQRCode}) {
       ]
     : []
 
+
   return (
     <Layout>
         <Layout.Section>
@@ -281,6 +281,7 @@ export function CodeEditForm({QRCode, setQRCode}) {
                   <Thumbnail
                     source={selectedProduct.images[0].originalSrc}
                     alt={selectedProduct.images[0].altText}
+
                   />
                 ) : (
                   <Icon source={ImageMajor} color="base" />
