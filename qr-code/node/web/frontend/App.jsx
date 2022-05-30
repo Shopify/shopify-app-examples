@@ -12,7 +12,7 @@ export default function App() {
   // .test.tsx or .test.jsx will be ignored
   // [id] can be used to match dynamic paths, e.g: /blog/[id].jsx
   // [..catchAll] will match all routes that don't match any files in /pages
-  const pages = import.meta.globEager("./pages/**/!(*.test.[jt]sx)*.([jt]sx)");
+  const pages = import.meta.globEager('./pages/**/!(*.test.[jt]sx)*.([jt]sx)')
 
   return (
     <PolarisProvider i18n={translations}>

@@ -10,20 +10,20 @@ import {
   TextContainer,
 } from '@shopify/polaris'
 
-import { CodeEditForm } from 'components/CodeEditForm'
-import { useAuthenticatedFetch } from 'hooks/useAuthenticatedFetch'
+import { CodeEditForm } from '../../../components/CodeEditForm'
+import { useAuthenticatedFetch } from '../../../hooks/useAuthenticatedFetch'
 import { TitleBar } from '@shopify/app-bridge-react'
-import { useLocation } from 'hooks/location-with-state'
+import { useLocation } from '../../../hooks/location-with-state'
 
 export default function CodeEdit() {
-  const {state} = useLocation();
-  const [QRCode, setQRCode] = useState(state);
+  const { state } = useLocation()
+  const [QRCode, setQRCode] = useState(state)
   const fetch = useAuthenticatedFetch()
   const { id } = useParams()
 
   useEffect(async () => {
-    if(QRCode) return;
-    const response = await fetch(`/api/qrcodes/${id}`, { method: 'GET' })
+    if (QRCode) return
+    const response = await fetch(`/api/qrcodes/${id}`)
 
     if (response.ok) {
       const body = await response.json()
@@ -67,8 +67,10 @@ export default function CodeEdit() {
     )
   }
 
-  return <Page>
+  return (
+    <Page>
       <TitleBar title="Edit QR code" primaryAction={null} />
-    <CodeEditForm {...{QRCode, setQRCode}} />
+      <CodeEditForm {...{ QRCode, setQRCode }} />
     </Page>
+  )
 }
