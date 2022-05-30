@@ -312,7 +312,7 @@ export function CodeEditForm({QRCode, setQRCode}) {
                   choices={[
                     {label: 'Link to product page', value: 'product'},
                     {
-                      label: 'Link to checkout page with product in the card',
+                      label: 'Link to checkout page with product in the cart',
                       value: 'checkout',
                     },
                   ]}
