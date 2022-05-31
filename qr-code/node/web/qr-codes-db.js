@@ -1,7 +1,7 @@
 import sqlite3 from "sqlite3";
 import path from "path";
 import { Shopify } from "@shopify/shopify-api";
-import { productCheckoutURL, productViewURL } from "./common/product-urls.js";
+import { productCheckoutURL, productViewURL } from "./helpers/product-urls.js";
 
 const QR_CODES_DB_FILE = path.join(process.cwd(), "qr_codes_db.sqlite");
 const DEFAULT_PURCHASE_QUANTITY = 1;
@@ -214,7 +214,7 @@ export const QRCodesDB = {
     return productViewURL({
       discountCode: qrcode.discountCode,
       host: url.toString(),
-      productHandle: qrcode.handle
+      productHandle: qrcode.handle,
     });
   },
 
@@ -223,7 +223,7 @@ export const QRCodesDB = {
       discountCode: qrcode.discountCode,
       host: url.toString(),
       variantId: qrcode.variantId,
-      quantity: DEFAULT_PURCHASE_QUANTITY
+      quantity: DEFAULT_PURCHASE_QUANTITY,
     });
   },
 };
