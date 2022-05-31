@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite'
-import path from 'path'
 
 // prettier-ignore
 const INDEX_ROUTE = '^/(\\?.*)?$'
@@ -24,8 +23,11 @@ export default defineConfig({
     jsxInject: `import React from 'react'`,
   },
   server: {
-    port: process.env.FRONTEND_PORT,
-    middlewareMode: 'html',
+    fs: {
+      allow: ['..'],
+    },
+    host: '0.0.0.0',
+    port: Number(process.env.FRONTEND_PORT),
     hmr: {
       protocol: 'ws',
       host: 'localhost',
