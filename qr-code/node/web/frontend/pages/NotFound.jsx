@@ -3,7 +3,7 @@ import { notFoundImage } from 'assets'
 
 export default function NotFound() {
     return (
-        <Page fullWidth>
+        <Page>
             <Card>
                 <Card.Section>
                     <EmptyState
