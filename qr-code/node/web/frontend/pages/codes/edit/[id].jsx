@@ -29,7 +29,7 @@ export default function CodeEdit() {
       const body = await response.json()
       setQRCode(body)
     }
-  }, [])
+  }, [id, QRCode])
 
   if (!QRCode) {
     return (
