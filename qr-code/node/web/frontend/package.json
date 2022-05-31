@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "build": "vite build",
-    "dev": "cross-env NODE_ENV=development vite",
+    "dev": "cross-env NODE_ENV=development vite --port $FRONTEND_PORT",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
