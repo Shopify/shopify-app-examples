@@ -254,7 +254,7 @@ describe("starter-node-app server", async () => {
   });
 
   describe("graphql proxy", () => {
-    vi.mock(`${process.cwd()}/backend/middleware/verify-request.js`, () => ({
+    vi.mock(`${process.cwd()}/middleware/verify-request.js`, () => ({
       default: vi.fn(() => (req, res, next) => {
         next();
       }),
