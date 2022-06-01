@@ -1,7 +1,7 @@
-import { useMutation } from "react-query";
-import { GraphQLClient } from "graphql-request";
+import { useMutation } from "react-query"
+import { GraphQLClient } from "graphql-request"
 
-import { useAuthenticatedFetch } from "hooks";
+import { useAuthenticatedFetch } from "./index"
 
 export const useShopifyMutation = ({ query }) => {
   const authenticatedFetch = useAuthenticatedFetch();

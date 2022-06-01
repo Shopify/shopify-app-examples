@@ -21,7 +21,7 @@ import {
 } from '@shopify/app-bridge-react'
 import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
 
-import { useShopifyQuery, useAuthenticatedFetch, useNavigate } from 'hooks'
+import { useShopifyQuery, useAuthenticatedFetch, useNavigate } from '../hooks'
 import { gql } from 'graphql-request'
 import { useForm, useField, notEmptyString } from '@shopify/react-form'
 import { productCheckoutURL, productViewURL } from '../helpers/product-urls'

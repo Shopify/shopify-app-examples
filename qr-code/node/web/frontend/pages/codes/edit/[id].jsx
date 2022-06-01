@@ -10,8 +10,8 @@ import {
   TextContainer,
 } from '@shopify/polaris'
 
-import { CodeEditForm } from 'components'
-import { useAuthenticatedFetch, useLocation } from 'hooks'
+import { CodeEditForm } from '../../../components'
+import { useAuthenticatedFetch, useLocation } from '../../../hooks'
 import { TitleBar } from '@shopify/app-bridge-react'
 
 export default function CodeEdit() {

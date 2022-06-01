@@ -1,7 +1,7 @@
-import { useQuery } from "react-query";
-import { GraphQLClient } from "graphql-request";
+import { useQuery } from "react-query"
+import { GraphQLClient } from "graphql-request"
 
-import { useAuthenticatedFetch } from "hooks";
+import { useAuthenticatedFetch } from './index'
 
 export const useShopifyQuery = ({ key, query, variables }) => {
   const authenticatedFetch = useAuthenticatedFetch();

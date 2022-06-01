@@ -3,7 +3,7 @@ import { AppProvider as PolarisProvider } from '@shopify/polaris'
 import translations from '@shopify/polaris/locales/en.json'
 import '@shopify/polaris/build/esm/styles.css'
 
-import { AppBridgeProvider,  GraphQLProvider } from 'components'
+import { AppBridgeProvider, GraphQLProvider } from './components'
 import Routes from './Routes'
 
 export default function App() {
