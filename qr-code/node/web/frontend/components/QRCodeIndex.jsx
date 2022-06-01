@@ -10,7 +10,7 @@ export function QRCodeIndex({ QRCodes }) {
     plural: 'codes',
   }
 
-  const rowMarkup =  QRCodes.map(
+  const rowMarkup = QRCodes.map(
     ({ id, title, product, discountCode, scans, createdAt }, index) => (
       <IndexTable.Row
         id={id}
