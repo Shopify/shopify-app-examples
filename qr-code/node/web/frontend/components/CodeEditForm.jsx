@@ -21,17 +21,10 @@ import {
 } from '@shopify/app-bridge-react'
 import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
 
-import { useShopifyQuery, useAuthenticatedFetch } from 'hooks'
+import { useShopifyQuery, useAuthenticatedFetch, useNavigate } from 'hooks'
 import { gql } from 'graphql-request'
 import { useForm, useField, notEmptyString } from '@shopify/react-form'
-<<<<<<< HEAD
-
-import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch'
 import { productCheckoutURL, productViewURL } from '../helpers/product-urls'
-=======
-import { productCheckoutURL, productViewURL } from '../../common/product-urls'
->>>>>>> 323b1b5 (Update files with rebase)
-import { useNavigate } from '../hooks/location-with-state.js'
 
 const NO_DISCOUNT_OPTION = { label: 'No discount', value: '' }
 
