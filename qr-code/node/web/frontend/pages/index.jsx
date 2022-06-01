@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, TitleBar } from '@shopify/app-bridge-react'
 import { Card, EmptyState, Layout, Page } from '@shopify/polaris'
-
-import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch'
-
-import { CodeIndex } from '../components/CodeIndex'
+import { useAuthenticatedFetch } from '../hooks'
+import { CodeIndex } from '../components'
 
 export default function HomePage() {
   const navigate = useNavigate()
