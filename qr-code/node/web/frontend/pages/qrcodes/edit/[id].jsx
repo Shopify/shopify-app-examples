@@ -12,7 +12,7 @@ import {
 
 import { QRCodeEditForm } from '../../../components'
 import { useAuthenticatedFetch, useLocation } from '../../../hooks'
-import { TitleBar } from '@shopify/app-bridge-react'
+import { Loading, TitleBar } from '@shopify/app-bridge-react'
 
 export default function CodeEdit() {
   const { state } = useLocation()
@@ -33,6 +33,7 @@ export default function CodeEdit() {
   if (!QRCode) {
     return (
       <SkeletonPage>
+        <Loading />
         <Layout>
           <Layout.Section>
             <Card sectioned>
