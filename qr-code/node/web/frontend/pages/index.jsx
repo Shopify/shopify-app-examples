@@ -1,20 +1,26 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, TitleBar, Loading } from '@shopify/app-bridge-react'
-import { Card, EmptyState, Layout, Page, SkeletonBodyText } from '@shopify/polaris'
+import {
+  Card,
+  EmptyState,
+  Layout,
+  Page,
+  SkeletonBodyText,
+} from '@shopify/polaris'
 import { useAuthenticatedFetch } from '../hooks'
-import { CodeIndex } from '../components'
+import { QRCodeIndex } from '../components'
 
 export default function HomePage() {
   const navigate = useNavigate()
   const fetch = useAuthenticatedFetch()
-  const [{ loading, qrCodes }, setData] = useState({
+  const [{ loading, QRCodes }, setData] = useState({
     loading: true,
-    qrCodes: [],
+    QRCodes: [],
   })
 
   useEffect(async () => {
-    const qrCodes = await fetch('/api/qrcodes').then((res) => res.json())
-    setData({ loading: false, qrCodes })
+    const QRCodes = await fetch('/api/qrcodes').then((res) => res.json())
+    setData({ loading: false, QRCodes })
   }, [])
 
   const loadingMarkup = loading ? (
@@ -24,17 +30,17 @@ export default function HomePage() {
     </Card>
   ) : null
 
-  const qrCodesMarkup =
-    qrCodes.length && !loading ? <CodeIndex qrCodes={qrCodes} /> : null
+  const QRCodesMarkup =
+    QRCodes.length && !loading ? <QRCodeIndex QRCodes={QRCodes} /> : null
 
   const emptyStateMarkup =
-    !loading && !qrCodes.length ? (
+    !loading && !QRCodes.length ? (
       <Card sectioned>
         <EmptyState
           heading="Create unique QR codes for your product"
           action={{
             content: 'Create QR code',
-            onAction: () => navigate('/codes'),
+            onAction: () => navigate('/qrcodes'),
           }}
           image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
         >
@@ -50,13 +56,13 @@ export default function HomePage() {
       <TitleBar
         primaryAction={{
           content: 'Create QR code',
-          onAction: () => navigate('/codes'),
+          onAction: () => navigate('/qrcodes'),
         }}
       />
       <Layout>
         <Layout.Section>
           {loadingMarkup}
-          {qrCodesMarkup}
+          {QRCodesMarkup}
           {emptyStateMarkup}
         </Layout.Section>
       </Layout>

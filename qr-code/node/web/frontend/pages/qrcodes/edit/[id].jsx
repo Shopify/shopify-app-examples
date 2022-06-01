@@ -10,7 +10,7 @@ import {
   TextContainer,
 } from '@shopify/polaris'
 
-import { CodeEditForm } from '../../../components'
+import { QRCodeEditForm } from '../../../components'
 import { useAuthenticatedFetch, useLocation } from '../../../hooks'
 import { TitleBar } from '@shopify/app-bridge-react'
 
@@ -69,7 +69,7 @@ export default function CodeEdit() {
   return (
     <Page>
       <TitleBar title="Edit QR code" primaryAction={null} />
-      <CodeEditForm {...{ QRCode, setQRCode }} />
+      <QRCodeEditForm {...{ QRCode, setQRCode }} />
     </Page>
   )
 }
