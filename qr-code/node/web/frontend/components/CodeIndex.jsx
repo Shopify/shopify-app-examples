@@ -1,8 +1,10 @@
-import { Card, IndexTable, Thumbnail, Link } from '@shopify/polaris'
+import { useNavigate } from '@shopify/app-bridge-react'
+import { Card, IndexTable, Thumbnail, UnstyledLink } from '@shopify/polaris'
 import { ShopcodesMajor } from '@shopify/polaris-icons'
 import dayjs from 'dayjs'
 
 export function CodeIndex({ QRCodes }) {
+  const navigate = useNavigate()
   const resourceName = {
     singular: 'code',
     plural: 'codes',
@@ -13,7 +15,14 @@ export function CodeIndex({ QRCodes }) {
       { id, title, product, discountCode, scans, createdAt },
       index
     ) => (
-      <IndexTable.Row id={id} key={id} position={index}>
+      <IndexTable.Row
+        id={id}
+        key={id}
+        position={index}
+        onClick={() => {
+          navigate(`/codes/edit/${id}`)
+        }}
+      >
         <IndexTable.Cell>
           <Thumbnail
             source={product?.images?.edges[0]?.node?.url || ShopcodesMajor}
@@ -22,7 +31,9 @@ export function CodeIndex({ QRCodes }) {
           />
         </IndexTable.Cell>
         <IndexTable.Cell>
-          <Link url={`/codes/edit/${id}`}>{title}</Link>
+          <UnstyledLink data-primary-link url={`/codes/edit/${id}`}>
+            {title}
+          </UnstyledLink>
         </IndexTable.Cell>
         <IndexTable.Cell>{product.title}</IndexTable.Cell>
         <IndexTable.Cell>{discountCode}</IndexTable.Cell>
