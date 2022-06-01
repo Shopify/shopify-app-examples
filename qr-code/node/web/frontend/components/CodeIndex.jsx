@@ -1,10 +1,8 @@
-import { useNavigate } from '@shopify/app-bridge-react'
-import { Button, Card, IndexTable, Thumbnail } from '@shopify/polaris'
+import { Card, IndexTable, Thumbnail, Link } from '@shopify/polaris'
 import { ShopcodesMajor } from '@shopify/polaris-icons'
 import dayjs from 'dayjs'
 
 export function CodeIndex({ QRCodes }) {
-  const navigate = useNavigate()
   const resourceName = {
     singular: 'code',
     plural: 'codes',
@@ -12,14 +10,7 @@ export function CodeIndex({ QRCodes }) {
 
   const rowMarkup = QRCodes.map(
     (
-      {
-        id,
-        title,
-        product,
-        discountCode,
-        scans,
-        createdAt,
-      },
+      { id, title, product, discountCode, scans, createdAt },
       index
     ) => (
       <IndexTable.Row id={id} key={id} position={index}>
@@ -30,16 +21,15 @@ export function CodeIndex({ QRCodes }) {
             size="small"
           />
         </IndexTable.Cell>
-        <IndexTable.Cell>{title}</IndexTable.Cell>
+        <IndexTable.Cell>
+          <Link url={`/codes/edit/${id}`}>{title}</Link>
+        </IndexTable.Cell>
         <IndexTable.Cell>{product.title}</IndexTable.Cell>
         <IndexTable.Cell>{discountCode}</IndexTable.Cell>
         <IndexTable.Cell>
           {dayjs(createdAt).format('MMMM D, YYYY')}
         </IndexTable.Cell>
         <IndexTable.Cell>{scans}</IndexTable.Cell>
-        <IndexTable.Cell>
-          <Button onClick={() => navigate(`/codes/edit/${id}`)}>Edit</Button>
-        </IndexTable.Cell>
       </IndexTable.Row>
     )
   )
