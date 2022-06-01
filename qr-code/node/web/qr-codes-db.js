@@ -25,8 +25,8 @@ export const QRCodesDB = {
 
     const query = `
       INSERT INTO ${this.qrCodesTableName}
-      (shopDomain, title, productId, variantId, handle, discountId, discountCode, destination, scans, conversions)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0)
+      (shopDomain, title, productId, variantId, handle, discountId, discountCode, destination, scans)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
       RETURNING id;
     `;
 
@@ -167,7 +167,6 @@ export const QRCodesDB = {
           discountCode VARCHAR(255) NOT NULL,
           destination VARCHAR(255) NOT NULL,
           scans INTEGER,
-          conversions INTEGER,
           createdAt DATETIME NOT NULL DEFAULT (datetime(CURRENT_TIMESTAMP, 'localtime'))
         )
       `;
