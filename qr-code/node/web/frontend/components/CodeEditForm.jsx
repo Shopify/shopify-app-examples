@@ -384,7 +384,7 @@ export function CodeEditForm({ QRCode, setQRCode }) {
               onClick={goToDestination}
               disabled={!handle.value}
             >
-              Go To Destination
+              Go to destination
             </Button>
           </Stack>
         </Card>
