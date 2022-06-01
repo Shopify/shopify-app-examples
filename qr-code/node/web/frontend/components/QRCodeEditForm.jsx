@@ -78,6 +78,7 @@ export function QRCodeEditForm({ QRCode, setQRCode }) {
   const appBridge = useAppBridge()
   const fetch = useAuthenticatedFetch()
 
+
   const onSubmit = useCallback(
     (body) => {
       ;(async () => {
@@ -181,7 +182,9 @@ export function QRCodeEditForm({ QRCode, setQRCode }) {
     },
   })
 
+  const [isDeleting, setIsDeleting] = useState(false)
   const deleteQRCode = useCallback(async () => {
+    setIsDeleting(true)
     const response = await fetch(`/api/qrcodes/${QRCode.id}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -351,7 +354,12 @@ export function QRCodeEditForm({ QRCode, setQRCode }) {
               />
             </Card>
             {QRCode?.id && (
-              <Button outline destructive onClick={deleteQRCode}>
+              <Button
+                outline
+                destructive
+                onClick={deleteQRCode}
+                loading={isDeleting}
+              >
                 Delete QR code
               </Button>
             )}
@@ -360,7 +368,7 @@ export function QRCodeEditForm({ QRCode, setQRCode }) {
       </Layout.Section>
       <Layout.Section secondary>
         <Card sectioned title="QR Code">
-          {QRCode?.id ? (
+          {QRCode ? (
             <EmptyState
               imageContained={true}
               largeImage={new URL(
@@ -374,13 +382,13 @@ export function QRCodeEditForm({ QRCode, setQRCode }) {
             </EmptyState>
           )}
           <Stack vertical>
-            <Button fullWidth primary>
+            <Button fullWidth primary disabled={!QRCode || isDeleting}>
               Download
             </Button>
             <Button
               fullWidth
               onClick={goToDestination}
-              disabled={!handle.value}
+              disabled={!selectedProduct}
             >
               Go to destination
             </Button>
