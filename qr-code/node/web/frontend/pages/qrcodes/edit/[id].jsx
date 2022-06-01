@@ -2,12 +2,9 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Card,
-  Layout,
   Page,
+  Layout,
   SkeletonBodyText,
-  SkeletonDisplayText,
-  SkeletonPage,
-  TextContainer,
 } from '@shopify/polaris'
 
 import { QRCodeEditForm } from '../../../components'
@@ -32,38 +29,30 @@ export default function CodeEdit() {
 
   if (!QRCode) {
     return (
-      <SkeletonPage>
+      <Page>
         <Loading />
         <Layout>
           <Layout.Section>
-            <Card sectioned>
+            <Card sectioned title="Title">
               <SkeletonBodyText />
             </Card>
-            <Card sectioned>
-              <TextContainer>
-                <SkeletonDisplayText size="small" />
-                <SkeletonBodyText />
-              </TextContainer>
+            <Card title="Product">
+              <Card.Section>
+                <SkeletonBodyText lines={1} />
+              </Card.Section>
+              <Card.Section>
+                <SkeletonBodyText lines={3} />
+              </Card.Section>
             </Card>
-            <Card sectioned>
-              <TextContainer>
-                <SkeletonDisplayText size="small" />
-                <SkeletonBodyText />
-              </TextContainer>
+            <Card sectioned title="Discount">
+              <SkeletonBodyText lines={2} />
             </Card>
           </Layout.Section>
           <Layout.Section secondary>
-            <Card>
-              <Card.Section>
-                <TextContainer>
-                  <SkeletonBodyText lines={5} />
-                  <SkeletonDisplayText size="small" />
-                </TextContainer>
-              </Card.Section>
-            </Card>
+            <Card sectioned title="QR Code"/>
           </Layout.Section>
         </Layout>
-      </SkeletonPage>
+      </Page>
     )
   }
 
