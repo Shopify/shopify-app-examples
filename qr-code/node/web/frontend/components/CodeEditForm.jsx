@@ -20,13 +20,11 @@ import {
   useAppBridge,
 } from '@shopify/app-bridge-react'
 import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
-import { useShopifyQuery } from '../hooks/useShopifyQuery'
+import { useShopifyQuery, useAuthenticatedFetch, useNavigate } from '../hooks'
 import { gql } from 'graphql-request'
 import { useForm, useField, notEmptyString } from '@shopify/react-form'
 
-import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch'
 import { productCheckoutURL, productViewURL } from '../helpers/product-urls'
-import { useNavigate } from '../hooks/location-with-state.js'
 
 const NO_DISCOUNT_OPTION = { label: 'No discount', value: '' }
 

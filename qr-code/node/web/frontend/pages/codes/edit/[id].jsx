@@ -10,10 +10,9 @@ import {
   TextContainer,
 } from '@shopify/polaris'
 
-import { CodeEditForm } from '../../../components/CodeEditForm'
-import { useAuthenticatedFetch } from '../../../hooks/useAuthenticatedFetch'
+import { CodeEditForm } from '../../../components'
+import { useAuthenticatedFetch, useLocation } from '../../../hooks'
 import { TitleBar } from '@shopify/app-bridge-react'
-import { useLocation } from '../../../hooks/location-with-state'
 
 export default function CodeEdit() {
   const { state } = useLocation()

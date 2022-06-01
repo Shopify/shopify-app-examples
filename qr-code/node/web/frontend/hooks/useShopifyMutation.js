@@ -1,7 +1,7 @@
 import { useMutation } from 'react-query'
 import { GraphQLClient } from 'graphql-request'
 
-import { useAuthenticatedFetch } from './useAuthenticatedFetch.js'
+import { useAuthenticatedFetch } from './'
 
 /**
  * A hook for mutating admin data.
