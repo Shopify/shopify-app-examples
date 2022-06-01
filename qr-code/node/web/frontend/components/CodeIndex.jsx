@@ -3,18 +3,15 @@ import { Card, IndexTable, Thumbnail, UnstyledLink } from '@shopify/polaris'
 import { ShopcodesMajor } from '@shopify/polaris-icons'
 import dayjs from 'dayjs'
 
-export function CodeIndex({ QRCodes }) {
+export function CodeIndex({ qrCodes }) {
   const navigate = useNavigate()
   const resourceName = {
     singular: 'code',
     plural: 'codes',
   }
 
-  const rowMarkup = QRCodes.map(
-    (
-      { id, title, product, discountCode, scans, createdAt },
-      index
-    ) => (
+  const rowMarkup =  qrCodes.map(
+    ({ id, title, product, discountCode, scans, createdAt }, index) => (
       <IndexTable.Row
         id={id}
         key={id}
@@ -49,7 +46,7 @@ export function CodeIndex({ QRCodes }) {
     <Card>
       <IndexTable
         resourceName={resourceName}
-        itemCount={QRCodes.length}
+        itemCount={qrCodes.length}
         headings={[
           { title: 'Thumbnail', hidden: true },
           { title: 'Title' },
