@@ -16,10 +16,8 @@ export function CodeIndex({ QRCodes }) {
         id,
         title,
         product,
-        discountId,
         discountCode,
         scans,
-        conversions,
         createdAt,
       },
       index
@@ -39,7 +37,6 @@ export function CodeIndex({ QRCodes }) {
           {dayjs(createdAt).format('MMMM D, YYYY')}
         </IndexTable.Cell>
         <IndexTable.Cell>{scans}</IndexTable.Cell>
-        <IndexTable.Cell>{conversions}</IndexTable.Cell>
         <IndexTable.Cell>
           <Button onClick={() => navigate(`/codes/edit/${id}`)}>Edit</Button>
         </IndexTable.Cell>
@@ -59,7 +56,6 @@ export function CodeIndex({ QRCodes }) {
           { title: 'Discount' },
           { title: 'Date created' },
           { title: 'Scans' },
-          { title: 'Conversions' },
         ]}
         selectable={false}
       >
