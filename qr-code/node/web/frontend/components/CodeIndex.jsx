@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 
 export function CodeIndex({ QRCodes }) {
   const navigate = useNavigate()
+
   const resourceName = {
     singular: 'code',
     plural: 'codes',
