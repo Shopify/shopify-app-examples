@@ -57,7 +57,7 @@ export default function QRCodeEdit() {
   return (
     <Page>
       {titleBarMarkup}
-      <QRCodeForm {...{ QRCode, setQRCode }} />
+      <QRCodeForm QRCode={QRCode} setQRCode={setQRCode} />
     </Page>
   )
 }
