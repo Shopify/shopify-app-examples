@@ -96,7 +96,10 @@ export function QRCodeForm({ QRCode, setQRCode }) {
         })
 
         if (response.ok) {
+          makeClean()
+
           const QRCode = await response.json()
+
           // If there is no codeId, this is a new QR Code being saved.
           if (!codeId) {
             navigate(`/qrcodes/${QRCode.id}`)
@@ -125,6 +128,7 @@ export function QRCodeForm({ QRCode, setQRCode }) {
     reset,
     submitting,
     submit,
+    makeClean,
   } = useForm({
     fields: {
       title: useField({
