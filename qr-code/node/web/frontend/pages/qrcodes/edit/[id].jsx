@@ -22,9 +22,12 @@ export default function CodeEdit() {
     }
   }, [id, QRCode])
 
+  const titleBarMarkup = <TitleBar title="Edit QR code" primaryAction={null} />
+
   if (!QRCode) {
     return (
       <Page>
+        {titleBarMarkup}
         <Loading />
         <Layout>
           <Layout.Section>
@@ -53,7 +56,7 @@ export default function CodeEdit() {
 
   return (
     <Page>
-      <TitleBar title="Edit QR code" primaryAction={null} />
+      {titleBarMarkup}
       <QRCodeEditForm {...{ QRCode, setQRCode }} />
     </Page>
   )
