@@ -1,48 +1,69 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, TitleBar } from '@shopify/app-bridge-react'
-import { Card, EmptyState, Layout, Page } from '@shopify/polaris'
+import { useNavigate, TitleBar, Loading } from '@shopify/app-bridge-react'
+import {
+  Card,
+  EmptyState,
+  Layout,
+  Page,
+  SkeletonBodyText,
+} from '@shopify/polaris'
 import { useAuthenticatedFetch } from '../hooks'
-import { CodeIndex } from '../components'
+import { QRCodeIndex } from '../components'
 
 export default function HomePage() {
   const navigate = useNavigate()
   const fetch = useAuthenticatedFetch()
-  const [QRCodes, setQRCodes] = useState([])
+  const [{ loading, QRCodes }, setData] = useState({
+    loading: true,
+    QRCodes: [],
+  })
 
   useEffect(async () => {
-    const codes = await fetch('/api/qrcodes').then((res) => res.json())
-    setQRCodes(codes)
+    const QRCodes = await fetch('/api/qrcodes').then((res) => res.json())
+    setData({ loading: false, QRCodes })
   }, [])
+
+  const loadingMarkup = loading ? (
+    <Card sectioned>
+      <Loading />
+      <SkeletonBodyText />
+    </Card>
+  ) : null
+
+  const QRCodesMarkup =
+    QRCodes.length && !loading ? <QRCodeIndex QRCodes={QRCodes} /> : null
+
+  const emptyStateMarkup =
+    !loading && !QRCodes.length ? (
+      <Card sectioned>
+        <EmptyState
+          heading="Create unique QR codes for your product"
+          action={{
+            content: 'Create QR code',
+            onAction: () => navigate('/qrcodes'),
+          }}
+          image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+        >
+          <p>
+            Allow customers to scan codes and buy products using their phones.
+          </p>
+        </EmptyState>
+      </Card>
+    ) : null
 
   return (
     <Page>
       <TitleBar
         primaryAction={{
           content: 'Create QR code',
-          onAction: () => navigate('/codes'),
+          onAction: () => navigate('/qrcodes'),
         }}
       />
       <Layout>
         <Layout.Section>
-          {QRCodes.length ? (
-            <CodeIndex QRCodes={QRCodes} />
-          ) : (
-            <Card sectioned>
-              <EmptyState
-                heading="Create unique QR codes for your product"
-                action={{
-                  content: 'Create QR code',
-                  onAction: () => navigate('/codes'),
-                }}
-                image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-              >
-                <p>
-                  Allow customers to scan codes and buy products using their
-                  phones.
-                </p>
-              </EmptyState>
-            </Card>
-          )}
+          {loadingMarkup}
+          {QRCodesMarkup}
+          {emptyStateMarkup}
         </Layout.Section>
       </Layout>
     </Page>

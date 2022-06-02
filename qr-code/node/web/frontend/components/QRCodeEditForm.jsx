@@ -71,7 +71,7 @@ const DISCOUNTS_QUERY = gql`
 
 const DISCOUNT_CODES = {}
 
-export function CodeEditForm({ QRCode, setQRCode }) {
+export function QRCodeEditForm({ QRCode, setQRCode }) {
   const [showResourcePicker, setShowResourcePicker] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState(QRCode?.product)
   const navigate = useNavigate()
@@ -98,7 +98,7 @@ export function CodeEditForm({ QRCode, setQRCode }) {
           const QRCode = await response.json()
           // If there is no codeId, this is a new QR Code being saved.
           if (!codeId) {
-            navigate(`/codes/edit/${QRCode.id}`, { state: QRCode })
+            navigate(`/qrcodes/edit/${QRCode.id}`, { state: QRCode })
           } else {
             setQRCode(QRCode)
           }

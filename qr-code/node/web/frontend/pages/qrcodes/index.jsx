@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Card, Page, Layout, Button, EmptyState } from '@shopify/polaris'
 import { TitleBar } from '@shopify/app-bridge-react'
 
-import { CodeEditForm } from '../../components/CodeEditForm'
+import { QRCodeEditForm } from '../../components'
 
 export default function ManageCode() {
   const [QRCode, setQRCode] = useState()
@@ -10,7 +10,7 @@ export default function ManageCode() {
   return (
     <Page>
       <TitleBar title="Create new QR code" primaryAction={null} />
-      <CodeEditForm QRCode={QRCode} setQRCode={setQRCode} />
+      <QRCodeEditForm QRCode={QRCode} setQRCode={setQRCode} />
     </Page>
   )
 }
