@@ -40,7 +40,7 @@ export default function HomePage() {
           heading="Create unique QR codes for your product"
           action={{
             content: 'Create QR code',
-            onAction: () => navigate('/qrcodes'),
+            onAction: () => navigate('/qrcodes/new'),
           }}
           image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
         >
