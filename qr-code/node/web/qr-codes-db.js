@@ -120,7 +120,7 @@ export const QRCodesDB = {
   },
 
   generateQrcodeDestinationUrl: function (qrcode) {
-    return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcodes/${qrcode.id}`;
+    return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcodes/${qrcode.id}/scan`;
   },
 
   handleCodeScan: async function (qrcode) {

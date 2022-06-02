@@ -21,7 +21,7 @@ export default function applyQrCodePublicEndpoints(app) {
     }
   });
 
-  app.get("/qrcodes/:id", async (req, res) => {
+  app.get("/qrcodes/:id/scan", async (req, res) => {
     const qrcode = await getQrCodeOr404(req, res, false);
 
     if (qrcode) {

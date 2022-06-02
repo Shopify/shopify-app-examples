@@ -4,7 +4,7 @@ import path from 'path'
 // prettier-ignore
 const INDEX_ROUTE = '^/(\\?.*)?$'
 const QR_CODE_IMAGE_ROUTE = '^/qrcodes/[0-9]+/image(\\?.*)?$'
-const QR_CODE_ROUTE = '^/qrcodes/[0-9]+(\\?.*)?$'
+const QR_CODE_ROUTE = '^/qrcodes/[0-9]+/scan(\\?.*)?$'
 const API_ROUTE = '^/api/'
 
 const root = new URL('.', import.meta.url).pathname
