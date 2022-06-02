@@ -78,7 +78,6 @@ export function QRCodeEditForm({ QRCode, setQRCode }) {
   const appBridge = useAppBridge()
   const fetch = useAuthenticatedFetch()
 
-
   const onSubmit = useCallback(
     (body) => {
       ;(async () => {

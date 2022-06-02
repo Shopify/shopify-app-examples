@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import {
-  Card,
-  Page,
-  Layout,
-  SkeletonBodyText,
-} from '@shopify/polaris'
+import { Card, Page, Layout, SkeletonBodyText } from '@shopify/polaris'
 
 import { QRCodeEditForm } from '../../../components'
 import { useAuthenticatedFetch, useLocation } from '../../../hooks'
@@ -49,7 +44,7 @@ export default function CodeEdit() {
             </Card>
           </Layout.Section>
           <Layout.Section secondary>
-            <Card sectioned title="QR Code"/>
+            <Card sectioned title="QR Code" />
           </Layout.Section>
         </Layout>
       </Page>
