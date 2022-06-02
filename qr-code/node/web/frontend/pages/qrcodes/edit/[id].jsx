@@ -1,18 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import {
-  Card,
-  Layout,
-  Page,
-  SkeletonBodyText,
-  SkeletonDisplayText,
-  SkeletonPage,
-  TextContainer,
-} from '@shopify/polaris'
+import { Card, Page, Layout, SkeletonBodyText } from '@shopify/polaris'
 
 import { QRCodeEditForm } from '../../../components'
 import { useAuthenticatedFetch, useLocation } from '../../../hooks'
-import { TitleBar } from '@shopify/app-bridge-react'
+import { Loading, TitleBar } from '@shopify/app-bridge-react'
 
 export default function CodeEdit() {
   const { state } = useLocation()
@@ -30,45 +22,41 @@ export default function CodeEdit() {
     }
   }, [id, QRCode])
 
+  const titleBarMarkup = <TitleBar title="Edit QR code" primaryAction={null} />
+
   if (!QRCode) {
     return (
-      <SkeletonPage>
+      <Page>
+        {titleBarMarkup}
+        <Loading />
         <Layout>
           <Layout.Section>
-            <Card sectioned>
+            <Card sectioned title="Title">
               <SkeletonBodyText />
             </Card>
-            <Card sectioned>
-              <TextContainer>
-                <SkeletonDisplayText size="small" />
-                <SkeletonBodyText />
-              </TextContainer>
+            <Card title="Product">
+              <Card.Section>
+                <SkeletonBodyText lines={1} />
+              </Card.Section>
+              <Card.Section>
+                <SkeletonBodyText lines={3} />
+              </Card.Section>
             </Card>
-            <Card sectioned>
-              <TextContainer>
-                <SkeletonDisplayText size="small" />
-                <SkeletonBodyText />
-              </TextContainer>
+            <Card sectioned title="Discount">
+              <SkeletonBodyText lines={2} />
             </Card>
           </Layout.Section>
           <Layout.Section secondary>
-            <Card>
-              <Card.Section>
-                <TextContainer>
-                  <SkeletonBodyText lines={5} />
-                  <SkeletonDisplayText size="small" />
-                </TextContainer>
-              </Card.Section>
-            </Card>
+            <Card sectioned title="QR Code" />
           </Layout.Section>
         </Layout>
-      </SkeletonPage>
+      </Page>
     )
   }
 
   return (
     <Page>
-      <TitleBar title="Edit QR code" primaryAction={null} />
+      {titleBarMarkup}
       <QRCodeEditForm {...{ QRCode, setQRCode }} />
     </Page>
   )

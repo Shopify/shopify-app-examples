@@ -30,7 +30,7 @@ export default function HomePage() {
     </Card>
   ) : null
 
-  const QRCodesMarkup =
+  const qrCodesMarkup =
     QRCodes.length && !loading ? <QRCodeIndex QRCodes={QRCodes} /> : null
 
   const emptyStateMarkup =
@@ -62,7 +62,7 @@ export default function HomePage() {
       <Layout>
         <Layout.Section>
           {loadingMarkup}
-          {QRCodesMarkup}
+          {qrCodesMarkup}
           {emptyStateMarkup}
         </Layout.Section>
       </Layout>
