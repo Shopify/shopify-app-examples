@@ -196,10 +196,11 @@ export function QRCodeEditForm({ QRCode, setQRCode }) {
     if (!selectedProduct) return
     const data = {
       host: appBridge.hostOrigin,
-      productHandle: handle.value,
+      productHandle: handle.value || selectedProduct.handle,
       discountCount: discountCode.value || undefined,
       variantId: variantId.value,
     }
+
     const targetURL =
       destination.value[0] === 'product'
         ? productViewURL(data)
