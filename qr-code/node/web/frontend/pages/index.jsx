@@ -56,7 +56,7 @@ export default function HomePage() {
       <TitleBar
         primaryAction={{
           content: 'Create QR code',
-          onAction: () => navigate('/qrcodes'),
+          onAction: () => navigate('/qrcodes/new'),
         }}
       />
       <Layout>

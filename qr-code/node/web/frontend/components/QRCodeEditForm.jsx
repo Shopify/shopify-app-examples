@@ -98,7 +98,7 @@ export function QRCodeEditForm({ QRCode, setQRCode }) {
           const QRCode = await response.json()
           // If there is no codeId, this is a new QR Code being saved.
           if (!codeId) {
-            navigate(`/qrcodes/edit/${QRCode.id}`, { state: QRCode })
+            navigate(`/qrcodes/${QRCode.id}`, { state: QRCode })
           } else {
             setQRCode(QRCode)
           }

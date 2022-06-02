@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Card, Page, Layout, SkeletonBodyText } from '@shopify/polaris'
 
-import { QRCodeEditForm } from '../../../components'
-import { useAuthenticatedFetch, useLocation } from '../../../hooks'
+import { QRCodeEditForm } from '../../components'
+import { useAuthenticatedFetch, useLocation } from '../../hooks'
 import { Loading, TitleBar } from '@shopify/app-bridge-react'
 
-export default function CodeEdit() {
+export default function QRCodeEdit() {
   const { state } = useLocation()
   const [QRCode, setQRCode] = useState(state)
   const fetch = useAuthenticatedFetch()
