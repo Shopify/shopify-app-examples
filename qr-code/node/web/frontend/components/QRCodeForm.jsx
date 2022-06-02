@@ -18,9 +18,10 @@ import {
   ContextualSaveBar,
   ResourcePicker,
   useAppBridge,
+  useNavigate,
 } from '@shopify/app-bridge-react'
 import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
-import { useShopifyQuery, useAuthenticatedFetch, useNavigate } from '../hooks'
+import { useShopifyQuery, useAuthenticatedFetch } from '../hooks'
 import { gql } from 'graphql-request'
 import { useForm, useField, notEmptyString } from '@shopify/react-form'
 
@@ -71,7 +72,7 @@ const DISCOUNTS_QUERY = gql`
 
 const DISCOUNT_CODES = {}
 
-export function QRCodeEditForm({ QRCode, setQRCode }) {
+export function QRCodeForm({ QRCode, setQRCode }) {
   const [showResourcePicker, setShowResourcePicker] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState(QRCode?.product)
   const navigate = useNavigate()
@@ -95,10 +96,13 @@ export function QRCodeEditForm({ QRCode, setQRCode }) {
         })
 
         if (response.ok) {
+          makeClean()
+
           const QRCode = await response.json()
+
           // If there is no codeId, this is a new QR Code being saved.
           if (!codeId) {
-            navigate(`/qrcodes/edit/${QRCode.id}`, { state: QRCode })
+            navigate(`/qrcodes/${QRCode.id}`)
           } else {
             setQRCode(QRCode)
           }
@@ -124,6 +128,7 @@ export function QRCodeEditForm({ QRCode, setQRCode }) {
     reset,
     submitting,
     submit,
+    makeClean,
   } = useForm({
     fields: {
       title: useField({

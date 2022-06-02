@@ -17,7 +17,7 @@ export function QRCodeIndex({ QRCodes }) {
         key={id}
         position={index}
         onClick={() => {
-          navigate(`/qrcodes/edit/${id}`)
+          navigate(`/qrcodes/${id}`)
         }}
       >
         <IndexTable.Cell>
@@ -28,7 +28,7 @@ export function QRCodeIndex({ QRCodes }) {
           />
         </IndexTable.Cell>
         <IndexTable.Cell>
-          <UnstyledLink data-primary-link url={`/qrcodes/edit/${id}`}>
+          <UnstyledLink data-primary-link url={`/qrcodes/${id}`}>
             {title}
           </UnstyledLink>
         </IndexTable.Cell>
