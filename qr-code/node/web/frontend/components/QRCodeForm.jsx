@@ -72,7 +72,8 @@ const DISCOUNTS_QUERY = gql`
 
 const DISCOUNT_CODES = {}
 
-export function QRCodeForm({ QRCode, setQRCode }) {
+export function QRCodeForm({ QRCode: InitialQRCode }) {
+  const [QRCode, setQRCode] = useState(InitialQRCode)
   const [showResourcePicker, setShowResourcePicker] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState(QRCode?.product)
   const navigate = useNavigate()
