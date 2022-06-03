@@ -3,11 +3,11 @@ import { Card, IndexTable, Thumbnail, UnstyledLink } from '@shopify/polaris'
 import { ShopcodesMajor } from '@shopify/polaris-icons'
 import dayjs from 'dayjs'
 
-export function QRCodeIndex({ QRCodes }) {
+export function QRCodeIndex({ QRCodes, loading }) {
   const navigate = useNavigate()
   const resourceName = {
-    singular: 'code',
-    plural: 'codes',
+    singular: 'QR code',
+    plural: 'QR codes',
   }
 
   const rowMarkup = QRCodes.map(
@@ -56,6 +56,7 @@ export function QRCodeIndex({ QRCodes }) {
           { title: 'Scans' },
         ]}
         selectable={false}
+        loading={loading}
       >
         {rowMarkup}
       </IndexTable>
