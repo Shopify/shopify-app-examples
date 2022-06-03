@@ -201,10 +201,11 @@ export function QRCodeForm({ QRCode, setQRCode }) {
 
   const goToDestination = useCallback(() => {
     if (!selectedProduct) return
+
     const data = {
       host: appBridge.hostOrigin,
-      productHandle: handle.value || selectedProduct.handle,
-      discountCount: discountCode.value || undefined,
+      productHandle: handle.value,
+      discountCode: discountCode.value,
       variantId: variantId.value,
     }
 
@@ -214,7 +215,7 @@ export function QRCodeForm({ QRCode, setQRCode }) {
         : productCheckoutURL(data)
 
     window.open(targetURL, '_blank', 'noreferrer,noopener')
-  }, [QRCode, selectedProduct, destination])
+  }, [appBridge.hostOrigin, handle.value, destination.value, variantId.value, discountCode.value, selectedProduct])
 
   const discountOptions = discounts
     ? [
