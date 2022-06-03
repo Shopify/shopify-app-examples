@@ -296,7 +296,7 @@ export function QRCodeForm({ QRCode, setQRCode }) {
                         alt={altText}
                       />
                     ) : (
-                      <Icon source={ImageMajor} color="base" />
+                      <Thumbnail source={ImageMajor} color="base" size="small" />
                     )}
                     <TextStyle variation="strong">
                       {selectedProduct.title}

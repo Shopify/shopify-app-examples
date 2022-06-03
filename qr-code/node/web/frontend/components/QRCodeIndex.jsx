@@ -1,6 +1,6 @@
 import { useNavigate } from '@shopify/app-bridge-react'
 import { Card, IndexTable, Thumbnail, UnstyledLink } from '@shopify/polaris'
-import { ShopcodesMajor } from '@shopify/polaris-icons'
+import { ImageMajor } from '@shopify/polaris-icons'
 import dayjs from 'dayjs'
 
 export function QRCodeIndex({ QRCodes }) {
@@ -22,8 +22,9 @@ export function QRCodeIndex({ QRCodes }) {
       >
         <IndexTable.Cell>
           <Thumbnail
-            source={product?.images?.edges[0]?.node?.url || ShopcodesMajor}
+            source={product?.images?.edges[0]?.node?.url || ImageMajor}
             alt="placeholder"
+            color="base"
             size="small"
           />
         </IndexTable.Cell>
