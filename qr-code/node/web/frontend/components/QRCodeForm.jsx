@@ -232,6 +232,10 @@ export function QRCodeForm({ QRCode, setQRCode }) {
       ]
     : []
 
+  const imageSrc = selectedProduct?.images?.edges?.[0]?.node?.url
+  const originalImageSrc = selectedProduct?.images?.[0]?.originalSrc
+  const altText = selectedProduct?.images?.[0]?.altText || selectedProduct?.title
+
   return (
     <Layout>
       <Layout.Section>
@@ -286,10 +290,10 @@ export function QRCodeForm({ QRCode, setQRCode }) {
                 )}
                 {productId.value ? (
                   <Stack alignment="center">
-                    {selectedProduct.images[0] ? (
+                    {(imageSrc || originalImageSrc) ? (
                       <Thumbnail
-                        source={selectedProduct.images[0].originalSrc}
-                        alt={selectedProduct.images[0].altText}
+                        source={imageSrc || originalImageSrc}
+                        alt={altText}
                       />
                     ) : (
                       <Icon source={ImageMajor} color="base" />
