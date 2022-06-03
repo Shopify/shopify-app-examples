@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { useNavigate, TitleBar, Loading } from '@shopify/app-bridge-react'
 import {
   Card,
@@ -7,34 +6,32 @@ import {
   Page,
   SkeletonBodyText,
 } from '@shopify/polaris'
-import { useAuthenticatedFetch } from '../hooks'
+import { useAppQuery } from '../hooks'
 import { QRCodeIndex } from '../components'
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const fetch = useAuthenticatedFetch()
-  const [{ loading, QRCodes }, setData] = useState({
-    loading: true,
-    QRCodes: [],
+  const {
+    data: QRCodes,
+    isLoading,
+    isRefetching,
+  } = useAppQuery({
+    url: '/api/qrcodes',
   })
 
-  useEffect(async () => {
-    const QRCodes = await fetch('/api/qrcodes').then((res) => res.json())
-    setData({ loading: false, QRCodes })
-  }, [])
-
-  const loadingMarkup = loading ? (
+  const loadingMarkup = isLoading ? (
     <Card sectioned>
       <Loading />
       <SkeletonBodyText />
     </Card>
   ) : null
 
-  const qrCodesMarkup =
-    QRCodes.length && !loading ? <QRCodeIndex QRCodes={QRCodes} /> : null
+  const qrCodesMarkup = QRCodes?.length ? (
+    <QRCodeIndex QRCodes={QRCodes} loading={isRefetching} />
+  ) : null
 
   const emptyStateMarkup =
-    !loading && !QRCodes.length ? (
+    !isLoading && !QRCodes?.length ? (
       <Card sectioned>
         <EmptyState
           heading="Create unique QR codes for your product"

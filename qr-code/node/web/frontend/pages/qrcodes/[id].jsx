@@ -1,28 +1,27 @@
-import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Card, Page, Layout, SkeletonBodyText } from '@shopify/polaris'
-
-import { QRCodeForm } from '../../components'
-import { useAuthenticatedFetch } from '../../hooks'
 import { Loading, TitleBar } from '@shopify/app-bridge-react'
 
+import { useAppQuery } from '../../hooks'
+import { QRCodeForm } from '../../components'
+
 export default function QRCodeEdit() {
-  const [QRCode, setQRCode] = useState()
-  const fetch = useAuthenticatedFetch()
   const { id } = useParams()
-
-  useEffect(async () => {
-    const response = await fetch(`/api/qrcodes/${id}`)
-
-    if (response.ok) {
-      const body = await response.json()
-      setQRCode(body)
-    }
-  }, [id, setQRCode])
+  const {
+    data: QRCode,
+    isLoading,
+    isRefetching,
+  } = useAppQuery({
+    url: `/api/qrcodes/${id}`,
+    reactQueryOptions: {
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    },
+  })
 
   const titleBarMarkup = <TitleBar title="Edit QR code" primaryAction={null} />
 
-  if (!QRCode) {
+  if (isLoading || isRefetching) {
     return (
       <Page>
         {titleBarMarkup}
@@ -55,7 +54,7 @@ export default function QRCodeEdit() {
   return (
     <Page>
       {titleBarMarkup}
-      <QRCodeForm QRCode={QRCode} setQRCode={setQRCode} />
+      <QRCodeForm QRCode={QRCode} />
     </Page>
   )
 }
