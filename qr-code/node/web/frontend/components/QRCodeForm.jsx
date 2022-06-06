@@ -234,6 +234,11 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
       ]
     : []
 
+  const QRCodeURL = new URL(
+    `/qrcodes/${QRCode.id}/image`,
+    location.toString()
+  ).toString()
+
   const imageSrc = selectedProduct?.images?.edges?.[0]?.node?.url
   const originalImageSrc = selectedProduct?.images?.[0]?.originalSrc
   const altText = selectedProduct?.images?.[0]?.altText || selectedProduct?.title
@@ -382,10 +387,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
           {QRCode ? (
             <EmptyState
               imageContained={true}
-              largeImage={new URL(
-                `/qrcodes/${QRCode.id}/image`,
-                location.toString()
-              ).toString()}
+              largeImage={QRCodeURL}
             />
           ) : (
             <EmptyState>
@@ -393,7 +395,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
             </EmptyState>
           )}
           <Stack vertical>
-            <Button fullWidth primary disabled={!QRCode || isDeleting}>
+            <Button fullWidth primary download url={QRCodeURL} disabled={!QRCode || isDeleting}>
               Download
             </Button>
             <Button
