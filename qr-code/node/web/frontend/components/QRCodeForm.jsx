@@ -189,6 +189,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
 
   const [isDeleting, setIsDeleting] = useState(false)
   const deleteQRCode = useCallback(async () => {
+    reset()
     setIsDeleting(true)
     const response = await fetch(`/api/qrcodes/${QRCode.id}`, {
       method: 'DELETE',
