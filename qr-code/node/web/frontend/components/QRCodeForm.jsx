@@ -82,13 +82,13 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
 
   const onSubmit = useCallback(
     (body) => {
-      ;(async () => {
+      (async () => {
         const parsedBody = body
         parsedBody.destination = parsedBody.destination[0]
 
-        const codeId = QRCode?.id
-        const url = codeId ? `/api/qrcodes/${codeId}` : '/api/qrcodes'
-        const method = codeId ? 'PATCH' : 'POST'
+        const QRCodeId = QRCode?.id
+        const url = QRCodeId ? `/api/qrcodes/${QRCodeId}` : '/api/qrcodes'
+        const method = QRCodeId ? 'PATCH' : 'POST'
 
         const response = await fetch(url, {
           method,
@@ -101,8 +101,8 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
 
           const QRCode = await response.json()
 
-          // If there is no codeId, this is a new QR Code being saved.
-          if (!codeId) {
+          // If there is no QRCodeId, this is a new QR Code being saved.
+          if (!QRCodeId) {
             navigate(`/qrcodes/${QRCode.id}`)
           } else {
             setQRCode(QRCode)
