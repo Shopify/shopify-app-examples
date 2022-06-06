@@ -234,10 +234,10 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
       ]
     : []
 
-  const QRCodeURL = new URL(
+  const QRCodeURL = QRCode ? new URL(
     `/qrcodes/${QRCode.id}/image`,
     location.toString()
-  ).toString()
+  ).toString() : null
 
   const imageSrc = selectedProduct?.images?.edges?.[0]?.node?.url
   const originalImageSrc = selectedProduct?.images?.[0]?.originalSrc
