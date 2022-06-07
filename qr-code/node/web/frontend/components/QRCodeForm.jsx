@@ -206,7 +206,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
     const data = {
       host: appBridge.hostOrigin,
       productHandle: handle.value || selectedProduct.handle,
-      discountCount: discountCode.value || undefined,
+      discountCode: discountCode.value || undefined,
       variantId: variantId.value,
     }
 
