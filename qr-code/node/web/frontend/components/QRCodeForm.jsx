@@ -216,7 +216,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
         : productCheckoutURL(data)
 
     window.open(targetURL, '_blank', 'noreferrer,noopener')
-  }, [QRCode, selectedProduct, destination])
+  }, [QRCode, selectedProduct, destination, discountCode, handle, variantId])
 
   const discountOptions = discounts
     ? [
