@@ -1,4 +1,3 @@
-import path from "path";
 import QRCode from "qrcode";
 
 import { QRCodesDB } from "../qr-codes-db.js";

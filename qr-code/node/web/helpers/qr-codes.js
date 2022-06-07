@@ -96,8 +96,10 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
 
   const formattedData = rawCodeData.map((qrCode) => {
     const product = adminData.body.data.nodes.find(
-      (node) => qrCode.productId == node.id
-    );
+      (node) => qrCode.productId === node?.id
+    ) || {
+      title: "Deleted product",
+    };
 
     const formattedQRCode = { ...qrCode, product };
 
