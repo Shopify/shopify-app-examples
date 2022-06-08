@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import {
+  Banner,
   Card,
   Form,
   FormLayout,
@@ -79,6 +80,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
   const navigate = useNavigate()
   const appBridge = useAppBridge()
   const fetch = useAuthenticatedFetch()
+  const deletedProduct = QRCode?.product?.title === 'Deleted product'
 
   const onSubmit = useCallback(
     (body) => {
@@ -137,7 +139,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
         validates: [notEmptyString('Please name your QR code')],
       }),
       productId: useField({
-        value: QRCode?.product?.id || '',
+        value: deletedProduct ? 'Deleted product' : (QRCode?.product?.id || ''),
         validates: [notEmptyString('Please select a product')],
       }),
       variantId: useField(QRCode?.variantId || ''),
@@ -210,10 +212,9 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
       variantId: variantId.value,
     }
 
-    const targetURL =
-      destination.value[0] === 'product'
-        ? productViewURL(data)
-        : productCheckoutURL(data)
+    const targetURL = deletedProduct || destination.value[0] === 'product'
+      ? productViewURL(data)
+      : productCheckoutURL(data)
 
     window.open(targetURL, '_blank', 'noreferrer,noopener')
   }, [QRCode, selectedProduct, destination, discountCode, handle, variantId])
@@ -244,7 +245,16 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
   const altText = selectedProduct?.images?.[0]?.altText || selectedProduct?.title
 
   return (
-    <Layout>
+    <Stack vertical>
+      {deletedProduct && <Banner
+        title="The product for this QR code no longer exists."
+        status="critical"
+      >
+        <p>
+          Scans will be directed to a 404 page, or you can choose another product for this QR code.
+        </p>
+      </Banner>}
+      <Layout>
       <Layout.Section>
         <Form>
           <ContextualSaveBar
@@ -398,16 +408,17 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
             <Button fullWidth primary download url={QRCodeURL} disabled={!QRCode || isDeleting}>
               Download
             </Button>
-            <Button
-              fullWidth
-              onClick={goToDestination}
-              disabled={!selectedProduct}
-            >
-              Go to destination
-            </Button>
-          </Stack>
-        </Card>
-      </Layout.Section>
-    </Layout>
+              <Button
+                fullWidth
+                onClick={goToDestination}
+                disabled={!selectedProduct}
+              >
+                Go to destination
+              </Button>
+            </Stack>
+          </Card>
+        </Layout.Section>
+      </Layout>
+    </Stack>
   )
 }
