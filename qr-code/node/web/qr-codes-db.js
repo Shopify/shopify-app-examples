@@ -3,12 +3,12 @@ import path from "path";
 import { Shopify } from "@shopify/shopify-api";
 import { productCheckoutURL, productViewURL } from "./helpers/product-urls.js";
 
-const QR_CODES_DB_FILE = path.join(process.cwd(), "qr_codes_db.sqlite");
+const DEFAULT_DB_FILE = path.join(process.cwd(), "qr_codes_db.sqlite");
 const DEFAULT_PURCHASE_QUANTITY = 1;
 
 export const QRCodesDB = {
   qrCodesTableName: "qr_codes",
-  db: new sqlite3.Database(QR_CODES_DB_FILE),
+  db: null,
   ready: null,
 
   create: async function ({
@@ -150,7 +150,8 @@ export const QRCodesDB = {
     return rows.length === 1;
   },
 
-  __init: async function () {
+  init: async function () {
+    this.db = this.db ?? new sqlite3.Database(DEFAULT_DB_FILE);
     const hasQrCodesTable = await this.__hasQrCodesTable();
     if (hasQrCodesTable) {
       this.ready = Promise.resolve();
@@ -226,5 +227,3 @@ export const QRCodesDB = {
     });
   },
 };
-
-QRCodesDB.__init();
