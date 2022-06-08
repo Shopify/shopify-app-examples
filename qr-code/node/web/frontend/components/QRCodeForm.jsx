@@ -387,7 +387,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
           {QRCode ? (
             <EmptyState
               imageContained={true}
-              largeImage={QRCodeURL}
+              image={QRCodeURL}
             />
           ) : (
             <EmptyState>
