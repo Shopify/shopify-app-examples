@@ -20,6 +20,9 @@ const QR_CODE_ADMIN_QUERY = `
       ... on ProductVariant {
         id
       }
+      ... on DiscountCodeNode {
+        id
+      }
     }
   }
 `;
@@ -101,7 +104,23 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
       title: "Deleted product",
     };
 
-    const formattedQRCode = { ...qrCode, product };
+    const discountDeleted =
+      qrCode.discountId &&
+      !adminData.body.data.nodes.find((node) => qrCode.discountId === node?.id);
+
+    if (discountDeleted) {
+      QRCodesDB.update(qrCode.id, {
+        ...qrCode,
+        discountId: "",
+        discountCode: "",
+      });
+    }
+
+    const formattedQRCode = {
+      ...qrCode,
+      product,
+      discountCode: discountDeleted ? "" : qrCode.discountCode,
+    };
 
     delete formattedQRCode.productId;
 
