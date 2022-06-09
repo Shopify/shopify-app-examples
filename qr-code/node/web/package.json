@@ -1,6 +1,7 @@
 {
   "name": "starter-node-app",
   "private": true,
+  "license": "UNLICENSED",
   "scripts": {
     "build": "vite build frontend --outDir ../dist --emptyOutDir",
     "debug": "node --inspect-brk index.js",
