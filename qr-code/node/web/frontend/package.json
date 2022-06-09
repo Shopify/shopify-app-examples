@@ -1,7 +1,7 @@
 {
   "name": "starter-react-frontend-app",
   "private": true,
-  "license": "MIT",
+  "license": "UNLICENSED",
   "scripts": {
     "build": "vite build",
     "dev": "cross-env NODE_ENV=development node vite-server.js",
