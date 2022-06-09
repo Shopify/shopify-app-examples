@@ -21,7 +21,7 @@ const isTest = process.env.NODE_ENV === "test" || !!process.env.VITE_TEST_BUILD;
 const DEV_INDEX_PATH = `${process.cwd()}/frontend/`;
 const PROD_INDEX_PATH = `${process.cwd()}/dist/`;
 
-const dbFile = path.join(process.cwd(), "db.sqlite");
+const dbFile = path.join(process.cwd(), "database.sqlite");
 const sessionDb = new Shopify.Session.SQLiteSessionStorage(dbFile);
 // Rip out the (technically private) SQLite DB from the session storage
 // so we can re-use it for storing QR codes. This is a temporary workaround
