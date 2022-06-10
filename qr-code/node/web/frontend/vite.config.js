@@ -23,6 +23,9 @@ export default defineConfig({
   esbuild: {
     jsxInject: `import React from 'react'`,
   },
+  resolve: {
+    preserveSymlinks: true,
+  },
   server: {
     port: process.env.FRONTEND_PORT,
     middlewareMode: 'html',
