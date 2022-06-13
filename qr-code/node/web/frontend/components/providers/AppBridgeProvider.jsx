@@ -3,8 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Provider } from '@shopify/app-bridge-react'
 import { Banner, Layout, Page } from '@shopify/polaris'
 
-const APPBRIDGE_HOST = new URLSearchParams(location.search).get('host')
-
 /**
  * A component to configure App Bridge.
  * @desc A thin wrapper around AppBridgeProvider that provides the following capabilities:
@@ -31,6 +29,15 @@ export function AppBridgeProvider({ children }) {
     [history, location]
   )
 
+  const appBridgeConfig = useMemo(
+    () => ({
+      apiKey: process.env.SHOPIFY_API_KEY,
+      host: new URLSearchParams(location.search).get('host'),
+      forceRedirect: true,
+    }),
+    [process.env.SHOPIFY_API_KEY, location.search]
+  )
+
   if (!process.env.SHOPIFY_API_KEY) {
     return (
       <Page narrowWidth>
@@ -50,14 +57,7 @@ export function AppBridgeProvider({ children }) {
   }
 
   return (
-    <Provider
-      config={{
-        apiKey: process.env.SHOPIFY_API_KEY,
-        host: APPBRIDGE_HOST,
-        forceRedirect: true,
-      }}
-      router={routerConfig}
-    >
+    <Provider config={appBridgeConfig} router={routerConfig}>
       {children}
     </Provider>
   )
