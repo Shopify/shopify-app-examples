@@ -1,7 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { Card, Page, Layout, SkeletonBodyText } from '@shopify/polaris'
 import { Loading, TitleBar } from '@shopify/app-bridge-react'
-
 import { useAppQuery } from '../../hooks'
 import { QRCodeForm } from '../../components'
 
@@ -19,12 +18,12 @@ export default function QRCodeEdit() {
     },
   })
 
-  const titleBarMarkup = <TitleBar title="Edit QR code" primaryAction={null} />
+  const breadcrumbs = [{content: 'QR codes', url: '/' }]
 
   if (isLoading || isRefetching) {
     return (
       <Page>
-        {titleBarMarkup}
+        <TitleBar title="Edit QR code" breadcrumbs={breadcrumbs} primaryAction={null} />
         <Loading />
         <Layout>
           <Layout.Section>
@@ -53,7 +52,7 @@ export default function QRCodeEdit() {
 
   return (
     <Page>
-      {titleBarMarkup}
+      <TitleBar title="Edit QR code" breadcrumbs={breadcrumbs} primaryAction={null} />
       <QRCodeForm QRCode={QRCode} />
     </Page>
   )
