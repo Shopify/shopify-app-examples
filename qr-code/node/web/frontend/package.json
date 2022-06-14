@@ -18,6 +18,7 @@
     "@shopify/app-bridge-utils": "^3.1.0",
     "@shopify/polaris": "^9.11.0",
     "@shopify/react-form": "^1.1.19",
+    "@shopify/react-hooks": "^3.0.1",
     "@vitejs/plugin-react": "1.2.0",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.2",
