@@ -26,7 +26,7 @@ import { useShopifyQuery, useAuthenticatedFetch } from '../hooks'
 import { gql } from 'graphql-request'
 import { useForm, useField, notEmptyString } from '@shopify/react-form'
 
-import { productCheckoutURL, productViewURL } from '../helpers/product-urls'
+import { productCheckoutURL, productViewURL } from '../helpers'
 
 const NO_DISCOUNT_OPTION = { label: 'No discount', value: '' }
 
