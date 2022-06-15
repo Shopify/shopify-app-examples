@@ -8,7 +8,7 @@ This app includes code for the following:
 - Layouts for mobile users on smaller screens.
 - A database storing application data.
 
-The app is based on the [Shopify App Template for Node](https://github.com/Shopify/shopify-app-template-node). That template comes with the following out-of-the-box functionality:
+The app is based on the [Shopify App Template for Node](https://github.com/Shopify/shopify-app-template-node/tree/cli_three). That template comes with the following out-of-the-box functionality:
 
 - OAuth: Installing the app and granting permissions
 - GraphQL Admin API: Querying or mutating Shopify admin data
