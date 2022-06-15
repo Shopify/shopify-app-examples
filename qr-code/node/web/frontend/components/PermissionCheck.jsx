@@ -3,39 +3,39 @@ import { useEffect } from "react";
 import { useAppQuery} from "../hooks";
 
 export function PermissionCheck() {
-	const navigate = useNavigate();
+  const navigate = useNavigate();
 
-	const {
+  const {
     data,
     isLoading,
-		error
+    error
   } = useAppQuery({
     url: '/api/graphql',
-		fetchInit: {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/graphql",
-			},
-			body: `
-				{
-					products(first: 1) {
-						edges {
-							node {
-								id
-							}
-						}
-					}
-				}
-			`
-		}
+    fetchInit: {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/graphql",
+      },
+      body: `
+        {
+          products(first: 1) {
+            edges {
+              node {
+                id
+              }
+            }
+          }
+        }
+      `
+    }
   });
 
-	useEffect(() => {
-		if(isLoading) return;
-		if(error || data?.errors) {
-			navigate("/gqlproducterror");
-			return;
-		}
-	}, [isLoading, error, data]);
-	return null;
+  useEffect(() => {
+    if(isLoading) return;
+    if(error || data?.errors) {
+      navigate("/gqlproducterror");
+      return;
+    }
+  }, [isLoading, error, data]);
+  return null;
 }
