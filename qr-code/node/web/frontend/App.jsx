@@ -5,6 +5,7 @@ import {
   AppBridgeProvider,
   GraphQLProvider,
   PolarisProvider,
+  PermissionCheck,
 } from './components'
 
 export default function App() {
@@ -13,14 +14,15 @@ export default function App() {
   const pages = import.meta.globEager('./pages/**/!(*.test.[jt]sx)*.([jt]sx)')
 
   return (
-    <PolarisProvider>
-      <BrowserRouter>
-        <AppBridgeProvider>
-          <GraphQLProvider>
-            <Routes pages={pages} />
-          </GraphQLProvider>
-        </AppBridgeProvider>
-      </BrowserRouter>
-    </PolarisProvider>
-  )
+      <PolarisProvider>
+        <BrowserRouter>
+          <AppBridgeProvider>
+            <GraphQLProvider>
+              <PermissionCheck />
+              <Routes pages={pages} />
+            </GraphQLProvider>
+          </AppBridgeProvider>
+        </BrowserRouter>
+      </PolarisProvider>
+    );
 }
