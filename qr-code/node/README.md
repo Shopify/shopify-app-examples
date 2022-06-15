@@ -1,6 +1,14 @@
 # Shopify App Example - QR Codes Node App
 
-This QR Codes example app is based on the [Shopify App Template for Node](https://github.com/Shopify/shopify-app-template-node).  That template comes with the following out-of-the-box functionality:
+This app includes code for the following:
+- Common application structure for creating, viewing, editing, and deleting entities.
+- A list view for the app index, along with an empty state to guide merchants using the app for the first time.
+- App Bridge features relevant for most apps. e.g. Titlebar, Contextual Save Bar, Primary Action Button, Resource Picker.
+- Polaris components relevant for most apps. e.g Resource List, Radio button, Index Table
+- Layouts for mobile users on smaller screens.
+- A database storing application data.
+
+The app is based on the [Shopify App Template for Node](https://github.com/Shopify/shopify-app-template-node). That template comes with the following out-of-the-box functionality:
 
 - OAuth: Installing the app and granting permissions
 - GraphQL Admin API: Querying or mutating Shopify admin data
