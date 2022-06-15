@@ -4,7 +4,7 @@ This app includes code for the following:
 - Common application structure for creating, viewing, editing, and deleting entities.
 - A list view for the app index, along with an empty state to guide merchants using the app for the first time.
 - App Bridge features relevant for most apps. e.g. Titlebar, Contextual Save Bar, Primary Action Button, Resource Picker.
-- Polaris components relevant for most apps. e.g Resource List, Radio button, Index Table
+- Polaris components relevant for most apps, e.g., Resource List, Radio button, Index Table.
 - Layouts for mobile users on smaller screens.
 - A database storing application data.
 
