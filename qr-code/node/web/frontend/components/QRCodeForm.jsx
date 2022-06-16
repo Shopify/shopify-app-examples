@@ -379,16 +379,6 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
                 labelHidden
               />
             </Card>
-            {QRCode?.id && (
-              <Button
-                outline
-                destructive
-                onClick={deleteQRCode}
-                loading={isDeleting}
-              >
-                Delete QR code
-              </Button>
-            )}
           </FormLayout>
         </Form>
       </Layout.Section>
@@ -417,6 +407,18 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
               </Button>
             </Stack>
           </Card>
+        </Layout.Section>
+        <Layout.Section>
+          {QRCode?.id && (
+            <Button
+              outline
+              destructive
+              onClick={deleteQRCode}
+              loading={isDeleting}
+            >
+              Delete QR code
+            </Button>
+          )}
         </Layout.Section>
       </Layout>
     </Stack>
