@@ -213,8 +213,8 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
     }
 
     const targetURL = deletedProduct || destination.value[0] === 'product'
-      ? productViewURL(data)
-      : productCheckoutURL(data)
+        ? productViewURL(data)
+        : productCheckoutURL(data)
 
     window.open(targetURL, '_blank', 'noreferrer,noopener')
   }, [QRCode, selectedProduct, destination, discountCode, handle, variantId])
@@ -238,7 +238,8 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
   const QRCodeURL = QRCode ? new URL(
     `/qrcodes/${QRCode.id}/image`,
     location.toString()
-  ).toString() : null
+    ).toString()
+    : null
 
   const imageSrc = selectedProduct?.images?.edges?.[0]?.node?.url
   const originalImageSrc = selectedProduct?.images?.[0]?.originalSrc
@@ -246,168 +247,165 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
 
   return (
     <Stack vertical>
-      {deletedProduct && <Banner
-        title="The product for this QR code no longer exists."
-        status="critical"
-      >
-        <p>
-          Scans will be directed to a 404 page, or you can choose another product for this QR code.
-        </p>
-      </Banner>}
+      {deletedProduct && (
+        <Banner
+          title="The product for this QR code no longer exists."
+          status="critical"
+        >
+          <p>
+            Scans will be directed to a 404 page, or you can choose another
+            product for this QR code.
+          </p>
+        </Banner>
+      )}
       <Layout>
-      <Layout.Section>
-        <Form>
-          <ContextualSaveBar
-            saveAction={{
-              label: 'Save',
-              onAction: submit,
-              loading: submitting,
-              disabled: submitting,
-            }}
-            discardAction={{
-              label: 'Discard',
-              onAction: reset,
-              loading: submitting,
-              disabled: submitting,
-            }}
-            visible={dirty}
-            fullWidth
-          />
-          <FormLayout>
-            <Card sectioned title="Title">
-              <TextField
-                {...title}
-                label="Title"
-                labelHidden
-                helpText="Only store staff can see this title"
-              />
-            </Card>
-
-            <Card
-              title="Product"
-              actions={[
-                {
-                  content: productId.value
-                    ? 'Change product'
-                    : 'Select product',
-                  onAction: toggleResourcePicker,
-                },
-              ]}
-            >
-              <Card.Section>
-                {showResourcePicker && (
-                  <ResourcePicker
-                    resourceType="Product"
-                    showVariants={false}
-                    selectMultiple={false}
-                    onCancel={toggleResourcePicker}
-                    onSelection={handleProductChange}
-                    open
-                  />
-                )}
-                {productId.value ? (
-                  <Stack alignment="center">
-                    {(imageSrc || originalImageSrc) ? (
-                      <Thumbnail
-                        source={imageSrc || originalImageSrc}
-                        alt={altText}
-                      />
-                    ) : (
-                      <Thumbnail source={ImageMajor} color="base" size="small" />
-                    )}
-                    <TextStyle variation="strong">
-                      {selectedProduct.title}
-                    </TextStyle>
-                  </Stack>
-                ) : (
-                  <Stack vertical spacing="extraTight">
-                    <Button onClick={toggleResourcePicker}>
-                      Select product
-                    </Button>
-                    {productId.error && (
-                      <Stack spacing="tight">
-                        <Icon source={AlertMinor} color="critical" />
-                        <TextStyle variation="negative">
-                          {productId.error}
-                        </TextStyle>
-                      </Stack>
-                    )}
-                  </Stack>
-                )}
-              </Card.Section>
-              <Card.Section title="Scan Destination">
-                <ChoiceList
-                  title="Scan destination"
-                  titleHidden
-                  choices={[
-                    { label: 'Link to product page', value: 'product' },
-                    {
-                      label: 'Link to checkout page with product in the cart',
-                      value: 'checkout',
-                    },
-                  ]}
-                  selected={destination.value}
-                  onChange={destination.onChange}
-                />
-              </Card.Section>
-            </Card>
-            <Card
-              sectioned
-              title="Discount"
-              actions={[
-                {
-                  content: 'Create discount',
-                  onAction: () =>
-                    navigate(
-                      {
-                        name: 'Discount',
-                        resource: {
-                          create: true,
-                        },
-                      },
-                      { target: 'new' }
-                    ),
-                },
-              ]}
-            >
-              <Select
-                label="discount code"
-                options={discountOptions}
-                onChange={handleDiscountChange}
-                value={discountId.value}
-                disabled={isLoadingDiscounts || discountsError}
-                labelHidden
-              />
-            </Card>
-            {QRCode?.id && (
-              <Button
-                outline
-                destructive
-                onClick={deleteQRCode}
-                loading={isDeleting}
-              >
-                Delete QR code
-              </Button>
-            )}
-          </FormLayout>
-        </Form>
-      </Layout.Section>
-      <Layout.Section secondary>
-        <Card sectioned title="QR Code">
-          {QRCode ? (
-            <EmptyState
-              imageContained={true}
-              image={QRCodeURL}
+        <Layout.Section>
+          <Form>
+            <ContextualSaveBar
+              saveAction={{
+                label: 'Save',
+                onAction: submit,
+                loading: submitting,
+                disabled: submitting,
+              }}
+              discardAction={{
+                label: 'Discard',
+                onAction: reset,
+                loading: submitting,
+                disabled: submitting,
+              }}
+              visible={dirty}
+              fullWidth
             />
-          ) : (
-            <EmptyState>
-              <p>Your QR code will appear here after you save.</p>
-            </EmptyState>
-          )}
-          <Stack vertical>
-            <Button fullWidth primary download url={QRCodeURL} disabled={!QRCode || isDeleting}>
-              Download
-            </Button>
+            <FormLayout>
+              <Card sectioned title="Title">
+                <TextField
+                  {...title}
+                  label="Title"
+                  labelHidden
+                  helpText="Only store staff can see this title"
+                />
+              </Card>
+              <Card
+                title="Product"
+                actions={[
+                  {
+                    content: productId.value
+                      ? 'Change product'
+                      : 'Select product',
+                    onAction: toggleResourcePicker,
+                  },
+                ]}
+              >
+                <Card.Section>
+                  {showResourcePicker && (
+                    <ResourcePicker
+                      resourceType="Product"
+                      showVariants={false}
+                      selectMultiple={false}
+                      onCancel={toggleResourcePicker}
+                      onSelection={handleProductChange}
+                      open
+                    />
+                  )}
+                  {productId.value ? (
+                    <Stack alignment="center">
+                      {imageSrc || originalImageSrc ? (
+                        <Thumbnail
+                          source={imageSrc || originalImageSrc}
+                          alt={altText}
+                        />
+                      ) : (
+                        <Thumbnail
+                          source={ImageMajor}
+                          color="base"
+                          size="small"
+                        />
+                      )}
+                      <TextStyle variation="strong">
+                        {selectedProduct.title}
+                      </TextStyle>
+                    </Stack>
+                  ) : (
+                    <Stack vertical spacing="extraTight">
+                      <Button onClick={toggleResourcePicker}>
+                        Select product
+                      </Button>
+                      {productId.error && (
+                        <Stack spacing="tight">
+                          <Icon source={AlertMinor} color="critical" />
+                          <TextStyle variation="negative">
+                            {productId.error}
+                          </TextStyle>
+                        </Stack>
+                      )}
+                    </Stack>
+                  )}
+                </Card.Section>
+                <Card.Section title="Scan Destination">
+                  <ChoiceList
+                    title="Scan destination"
+                    titleHidden
+                    choices={[
+                      { label: 'Link to product page', value: 'product' },
+                      {
+                        label: 'Link to checkout page with product in the cart',
+                        value: 'checkout',
+                      },
+                    ]}
+                    selected={destination.value}
+                    onChange={destination.onChange}
+                  />
+                </Card.Section>
+              </Card>
+              <Card
+                sectioned
+                title="Discount"
+                actions={[
+                  {
+                    content: 'Create discount',
+                    onAction: () =>
+                      navigate(
+                        {
+                          name: 'Discount',
+                          resource: {
+                            create: true,
+                          },
+                        },
+                        { target: 'new' }
+                      ),
+                  },
+                ]}
+              >
+                <Select
+                  label="discount code"
+                  options={discountOptions}
+                  onChange={handleDiscountChange}
+                  value={discountId.value}
+                  disabled={isLoadingDiscounts || discountsError}
+                  labelHidden
+                />
+              </Card>
+            </FormLayout>
+          </Form>
+        </Layout.Section>
+        <Layout.Section secondary>
+          <Card sectioned title="QR Code">
+            {QRCode ? (
+              <EmptyState 
+                imageContained={true} 
+                image={QRCodeURL} 
+              />
+            ) : (
+              <EmptyState>
+                <p>Your QR code will appear here after you save.</p>
+              </EmptyState>
+            )}
+            <Stack vertical>
+              <Button
+                fullWidth primary download url={QRCodeURL} disabled={!QRCode || isDeleting}>
+                Download
+              </Button>
               <Button
                 fullWidth
                 onClick={goToDestination}
@@ -417,6 +415,18 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
               </Button>
             </Stack>
           </Card>
+        </Layout.Section>
+        <Layout.Section>
+          {QRCode?.id && (
+            <Button
+              outline
+              destructive
+              onClick={deleteQRCode}
+              loading={isDeleting}
+            >
+              Delete QR code
+            </Button>
+          )}
         </Layout.Section>
       </Layout>
     </Stack>
