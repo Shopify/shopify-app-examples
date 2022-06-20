@@ -1,3 +1,8 @@
+/*
+  This file will interact with our custom app database.
+  It's used by our applications REST API's.
+*/
+
 import sqlite3 from "sqlite3";
 import path from "path";
 import { Shopify } from "@shopify/shopify-api";
@@ -118,19 +123,28 @@ export const QRCodesDB = {
     return true;
   },
 
+  /* The URL that a scanned QR Code goes to is generated at query time */
   generateQrcodeDestinationUrl: function (qrcode) {
     return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcodes/${qrcode.id}/scan`;
   },
 
+  /* The behaviour that happens when a QR Code is scaned */
   handleCodeScan: async function (qrcode) {
+
+    /* Log the scan in our database */
     await this.__increaseScanCount(qrcode);
 
     const url = new URL(qrcode.shopDomain);
     switch (qrcode.destination) {
+
+      /* The QR Code redirects to the product view */
       case "product":
         return this.__goToProductView(url, qrcode);
+
+      /* The QR Code redirects to checkout */
       case "checkout":
         return this.__goToProductCheckout(url, qrcode);
+
       default:
         throw `Unrecognized destination "${qrcode.destination}"`;
     }
@@ -138,6 +152,7 @@ export const QRCodesDB = {
 
   // Private
 
+  /* Used to check if we should create the database */
   __hasQrCodesTable: async function () {
     const query = `
       SELECT name FROM sqlite_schema
@@ -149,11 +164,18 @@ export const QRCodesDB = {
     return rows.length === 1;
   },
 
+  /* Used to initialize the connection with our sqlite3 database */
   init: async function () {
+
+    /* Initialize the connection to the database */
     this.db = this.db ?? new sqlite3.Database(DEFAULT_DB_FILE);
+
     const hasQrCodesTable = await this.__hasQrCodesTable();
+
     if (hasQrCodesTable) {
       this.ready = Promise.resolve();
+
+    /* Create the QR code table if it has not bee created */
     } else {
       const query = `
         CREATE TABLE ${this.qrCodesTableName} (
@@ -170,10 +192,13 @@ export const QRCodesDB = {
           createdAt DATETIME NOT NULL DEFAULT (datetime(CURRENT_TIMESTAMP, 'localtime'))
         )
       `;
+
+      /* Tell the various CRUD methods they can execute */
       this.ready = this.__query(query);
     }
   },
 
+  /* Perform a query on the database. Used by the various CRUD methods */
   __query: function (sql, params = []) {
     return new Promise((resolve, reject) => {
       this.db.all(sql, params, (err, result) => {
@@ -228,13 +253,16 @@ export const QRCodesDB = {
 };
 
 
+/* Generate the URL to a product show page */
 function productViewURL({ host, productHandle, discountCode }) {
   const url = new URL(host);
   const productPath = `/products/${productHandle}`;
 
+  /* If this QR Code has a discount code add it to the URL */
   if (discountCode) {
     url.pathname = `/discount/${discountCode}`;
     url.searchParams.append("redirect", productPath);
+
   } else {
     url.pathname = productPath;
   }
@@ -242,6 +270,7 @@ function productViewURL({ host, productHandle, discountCode }) {
   return url.toString();
 }
 
+/* Generate the URL to checkout with the product from a QR Code */
 function productCheckoutURL({
   host,
   variantId,
@@ -254,6 +283,7 @@ function productCheckoutURL({
     "$1"
   );
 
+  // the cart URL resolves to a checkout URL
   url.pathname = `/cart/${id}:${quantity}`;
 
   if (discountCode) {
