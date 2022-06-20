@@ -29,7 +29,6 @@ import { useAuthenticatedFetch } from '../hooks'
 /* Import custom hooks for forms */
 import { useForm, useField, notEmptyString } from '@shopify/react-form'
 
-/* Import the link helpers you created */
 import { productCheckoutURL, productViewURL } from '../helpers'
 
 const NO_DISCOUNT_OPTION = { label: 'No discount', value: '' }

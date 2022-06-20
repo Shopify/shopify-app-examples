@@ -1,7 +1,7 @@
 /*
   The custom REST API to support our frontend.
   Handlers here combine application data from qr-codes-db.js with helpers to merge Shopify Admin GraphQL API data.
-  The Shop is the Shop that the current user belongs too.  E.g: The shop that is using the app.
+  Shop is the Shop that is using the app.  We can grab this from the shopify-api library.
   We get this information from the Authorization header, which is decoded from the request.
   The authorization header by AppBridge in our application code.
 */

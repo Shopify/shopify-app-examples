@@ -151,7 +151,11 @@ export const QRCodesDB = {
 
   // Private
 
-  /* Check whether to create the database */
+  /*
+    Used to check whether to create the database.
+    Also used to make sure the databse and table are all setup before the server starts.
+  */
+
   __hasQrCodesTable: async function () {
     const query = `
       SELECT name FROM sqlite_schema

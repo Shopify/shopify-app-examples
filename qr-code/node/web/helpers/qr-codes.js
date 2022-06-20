@@ -6,6 +6,7 @@ import { QRCodesDB } from "../qr-codes-db.js";
   The app's database stores the productId and the discountId.
   This query is used to get the fields the frontend needs for those IDs.
   By querying the Shopify GraphQL Admin API at runtime, data cannot become stale.
+  We also query this data so we can save the full state to the database, so that we can generate QR code links
 */
 const QR_CODE_ADMIN_QUERY = `
   query nodes($ids: [ID!]!) {
