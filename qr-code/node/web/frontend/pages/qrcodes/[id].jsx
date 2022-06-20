@@ -6,6 +6,12 @@ import { QRCodeForm } from '../../components'
 
 export default function QRCodeEdit() {
   const { id } = useParams()
+
+  /*
+    Fetch the QR Code.
+    useAppQuery use AppBridge to authenticate the request.
+    The backend supplements app data with data queried from Shopify Admin GraphQL API.
+  */
   const {
     data: QRCode,
     isLoading,
@@ -13,18 +19,22 @@ export default function QRCodeEdit() {
   } = useAppQuery({
     url: `/api/qrcodes/${id}`,
     reactQueryOptions: {
+      /* Refetched data would be ignored by the QRCodeForm component. So, we disable refetching here. */
       refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
     },
   })
 
-  const breadcrumbs = [{content: 'QR codes', url: '/' }]
+  const breadcrumbs = [{ content: 'QR codes', url: '/' }]
 
   /* Loading action and markup built using App Bridge and Polaris components */
   if (isLoading || isRefetching) {
     return (
       <Page>
-        <TitleBar title="Edit QR code" breadcrumbs={breadcrumbs} primaryAction={null} />
+        <TitleBar
+          title="Edit QR code"
+          breadcrumbs={breadcrumbs}
+          primaryAction={null}
+        />
         <Loading />
         <Layout>
           <Layout.Section>
@@ -53,7 +63,11 @@ export default function QRCodeEdit() {
 
   return (
     <Page>
-      <TitleBar title="Edit QR code" breadcrumbs={breadcrumbs} primaryAction={null} />
+      <TitleBar
+        title="Edit QR code"
+        breadcrumbs={breadcrumbs}
+        primaryAction={null}
+      />
       <QRCodeForm QRCode={QRCode} />
     </Page>
   )
