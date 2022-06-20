@@ -4,8 +4,6 @@ import { DiamondAlertMajor, ImageMajor } from '@shopify/polaris-icons'
 import { useMedia } from '@shopify/react-hooks'
 import dayjs from 'dayjs'
 
-import {truncate} from '../helpers'
-
 function SmallScreenCard({ id, title, product, discountCode, scans, createdAt, navigate }) {
   return (
     <UnstyledLink onClick={() => navigate(`/qrcodes/${id}`)}>
@@ -126,3 +124,8 @@ export function QRCodeIndex({ QRCodes, loading }) {
     </Card>
   )
 }
+
+function truncate(str, n) {
+  return str.length > n ? str.substr(0, n - 1) + '…' : str
+}
+
