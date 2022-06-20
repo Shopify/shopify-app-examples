@@ -69,7 +69,7 @@ export function QRCodeIndex({ QRCodes, loading }) {
     ({ id, title, product, discountCode, scans, createdAt }, index) => {
       const deletedProduct = product.title.includes('Deleted product')
 
-      /* The form layout, created using Polaris components. Includes QR code data set above. */
+      /* The form layout, created using Polaris components. Includes the QR code data set above. */
       return (
         <IndexTable.Row
           id={id}

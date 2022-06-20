@@ -20,7 +20,7 @@ export default function applyQrCodeApiEndpoints(app) {
       const id = await QRCodesDB.create({
         ...(await parseQrCodeBody(req)),
 
-        /* By getting the shop from the authorization header users cannot spoof the data */
+        /* Get the shop from the authorization header to prevent users from spoofing the data */
         shopDomain: await getShopUrlFromSession(req, res),
       });
       const response = await formatQrCodeResponse(req, res, [

@@ -1,6 +1,5 @@
 /*
-  This file will interact with our custom app database.
-  It's used by our applications REST API's.
+  This file interacts with the app's database and is used by the app's REST APIs.
 */
 
 import sqlite3 from "sqlite3";
@@ -123,25 +122,25 @@ export const QRCodesDB = {
     return true;
   },
 
-  /* The URL that a scanned QR Code goes to is generated at query time */
+  /* The destination URL for a  QR code is generated at query time */
   generateQrcodeDestinationUrl: function (qrcode) {
     return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcodes/${qrcode.id}/scan`;
   },
 
-  /* The behaviour that happens when a QR Code is scaned */
+  /* The behavior when a QR code is scaned */
   handleCodeScan: async function (qrcode) {
 
-    /* Log the scan in our database */
+    /* Log the scan in the database */
     await this.__increaseScanCount(qrcode);
 
     const url = new URL(qrcode.shopDomain);
     switch (qrcode.destination) {
 
-      /* The QR Code redirects to the product view */
+      /* The QR code redirects to the product view */
       case "product":
         return this.__goToProductView(url, qrcode);
 
-      /* The QR Code redirects to checkout */
+      /* The QR code redirects to checkout */
       case "checkout":
         return this.__goToProductCheckout(url, qrcode);
 
@@ -152,7 +151,7 @@ export const QRCodesDB = {
 
   // Private
 
-  /* Used to check if we should create the database */
+  /* Check whether to create the database */
   __hasQrCodesTable: async function () {
     const query = `
       SELECT name FROM sqlite_schema
@@ -164,10 +163,10 @@ export const QRCodesDB = {
     return rows.length === 1;
   },
 
-  /* Used to initialize the connection with our sqlite3 database */
+  /* Initializes the connection with the app's sqlite3 database */
   init: async function () {
 
-    /* Initialize the connection to the database */
+    /* Initializes the connection to the database */
     this.db = this.db ?? new sqlite3.Database(DEFAULT_DB_FILE);
 
     const hasQrCodesTable = await this.__hasQrCodesTable();
@@ -175,7 +174,7 @@ export const QRCodesDB = {
     if (hasQrCodesTable) {
       this.ready = Promise.resolve();
 
-    /* Create the QR code table if it has not bee created */
+    /* Create the QR code table if it hasn't been created */
     } else {
       const query = `
         CREATE TABLE ${this.qrCodesTableName} (
@@ -193,12 +192,12 @@ export const QRCodesDB = {
         )
       `;
 
-      /* Tell the various CRUD methods they can execute */
+      /* Tell the various CRUD methods that they can execute */
       this.ready = this.__query(query);
     }
   },
 
-  /* Perform a query on the database. Used by the various CRUD methods */
+  /* Perform a query on the database. Used by the various CRUD methods. */
   __query: function (sql, params = []) {
     return new Promise((resolve, reject) => {
       this.db.all(sql, params, (err, result) => {
@@ -253,12 +252,12 @@ export const QRCodesDB = {
 };
 
 
-/* Generate the URL to a product show page */
+/* Generate the URL to a product page */
 function productViewURL({ host, productHandle, discountCode }) {
   const url = new URL(host);
   const productPath = `/products/${productHandle}`;
 
-  /* If this QR Code has a discount code add it to the URL */
+  /* If this QR Code has a discount code, then add it to the URL */
   if (discountCode) {
     url.pathname = `/discount/${discountCode}`;
     url.searchParams.append("redirect", productPath);
@@ -270,7 +269,7 @@ function productViewURL({ host, productHandle, discountCode }) {
   return url.toString();
 }
 
-/* Generate the URL to checkout with the product from a QR Code */
+/* Generate the URL to checkout with the product in the cart */
 function productCheckoutURL({
   host,
   variantId,
@@ -283,7 +282,7 @@ function productCheckoutURL({
     "$1"
   );
 
-  // the cart URL resolves to a checkout URL
+  // The cart URL resolves to a checkout URL
   url.pathname = `/cart/${id}:${quantity}`;
 
   if (discountCode) {

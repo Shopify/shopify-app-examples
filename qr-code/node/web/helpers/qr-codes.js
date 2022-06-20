@@ -3,9 +3,9 @@ import { Shopify } from "@shopify/shopify-api";
 import { QRCodesDB } from "../qr-codes-db.js";
 
 /*
-  The apps database stores the productId and the discountId.
+  The app's database stores the productId and the discountId.
   This query is used to get the fields the frontend needs for those IDs.
-  By querying the Shopify Admin GraphQL API at runtime data cannot become stale.
+  By querying the Shopify GraphQL Admin API at runtime, data cannot become stale.
 */
 const QR_CODE_ADMIN_QUERY = `
   query nodes($ids: [ID!]!) {
@@ -79,7 +79,7 @@ export async function parseQrCodeBody(req, res) {
 }
 
 /*
-  Replaces productId with product data queried from the Shopify Admin GraphQL API
+  Replaces productId with product data queried from the Shopify GraphQL Admin API
 */
 export async function formatQrCodeResponse(req, res, rawCodeData) {
   const ids = [];
@@ -94,23 +94,22 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
     }
   });
 
-  /* Instantiate a new GraphQL client so we can query the Shopify Admin GraphQL API */
+  /* Instantiate a new GraphQL client to query the Shopify GraphQL Admin API */
   const session = await Shopify.Utils.loadCurrentSession(req, res, true);
   const client = new Shopify.Clients.Graphql(session.shop, session.accessToken);
 
-  /* Query the Shopify Admin GraphQL API */
+  /* Query the Shopify GraphQL Admin API */
   const adminData = await client.query({
     data: {
       query: QR_CODE_ADMIN_QUERY,
 
-      /* The Id's we pulled from our own database are used to query product, variant and discount information */
+      /* The IDs that are pulled from the app's database are used to query product, variant and discount information */
       variables: { ids },
     },
   });
 
   /*
-    We have the data from the Shopify Admin GraphQL API.
-    Now we need to replace the product, discount and variant IDs with that data
+    Replace the product, discount and variant IDs with the data fetched using the Shopify GraphQL Admin API.
   */
   const formattedData = rawCodeData.map((qrCode) => {
     const product = adminData.body.data.nodes.find(
@@ -137,7 +136,7 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
     }
 
     /*
-      Merge the data from our application database with the data we just queried from Shopify Admin GraphQL API.
+      Merge the data from the app's database with the data queried from Shopify GraphQL Admin API.
     */
     const formattedQRCode = {
       ...qrCode,

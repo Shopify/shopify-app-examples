@@ -1,6 +1,6 @@
 /*
-  Users need to be able to scan our QR Codes.
-  This file provides the publicly avialble URL's to do that
+  Merchants need to be able to scan the QR Codes.
+  This file provides the publicly available URLs to do that.
 */
 import QRCode from "qrcode";
 
@@ -25,7 +25,7 @@ export default function applyQrCodePublicEndpoints(app) {
     }
   });
 
-  /* The URL users are taken to when they scan the QR code */
+  /* The URL customers are taken to when they scan the QR code */
   app.get("/qrcodes/:id/scan", async (req, res) => {
     const qrcode = await getQrCodeOr404(req, res, false);
 

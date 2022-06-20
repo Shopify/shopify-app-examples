@@ -17,23 +17,23 @@ export default function HomePage() {
   */
   const navigate = useNavigate()
 
-  /* useAppQuery wraps react-query and AppBridge's authenticatedFetch */
+  /* useAppQuery wraps react-query and the App Bridge authenticatedFetch function */
   const {
     data: QRCodes,
     isLoading,
 
     /*
-      react-query provides stale-while-revalidate caching
+      react-query provides stale-while-revalidate caching.
       By passing isRefetching to Index Tables we can show stale data and a loading state.
-      Once the query refetches, IndexTable update and the loading state is removed.
-      This ensure a performant UX.
+      Once the query refetches, IndexTable updates and the loading state is removed.
+      This ensures a performant UX.
     */
     isRefetching,
   } = useAppQuery({
     url: '/api/qrcodes',
   })
 
-  /* loadingMarkup using loading component from AppBridge and components from Polaris  */
+  /* loadingMarkup uses the loading component from AppBridge and components from Polaris  */
   const loadingMarkup = isLoading ? (
     <Card sectioned>
       <Loading />
@@ -66,7 +66,7 @@ export default function HomePage() {
 
   /*
     Use Polaris Page and TitleBar components to create the page layout,
-    and include empty state contents set above
+    and include the empty state contents set above.
   */
   return (
     <Page>
