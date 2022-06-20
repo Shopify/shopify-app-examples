@@ -103,7 +103,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
 
           const QRCode = await response.json()
 
-          // If there is no QRCodeId, this is a new QR Code being saved.
+          // If there is no QRCodeId, this is a new QR code being saved.
           if (!QRCodeId) {
             navigate(`/qrcodes/${QRCode.id}`)
           } else {
@@ -383,7 +383,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
         </Form>
       </Layout.Section>
       <Layout.Section secondary>
-        <Card sectioned title="QR Code">
+        <Card sectioned title="QR code">
           {QRCode ? (
             <EmptyState
               imageContained={true}

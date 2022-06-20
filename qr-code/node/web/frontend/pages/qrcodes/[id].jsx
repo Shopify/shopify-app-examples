@@ -43,7 +43,7 @@ export default function QRCodeEdit() {
             </Card>
           </Layout.Section>
           <Layout.Section secondary>
-            <Card sectioned title="QR Code" />
+            <Card sectioned title="QR code" />
           </Layout.Section>
         </Layout>
       </Page>
