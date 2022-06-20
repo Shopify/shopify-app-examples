@@ -20,6 +20,7 @@ export default function QRCodeEdit() {
 
   const breadcrumbs = [{content: 'QR codes', url: '/' }]
 
+  /* Loading action and markup built using App Bridge and Polaris components */
   if (isLoading || isRefetching) {
     return (
       <Page>
