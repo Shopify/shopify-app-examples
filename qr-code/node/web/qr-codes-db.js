@@ -228,7 +228,7 @@ export const QRCodesDB = {
 };
 
 
-export function productViewURL({ host, productHandle, discountCode }) {
+function productViewURL({ host, productHandle, discountCode }) {
   const url = new URL(host);
   const productPath = `/products/${productHandle}`;
 
@@ -242,7 +242,7 @@ export function productViewURL({ host, productHandle, discountCode }) {
   return url.toString();
 }
 
-export function productCheckoutURL({
+function productCheckoutURL({
   host,
   variantId,
   quantity = 1,
