@@ -17,9 +17,17 @@ export default function HomePage() {
   */
   const navigate = useNavigate()
 
+  /* useAppQuery wraps react-query and AppBridge's authenticatedFetch */
   const {
     data: QRCodes,
     isLoading,
+
+    /*
+      react-query provides stale-while-revalidate caching
+      By passing isRefetching to Index Tables we can show stale data and a loading state.
+      Once the query refetches, IndexTable update and the loading state is removed.
+      This ensure a performant UX.
+    */
     isRefetching,
   } = useAppQuery({
     url: '/api/qrcodes',
