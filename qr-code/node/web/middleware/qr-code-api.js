@@ -1,3 +1,11 @@
+/*
+  The custom REST API to support our frontend.
+  Handlers here combine application data from qr-codes-db.js with helpers to merge Shopify Admin GraphQL API data.
+  The Shop is the Shop that the current user belongs too.  E.g: The shop that is using the app.
+  We get this information from the Authorization header, which is decoded from the request.
+  The authorization header by AppBridge in our application code.
+*/
+
 import { QRCodesDB } from "../qr-codes-db.js";
 import {
   getQrCodeOr404,
@@ -11,6 +19,8 @@ export default function applyQrCodeApiEndpoints(app) {
     try {
       const id = await QRCodesDB.create({
         ...(await parseQrCodeBody(req)),
+
+        /* By getting the shop from the authorization header users cannot spoof the data */
         shopDomain: await getShopUrlFromSession(req, res),
       });
       const response = await formatQrCodeResponse(req, res, [
