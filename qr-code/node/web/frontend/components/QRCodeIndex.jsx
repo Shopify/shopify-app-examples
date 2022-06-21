@@ -1,9 +1,14 @@
 import { useNavigate } from '@shopify/app-bridge-react'
 import { Card, Icon, IndexTable, Stack, TextStyle, Thumbnail, UnstyledLink } from '@shopify/polaris'
 import { DiamondAlertMajor, ImageMajor } from '@shopify/polaris-icons'
+
+/* useMedia is used to support multiple screen sizes */
 import { useMedia } from '@shopify/react-hooks'
+
+/* dayjs is used to capture and format the date a QR code was created or modified */
 import dayjs from 'dayjs'
 
+/* Markup for small screen sizes (mobile) */
 function SmallScreenCard({ id, title, product, discountCode, scans, createdAt, navigate }) {
   return (
     <UnstyledLink onClick={() => navigate(`/qrcodes/${id}`)}>
@@ -46,10 +51,13 @@ function SmallScreenCard({ id, title, product, discountCode, scans, createdAt, n
 
 export function QRCodeIndex({ QRCodes, loading }) {
   const navigate = useNavigate()
+
+  /* Check if screen is small */
   const isSmallScreen = useMedia('(max-width: 640px)')
 
+  /* Map over QRCodes for small screen */
   const smallScreenMarkup = QRCodes.map((QRCode) => (
-    <SmallScreenCard key={QRCode.id} navigate={navigate} {...QRCode}/>
+    <SmallScreenCard key={QRCode.id} navigate={navigate} {...QRCode} />
   ))
 
   const resourceName = {
@@ -61,6 +69,7 @@ export function QRCodeIndex({ QRCodes, loading }) {
     ({ id, title, product, discountCode, scans, createdAt }, index) => {
       const deletedProduct = product.title.includes('Deleted product')
 
+      /* The form layout, created using Polaris components. Includes the QR code data set above. */
       return (
         <IndexTable.Row
           id={id}
@@ -85,9 +94,11 @@ export function QRCodeIndex({ QRCodes, loading }) {
           </IndexTable.Cell>
           <IndexTable.Cell>
             <Stack>
-              {deletedProduct && <Icon source={DiamondAlertMajor} color="critical" />}
-              <TextStyle variation={deletedProduct ? "negative" : null}>
-              {truncate(product?.title, 25)}
+              {deletedProduct && (
+                <Icon source={DiamondAlertMajor} color="critical" />
+              )}
+              <TextStyle variation={deletedProduct ? 'negative' : null}>
+                {truncate(product?.title, 25)}
               </TextStyle>
             </Stack>
           </IndexTable.Cell>
@@ -101,9 +112,12 @@ export function QRCodeIndex({ QRCodes, loading }) {
     }
   )
 
+  /* A layout for small screens, built using Polaris components */
   return (
     <Card>
-      {isSmallScreen ? smallScreenMarkup : (
+      {isSmallScreen ? (
+        smallScreenMarkup
+      ) : (
         <IndexTable
           resourceName={resourceName}
           itemCount={QRCodes.length}
@@ -117,7 +131,7 @@ export function QRCodeIndex({ QRCodes, loading }) {
           ]}
           selectable={false}
           loading={loading}
-          >
+        >
           {rowMarkup}
         </IndexTable>
       )}

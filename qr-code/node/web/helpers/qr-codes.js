@@ -2,6 +2,12 @@ import { Shopify } from "@shopify/shopify-api";
 
 import { QRCodesDB } from "../qr-codes-db.js";
 
+/*
+  The app's database stores the productId and the discountId.
+  This query is used to get the fields the frontend needs for those IDs.
+  By querying the Shopify GraphQL Admin API at runtime, data can't become stale.
+  This data is also queried so that the full state can be saved to the database, in order to generate QR code links.
+*/
 const QR_CODE_ADMIN_QUERY = `
   query nodes($ids: [ID!]!) {
     nodes(ids: $ids) {
@@ -51,17 +57,15 @@ export async function getShopUrlFromSession(req, res) {
   return `https://${session.shop}`;
 }
 
-/**
- * Expect body to contain
- * {
- *   title: string
- *   productId: string
- *   variantId: string
- *   handle: string
- *   discountId: string
- *   discountCode: string
- *   destination: string
- * }
+/* 
+Expect body to contain
+title: string
+productId: string
+variantId: string
+handle: string
+discountId: string
+discountCode: string
+destination: string
  */
 export async function parseQrCodeBody(req, res) {
   return {
@@ -75,9 +79,13 @@ export async function parseQrCodeBody(req, res) {
   };
 }
 
+/*
+  Replaces the productId with product data queried from the Shopify GraphQL Admin API
+*/
 export async function formatQrCodeResponse(req, res, rawCodeData) {
   const ids = [];
 
+  /* Get every product, variant and discountID that was queried from the database */
   rawCodeData.forEach(({ productId, discountId, variantId }) => {
     ids.push(productId);
     ids.push(variantId);
@@ -87,16 +95,23 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
     }
   });
 
+  /* Instantiate a new GraphQL client to query the Shopify GraphQL Admin API */
   const session = await Shopify.Utils.loadCurrentSession(req, res, true);
   const client = new Shopify.Clients.Graphql(session.shop, session.accessToken);
 
+  /* Query the Shopify GraphQL Admin API */
   const adminData = await client.query({
     data: {
       query: QR_CODE_ADMIN_QUERY,
+
+      /* The IDs that are pulled from the app's database are used to query product, variant and discount information */
       variables: { ids },
     },
   });
 
+  /*
+    Replace the product, discount and variant IDs with the data fetched using the Shopify GraphQL Admin API.
+  */
   const formattedData = rawCodeData.map((qrCode) => {
     const product = adminData.body.data.nodes.find(
       (node) => qrCode.productId === node?.id
@@ -108,6 +123,11 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
       qrCode.discountId &&
       !adminData.body.data.nodes.find((node) => qrCode.discountId === node?.id);
 
+    /*
+      A user might create a QR code with a discount code and then later delete that discount code.
+      For optimal UX it's important to handle that edge case.
+      Use mock data so that the frontend knows how to interpret this QR Code.
+    */
     if (discountDeleted) {
       QRCodesDB.update(qrCode.id, {
         ...qrCode,
@@ -116,12 +136,16 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
       });
     }
 
+    /*
+      Merge the data from the app's database with the data queried from the Shopify GraphQL Admin API
+    */
     const formattedQRCode = {
       ...qrCode,
       product,
       discountCode: discountDeleted ? "" : qrCode.discountCode,
     };
 
+    /* Since product.id already exists, productId isn't required */
     delete formattedQRCode.productId;
 
     return formattedQRCode;
