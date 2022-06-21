@@ -19,7 +19,7 @@ export default function QRCodeEdit() {
   } = useAppQuery({
     url: `/api/qrcodes/${id}`,
     reactQueryOptions: {
-      /* Refetched data would be ignored by the QRCodeForm component. So, we disable refetching here. */
+      /* Disable refetching because the QRCodeForm component ignores changes to its props */
       refetchOnReconnect: false,
     },
   })
