@@ -5,8 +5,8 @@ import { QRCodesDB } from "../qr-codes-db.js";
 /*
   The app's database stores the productId and the discountId.
   This query is used to get the fields the frontend needs for those IDs.
-  By querying the Shopify GraphQL Admin API at runtime, data cannot become stale.
-  We also query this data so we can save the full state to the database, so that we can generate QR code links
+  By querying the Shopify GraphQL Admin API at runtime, data can't become stale.
+  This data is also queried so that the full state can be saved to the database, in order to generate QR code links.
 */
 const QR_CODE_ADMIN_QUERY = `
   query nodes($ids: [ID!]!) {
@@ -57,15 +57,15 @@ export async function getShopUrlFromSession(req, res) {
   return `https://${session.shop}`;
 }
 
-/**
- * Expect body to contain
- *   title: string
- *   productId: string
- *   variantId: string
- *   handle: string
- *   discountId: string
- *   discountCode: string
- *   destination: string
+/* 
+Expect body to contain
+title: string
+productId: string
+variantId: string
+handle: string
+discountId: string
+discountCode: string
+destination: string
  */
 export async function parseQrCodeBody(req, res) {
   return {
@@ -80,7 +80,7 @@ export async function parseQrCodeBody(req, res) {
 }
 
 /*
-  Replaces productId with product data queried from the Shopify GraphQL Admin API
+  Replaces the productId with product data queried from the Shopify GraphQL Admin API
 */
 export async function formatQrCodeResponse(req, res, rawCodeData) {
   const ids = [];
@@ -124,9 +124,9 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
       !adminData.body.data.nodes.find((node) => qrCode.discountId === node?.id);
 
     /*
-      A user may create a QR code with a discount code and then later delete that QR Code.
+      A user might create a QR code with a discount code and then later delete that discount code.
       For optimal UX it's important to handle that edge case.
-      Here we use mocks data so that the frontend knows how to interprit this QR Code.
+      Use mock data so that the frontend knows how to interpret this QR Code.
     */
     if (discountDeleted) {
       QRCodesDB.update(qrCode.id, {
@@ -137,7 +137,7 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
     }
 
     /*
-      Merge the data from the app's database with the data queried from Shopify GraphQL Admin API.
+      Merge the data from the app's database with the data queried from the Shopify GraphQL Admin API
     */
     const formattedQRCode = {
       ...qrCode,
@@ -145,7 +145,7 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
       discountCode: discountDeleted ? "" : qrCode.discountCode,
     };
 
-    /* Since product.id already exists, we no longer need productId */
+    /* Since product.id already exists, productId isn't required */
     delete formattedQRCode.productId;
 
     return formattedQRCode;

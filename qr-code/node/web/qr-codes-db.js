@@ -122,12 +122,12 @@ export const QRCodesDB = {
     return true;
   },
 
-  /* The destination URL for a  QR code is generated at query time */
+  /* The destination URL for a QR code is generated at query time */
   generateQrcodeDestinationUrl: function (qrcode) {
     return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcodes/${qrcode.id}/scan`;
   },
 
-  /* The behavior when a QR code is scaned */
+  /* The behavior when a QR code is scanned */
   handleCodeScan: async function (qrcode) {
 
     /* Log the scan in the database */
@@ -153,7 +153,7 @@ export const QRCodesDB = {
 
   /*
     Used to check whether to create the database.
-    Also used to make sure the databse and table are all setup before the server starts.
+    Also used to make sure the database and table are set up before the server starts.
   */
 
   __hasQrCodesTable: async function () {

@@ -125,7 +125,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
 
     Returns a "fields" object that is destructured to access each of the fields individually, so they can be used in other parts of the component.
 
-    Returns helpers to manage form state, as well as component state that is based on form state.
+    Returns helpers to manage the form state, as well as the component state that is based on the form state.
   */
   const {
     fields: {
@@ -220,7 +220,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
   const [isDeleting, setIsDeleting] = useState(false)
   const deleteQRCode = useCallback(async () => {
     reset()
-    /* the isDeleting state disables the download button and the delete QR code button to show the merchant that an action is in progress */
+    /* The isDeleting state disables the download button and the delete QR code button to show the merchant that an action is in progress */
     setIsDeleting(true)
     const response = await fetch(`/api/qrcodes/${QRCode.id}`, {
       method: 'DELETE',
@@ -255,7 +255,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
   }, [QRCode, selectedProduct, destination, discountCode, handle, variantId])
 
   /*
-    This array is used in a select field in the form to manage discount options.
+    This array is used in a select field in the form to manage discount options
   */
   const discountOptions = discounts
     ? [
@@ -282,7 +282,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
   const altText =
     selectedProduct?.images?.[0]?.altText || selectedProduct?.title
 
-  /* The form layout, created using Polaris and App Bridge components. */
+  /* The form layout, created using Polaris and App Bridge components */
   return (
     <Stack vertical>
       {deletedProduct && (
