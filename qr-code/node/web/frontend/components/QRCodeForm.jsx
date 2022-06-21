@@ -24,12 +24,12 @@ import {
 import { ImageMajor, AlertMinor } from '@shopify/polaris-icons'
 
 /* Import the useAuthenticatedFetch hook included in the Node app template */
-import { useAuthenticatedFetch } from '../hooks'
+import { useAuthenticatedFetch, useShopifyQuery } from '../hooks'
 
 /* Import custom hooks for forms */
 import { useForm, useField, notEmptyString } from '@shopify/react-form'
 
-import { productCheckoutURL, productViewURL } from '../helpers'
+import { gql } from 'graphql-request'
 
 const NO_DISCOUNT_OPTION = { label: 'No discount', value: '' }
 
