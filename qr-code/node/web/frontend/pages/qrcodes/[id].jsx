@@ -8,9 +8,9 @@ export default function QRCodeEdit() {
   const { id } = useParams()
 
   /*
-    Fetch the QR Code.
-    useAppQuery use AppBridge to authenticate the request.
-    The backend supplements app data with data queried from Shopify Admin GraphQL API.
+    Fetch the QR code.
+    useAppQuery uses useAuthenticatedQuery from App Bridge to authenticate the request.
+    The backend supplements app data with data queried from the Shopify GraphQL Admin API.
   */
   const {
     data: QRCode,
