@@ -1,5 +1,5 @@
 // @ts-check
-import path from "path";
+import { join } from "path";
 import express from "express";
 import cookieParser from "cookie-parser";
 import { Shopify, ApiVersion } from "@shopify/shopify-api";
@@ -21,7 +21,7 @@ const isTest = process.env.NODE_ENV === "test" || !!process.env.VITE_TEST_BUILD;
 const DEV_INDEX_PATH = `${process.cwd()}/frontend/`;
 const PROD_INDEX_PATH = `${process.cwd()}/dist/`;
 
-const dbFile = path.join(process.cwd(), "database.sqlite");
+const dbFile = join(process.cwd(), "database.sqlite");
 const sessionDb = new Shopify.Session.SQLiteSessionStorage(dbFile);
 // Rip out the (technically private) SQLite DB from the session storage
 // so we can re-use it for storing QR codes. This is a temporary workaround
@@ -137,7 +137,7 @@ export async function createServer(
     } else {
       // res.set('X-Shopify-App-Nothing-To-See-Here', '1');
       const fs = await import("fs");
-      const fallbackFile = path.join(
+      const fallbackFile = join(
         isProd ? PROD_INDEX_PATH : DEV_INDEX_PATH,
         "index.html"
       );
