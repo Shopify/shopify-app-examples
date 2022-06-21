@@ -38,11 +38,5 @@
     "prettier": "^2.6.0",
     "vi-fetch": "^0.6.1",
     "vitest": "^0.10.0"
-  },
-  "prettier": {
-    "trailingComma": "es5",
-    "tabWidth": 2,
-    "semi": false,
-    "singleQuote": true
   }
 }

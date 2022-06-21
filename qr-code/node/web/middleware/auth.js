@@ -1,5 +1,5 @@
 import { Shopify } from "@shopify/shopify-api";
-import { gdprTopics } from '@shopify/shopify-api/dist/webhooks/registry.js';
+import { gdprTopics } from "@shopify/shopify-api/dist/webhooks/registry.js";
 
 import topLevelAuthRedirect from "../helpers/top-level-auth-redirect.js";
 

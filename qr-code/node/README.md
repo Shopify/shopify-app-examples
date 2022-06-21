@@ -1,6 +1,7 @@
 # Shopify App Example - QR Codes Node App
 
 This app includes code for the following:
+
 - Common application structure for creating, viewing, editing, and deleting entities.
 - A list view for the app index, along with an empty state to guide merchants using the app for the first time.
 - App Bridge features relevant for most apps, e.g., Titlebar, Contextual Save Bar, Primary Action Button, Resource Picker.
@@ -52,7 +53,7 @@ The following Shopify tools complement these third-party tools to ease app devel
 git clone https://github.com/Shopify/shopify-app-examples
 ```
 
-1. Install the required dependencies.  You can use your preferred package manager:
+1. Install the required dependencies. You can use your preferred package manager:
 
 Using yarn:
 
@@ -79,7 +80,7 @@ pnpm install
 
 [The Shopify CLI](https://shopify.dev/apps/tools/cli) connects to an app in your Partners dashboard. It provides environment variables, runs commands in parallel, and updates application URLs for easier development.
 
-You can develop locally using your preferred package manager.  Run one of the following commands from the root of your app.
+You can develop locally using your preferred package manager. Run one of the following commands from the root of your app.
 
 Using yarn:
 
@@ -99,7 +100,7 @@ Using pnpm:
 pnpm run dev
 ```
 
-Open the URL generated in your console.  Once you grant permission to the app, you can start development.
+Open the URL generated in your console. Once you grant permission to the app, you can start development.
 
 ## Deployment
 
@@ -109,12 +110,12 @@ This template uses [SQLite](https://www.sqlite.org/index.html) to store session 
 
 The database that works best for you depends on the data your app needs and how it is queried. You can run your database of choice on a server yourself or host it with a SaaS company. Here’s a short list of databases providers that provide a free tier to get started:
 
-Database | Type | Hosters
--- | -- | --
-MySQL | SQL | [Digital Ocean](https://www.digitalocean.com/try/managed-databases-mysql), [Planet Scale](https://planetscale.com/),  [Amazon Aurora](https://aws.amazon.com/rds/aurora/), [Google Cloud SQL](https://cloud.google.com/sql/docs/mysql)
-PostgreSQL | SQL | [Digital Ocean](https://www.digitalocean.com/try/managed-databases-postgresql), [Amazon Aurora](https://aws.amazon.com/rds/aurora/), [Google Cloud SQL](https://cloud.google.com/sql/docs/postgres)
-Redis | Key-value | [Digital Ocean](https://www.digitalocean.com/try/managed-databases-redis), [Amazon MemoryDB](https://aws.amazon.com/memorydb/)
-MongoDB | NoSQL / Document | [Digital Ocean](https://www.digitalocean.com/try/managed-databases-mongodb), [MongoDB Atlas](https://www.mongodb.com/atlas/database)
+| Database   | Type             | Hosters                                                                                                                                                                                                                               |
+| ---------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MySQL      | SQL              | [Digital Ocean](https://www.digitalocean.com/try/managed-databases-mysql), [Planet Scale](https://planetscale.com/), [Amazon Aurora](https://aws.amazon.com/rds/aurora/), [Google Cloud SQL](https://cloud.google.com/sql/docs/mysql) |
+| PostgreSQL | SQL              | [Digital Ocean](https://www.digitalocean.com/try/managed-databases-postgresql), [Amazon Aurora](https://aws.amazon.com/rds/aurora/), [Google Cloud SQL](https://cloud.google.com/sql/docs/postgres)                                   |
+| Redis      | Key-value        | [Digital Ocean](https://www.digitalocean.com/try/managed-databases-redis), [Amazon MemoryDB](https://aws.amazon.com/memorydb/)                                                                                                        |
+| MongoDB    | NoSQL / Document | [Digital Ocean](https://www.digitalocean.com/try/managed-databases-mongodb), [MongoDB Atlas](https://www.mongodb.com/atlas/database)                                                                                                  |
 
 To use one of these, you need to change your session storage configuration. To help, here’s a list of [SessionStorage adapters](https://github.com/Shopify/shopify-api-node/tree/main/src/auth/session/storage).
 
@@ -180,3 +181,4 @@ SHOPIFY_VITE_HMR_USE_POLLING=1 pnpm dev
   - [PHP backend](https://github.com/Shopify/shopify-app-template-php)
   - [Ruby backend](https://github.com/Shopify/shopify-app-template-ruby)
   - [React frontend](https://github.com/Shopify/shopify-frontend-template-react)
+```

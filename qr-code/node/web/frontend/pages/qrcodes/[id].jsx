@@ -1,11 +1,11 @@
-import { useParams } from 'react-router-dom'
-import { Card, Page, Layout, SkeletonBodyText } from '@shopify/polaris'
-import { Loading, TitleBar } from '@shopify/app-bridge-react'
-import { useAppQuery } from '../../hooks'
-import { QRCodeForm } from '../../components'
+import { useParams } from "react-router-dom";
+import { Card, Page, Layout, SkeletonBodyText } from "@shopify/polaris";
+import { Loading, TitleBar } from "@shopify/app-bridge-react";
+import { useAppQuery } from "../../hooks";
+import { QRCodeForm } from "../../components";
 
 export default function QRCodeEdit() {
-  const { id } = useParams()
+  const { id } = useParams();
 
   /*
     Fetch the QR code.
@@ -22,9 +22,9 @@ export default function QRCodeEdit() {
       /* Disable refetching because the QRCodeForm component ignores changes to its props */
       refetchOnReconnect: false,
     },
-  })
+  });
 
-  const breadcrumbs = [{ content: 'QR codes', url: '/' }]
+  const breadcrumbs = [{ content: "QR codes", url: "/" }];
 
   /* Loading action and markup that uses App Bridge and Polaris components */
   if (isLoading || isRefetching) {
@@ -58,7 +58,7 @@ export default function QRCodeEdit() {
           </Layout.Section>
         </Layout>
       </Page>
-    )
+    );
   }
 
   return (
@@ -70,5 +70,5 @@ export default function QRCodeEdit() {
       />
       <QRCodeForm QRCode={QRCode} />
     </Page>
-  )
+  );
 }

@@ -9,7 +9,7 @@ import verifyRequest from "./middleware/verify-request.js";
 import applyQrCodeApiEndpoints from "./middleware/qr-code-api.js";
 import applyQrCodePublicEndpoints from "./middleware/qr-code-public.js";
 import { setupGDPRWebHooks } from "./gdpr.js";
-import {QRCodesDB} from "./qr-codes-db.js";
+import { QRCodesDB } from "./qr-codes-db.js";
 
 const USE_ONLINE_TOKENS = true;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";

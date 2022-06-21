@@ -22,9 +22,7 @@ export async function serve(root, isProd) {
     });
   }
 
-  const { createServer } = await import(
-    path.resolve(root, "index.js")
-  );
+  const { createServer } = await import(path.resolve(root, "index.js"));
   process.env.PORT = port;
   return await createServer(root, isProd);
 }
