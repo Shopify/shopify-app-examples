@@ -154,8 +154,6 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
   })
 
   const handleProductChange = useCallback(({ selection }) => {
-    // TODO: Storing product details, and product ID seperately is a hack
-    // This will be fixed when this form queries the product data
     setSelectedProduct({
       title: selection[0].title,
       images: selection[0].images,
