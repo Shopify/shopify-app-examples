@@ -1,13 +1,13 @@
-import { useNavigate, TitleBar, Loading } from '@shopify/app-bridge-react'
+import { useNavigate, TitleBar, Loading } from "@shopify/app-bridge-react";
 import {
   Card,
   EmptyState,
   Layout,
   Page,
   SkeletonBodyText,
-} from '@shopify/polaris'
-import { useAppQuery } from '../hooks'
-import { QRCodeIndex } from '../components'
+} from "@shopify/polaris";
+import { useAppQuery } from "../hooks";
+import { QRCodeIndex } from "../components";
 
 export default function HomePage() {
   /*
@@ -15,7 +15,7 @@ export default function HomePage() {
     This function modifies the top-level browser URL so that you can
     navigate within the embedded app and keep the browser in sync on reload.
   */
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   /* useAppQuery wraps react-query and the App Bridge authenticatedFetch function */
   const {
@@ -30,8 +30,8 @@ export default function HomePage() {
     */
     isRefetching,
   } = useAppQuery({
-    url: '/api/qrcodes',
-  })
+    url: "/api/qrcodes",
+  });
 
   /* loadingMarkup uses the loading component from AppBridge and components from Polaris  */
   const loadingMarkup = isLoading ? (
@@ -39,11 +39,11 @@ export default function HomePage() {
       <Loading />
       <SkeletonBodyText />
     </Card>
-  ) : null
+  ) : null;
 
   const qrCodesMarkup = QRCodes?.length ? (
     <QRCodeIndex QRCodes={QRCodes} loading={isRefetching} />
-  ) : null
+  ) : null;
 
   /* Use Polaris Card and EmptyState components to define the contents of the empty state */
   const emptyStateMarkup =
@@ -52,8 +52,8 @@ export default function HomePage() {
         <EmptyState
           heading="Create unique QR codes for your product"
           action={{
-            content: 'Create QR code',
-            onAction: () => navigate('/qrcodes/new'),
+            content: "Create QR code",
+            onAction: () => navigate("/qrcodes/new"),
           }}
           image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
         >
@@ -62,7 +62,7 @@ export default function HomePage() {
           </p>
         </EmptyState>
       </Card>
-    ) : null
+    ) : null;
 
   /*
     Use Polaris Page and TitleBar components to create the page layout,
@@ -73,8 +73,8 @@ export default function HomePage() {
       <TitleBar
         title="QR codes"
         primaryAction={{
-          content: 'Create QR code',
-          onAction: () => navigate('/qrcodes/new'),
+          content: "Create QR code",
+          onAction: () => navigate("/qrcodes/new"),
         }}
       />
       <Layout>
@@ -85,5 +85,5 @@ export default function HomePage() {
         </Layout.Section>
       </Layout>
     </Page>
-  )
+  );
 }

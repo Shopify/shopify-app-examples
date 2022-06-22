@@ -1,5 +1,5 @@
-import { Card, EmptyState, Page } from '@shopify/polaris'
-import { notFoundImage } from '../assets'
+import { Card, EmptyState, Page } from "@shopify/polaris";
+import { notFoundImage } from "../assets";
 
 export default function NotFound() {
   return (
@@ -19,5 +19,5 @@ export default function NotFound() {
         </Card.Section>
       </Card>
     </Page>
-  )
+  );
 }
