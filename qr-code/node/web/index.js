@@ -22,13 +22,19 @@ const DEV_INDEX_PATH = `${process.cwd()}/frontend/`;
 const PROD_INDEX_PATH = `${process.cwd()}/dist/`;
 
 const dbFile = join(process.cwd(), "database.sqlite");
-const sessionDb = new Shopify.Session.SQLiteSessionStorage(dbFile);
-// Rip out the (technically private) SQLite DB from the session storage
-// so we can re-use it for storing QR codes. This is a temporary workaround
-// until we augment the SQLiteSessionStorage implementation to also accept
-// a db instance.
-QRCodesDB.db = sessionDb.db;
-QRCodesDB.init();
+
+let sessionDb;
+if (process.env.NODE_ENV === "test") {
+  sessionDb = new Shopify.Session.MemorySessionStorage();
+} else {
+  sessionDb = new Shopify.Session.SQLiteSessionStorage(dbFile);
+  // Rip out the (technically private) SQLite DB from the session storage
+  // so we can re-use it for storing QR codes. This is a temporary workaround
+  // until we augment the SQLiteSessionStorage implementation to also accept
+  // a db instance.
+  QRCodesDB.db = sessionDb.db;
+}
+await QRCodesDB.init();
 
 Shopify.Context.initialize({
   API_KEY: process.env.SHOPIFY_API_KEY,

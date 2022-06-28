@@ -34,8 +34,13 @@ const QR_CODE_ADMIN_QUERY = `
 `;
 
 export async function getQrCodeOr404(req, res, checkDomain = true) {
+  const id = req.params.id;
+  if (!id.match(/[0-9]+/)) {
+    res.status(404).send();
+  }
+
   try {
-    const response = await QRCodesDB.read(req.params.id);
+    const response = await QRCodesDB.read(id);
     if (
       response === undefined ||
       (checkDomain &&
@@ -57,16 +62,16 @@ export async function getShopUrlFromSession(req, res) {
   return `https://${session.shop}`;
 }
 
-/* 
-Expect body to contain
-title: string
-productId: string
-variantId: string
-handle: string
-discountId: string
-discountCode: string
-destination: string
- */
+/*
+  Expect body to contain
+  title: string
+  productId: string
+  variantId: string
+  handle: string
+  discountId: string
+  discountCode: string
+  destination: string
+*/
 export async function parseQrCodeBody(req, res) {
   return {
     title: req.body.title,

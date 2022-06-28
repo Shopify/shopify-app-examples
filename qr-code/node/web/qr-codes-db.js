@@ -26,6 +26,17 @@ export const QRCodesDB = {
   }) {
     await this.ready;
 
+    this.__validateQRCode({
+      shopDomain,
+      title,
+      productId,
+      variantId,
+      handle,
+      discountId,
+      discountCode,
+      destination,
+    });
+
     const query = `
       INSERT INTO ${this.qrCodesTableName}
       (shopDomain, title, productId, variantId, handle, discountId, discountCode, destination, scans)
@@ -60,6 +71,17 @@ export const QRCodesDB = {
     }
   ) {
     await this.ready;
+
+    this.__validateQRCode({
+      id,
+      title,
+      productId,
+      variantId,
+      handle,
+      discountId,
+      discountCode,
+      destination,
+    });
 
     const query = `
       UPDATE ${this.qrCodesTableName}
@@ -250,7 +272,91 @@ export const QRCodesDB = {
       quantity: DEFAULT_PURCHASE_QUANTITY,
     });
   },
+
+  __validateQRCode: function ({
+    id = null,
+    shopDomain = null,
+    title,
+    productId,
+    variantId,
+    handle,
+    destination,
+    discountId,
+    discountCode,
+  }) {
+    if (id && shopDomain) {
+      throw new QRCodeValidationError(
+        "Can't change the shopDomain of an existing code"
+      );
+    } else if (!id && !shopDomain) {
+      throw new QRCodeValidationError(
+        "Must pass in a shopDomain when creating a new code"
+      );
+    }
+
+    if (shopDomain) {
+      try {
+        const url = new URL(shopDomain);
+      } catch (e) {
+        throw new QRCodeValidationError(`Invalid shopDomain '${shopDomain}'`);
+      }
+    }
+
+    const missingRequired = [];
+    if (!title.length) {
+      missingRequired.push("title");
+    }
+    if (!productId.length) {
+      missingRequired.push("productId");
+    }
+    if (!variantId.length) {
+      missingRequired.push("variantId");
+    }
+    if (!handle.length) {
+      missingRequired.push("handle");
+    }
+    if (!destination.length) {
+      missingRequired.push("destination");
+    }
+
+    if (missingRequired.length) {
+      throw new QRCodeValidationError(
+        `Missing required fields: [${missingRequired.join(", ")}]`
+      );
+    }
+
+    const invalidIds = [];
+    if (!productId.match(/gid:\/\/shopify\/Product\/[0-9]+/)) {
+      invalidIds.push("productId");
+    }
+    if (!variantId.match(/gid:\/\/shopify\/ProductVariant\/[0-9]+/)) {
+      invalidIds.push("variantId");
+    }
+    if (
+      discountId &&
+      !discountId.match(/gid:\/\/shopify\/DiscountCodeNode\/[0-9]+/)
+    ) {
+      invalidIds.push("discountId");
+    }
+
+    if (invalidIds.length) {
+      throw new QRCodeValidationError(
+        `Invalid ids: [${invalidIds.join(", ")}]`
+      );
+    }
+
+    if (!["product", "checkout"].includes(destination)) {
+      throw new QRCodeValidationError(`Invalid destination '${destination}'`);
+    }
+  },
 };
+
+export class QRCodeValidationError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "QRCodeValidationError";
+  }
+}
 
 /* Generate the URL to a product page */
 function productViewURL({ host, productHandle, discountCode }) {
