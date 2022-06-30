@@ -252,43 +252,4 @@ describe("starter-node-app server", async () => {
       expect(consoleSpy.mock.lastCall[0]).toContain("something went wrong");
     });
   });
-
-  describe("graphql proxy", () => {
-    vi.mock(`${process.cwd()}/middleware/verify-request.js`, () => ({
-      default: vi.fn(() => (req, res, next) => {
-        next();
-      }),
-    }));
-    const proxy = vi.spyOn(Shopify.Utils, "graphqlProxy");
-
-    test("graphql proxy is called & responds with body", async () => {
-      const body = {
-        data: {
-          test: "test",
-        },
-      };
-      proxy.mockImplementationOnce(() => ({
-        body,
-      }));
-
-      const response = await request(app).post("/api/graphql").send({
-        query: "{hello}",
-      });
-
-      expect(proxy).toHaveBeenCalledTimes(1);
-      expect(response.status).toEqual(200);
-      expect(response.body).toEqual(body);
-    });
-
-    test("returns a 500 error if graphql proxy fails", async () => {
-      proxy.mockImplementationOnce(() => {
-        throw new Error("test 500 response");
-      });
-
-      const response = await request(app).post("/api/graphql");
-
-      expect(response.status).toEqual(500);
-      expect(response.text).toContain("test 500 response");
-    });
-  });
 });

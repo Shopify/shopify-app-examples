@@ -11,7 +11,7 @@ import applyQrCodePublicEndpoints from "./middleware/qr-code-public.js";
 import { setupGDPRWebHooks } from "./gdpr.js";
 import { QRCodesDB } from "./qr-codes-db.js";
 
-const USE_ONLINE_TOKENS = true;
+const USE_ONLINE_TOKENS = false;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
@@ -96,16 +96,36 @@ export async function createServer(
   // All endpoints from this point on will require authentication, comment to disable authentication as a whole
   app.use("/api/*", verifyRequest(app));
 
-  app.post("/api/graphql", async (req, res) => {
-    try {
-      const response = await Shopify.Utils.graphqlProxy(req, res);
-      res.status(200).send(response.body);
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
-  });
-
   app.use(express.json());
+
+  app.get("/api/discounts", async (req, res) => {
+    const session = await Shopify.Utils.loadCurrentSession(
+      req,
+      res,
+      USE_ONLINE_TOKENS
+    );
+
+    if (!session) {
+      res.status(401).send("Could not find a Shopify session");
+      return;
+    }
+
+    const client = new Shopify.Clients.Graphql(
+      session.shop,
+      session.accessToken
+    );
+
+    const discounts = await client.query({
+      data: {
+        query: DISCOUNTS_QUERY,
+        variables: {
+          first: 25,
+        },
+      },
+    });
+
+    res.send(discounts.body.data);
+  });
 
   applyQrCodeApiEndpoints(app);
 
@@ -160,3 +180,44 @@ export async function createServer(
 if (!isTest) {
   createServer().then(({ app }) => app.listen(PORT));
 }
+
+const DISCOUNTS_QUERY = `
+  query discounts($first: Int!) {
+    codeDiscountNodes(first: $first) {
+      edges {
+        node {
+          id
+          codeDiscount {
+            ... on DiscountCodeBasic {
+              codes(first: 1) {
+                edges {
+                  node {
+                    code
+                  }
+                }
+              }
+            }
+            ... on DiscountCodeBxgy {
+              codes(first: 1) {
+                edges {
+                  node {
+                    code
+                  }
+                }
+              }
+            }
+            ... on DiscountCodeFreeShipping {
+              codes(first: 1) {
+                edges {
+                  node {
+                    code
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;

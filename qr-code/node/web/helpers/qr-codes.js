@@ -58,7 +58,7 @@ export async function getQrCodeOr404(req, res, checkDomain = true) {
 }
 
 export async function getShopUrlFromSession(req, res) {
-  const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+  const session = await Shopify.Utils.loadCurrentSession(req, res, false);
   return `https://${session.shop}`;
 }
 
@@ -101,7 +101,7 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
   });
 
   /* Instantiate a new GraphQL client to query the Shopify GraphQL Admin API */
-  const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+  const session = await Shopify.Utils.loadCurrentSession(req, res, false);
   const client = new Shopify.Clients.Graphql(session.shop, session.accessToken);
 
   /* Query the Shopify GraphQL Admin API */

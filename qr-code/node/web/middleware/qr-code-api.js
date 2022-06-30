@@ -57,6 +57,7 @@ export default function applyQrCodeApiEndpoints(app) {
       const response = await formatQrCodeResponse(req, res, rawCodeData);
       res.status(200).send(response);
     } catch (error) {
+      console.error(error);
       res.status(500).send(error.message);
     }
   });
