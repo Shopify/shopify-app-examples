@@ -1,84 +1,48 @@
-import {
-  Card,
-  Page,
-  Layout,
-  TextContainer,
-  Image,
-  Stack,
-  Link,
-  Heading,
-} from "@shopify/polaris";
-
-import trophyImgUrl from "../assets/home-trophy.png";
-
-import { ProductsCard } from "./ProductsCard";
+import { Card, Page, EmptyState, List } from '@shopify/polaris';
+import { ResourcePicker } from '@shopify/app-bridge-react';
+import { useState } from 'react';
 
 export function HomePage() {
+  const [resourcePickerOpen, setResourcePickerOpen] = useState(false);
+
+  const [selectedProducts, setSelectedProducts] = useState([]);
+
+  const emptyState = (
+    <EmptyState
+      heading="Create a Subscription box"
+      action={{
+        content: 'Select Products',
+        onAction: () => setResourcePickerOpen(true),
+      }}
+      image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+    >
+      <p>Select products to create a subscription plan</p>
+    </EmptyState>
+  );
+
+  const productList = (
+    <List>
+      {selectedProducts.map(({ title }) => (
+        <List.Item> {title}</List.Item>
+      ))}
+    </List>
+  );
+
   return (
     <Page fullWidth>
-      <Layout>
-        <Layout.Section>
-          <Card sectioned>
-            <Stack
-              wrap={false}
-              spacing="extraTight"
-              distribution="trailing"
-              alignment="center"
-            >
-              <Stack.Item fill>
-                <TextContainer spacing="loose">
-                  <Heading>Nice work on building a Shopify app 🎉</Heading>
-                  <p>
-                    Your app is ready to explore! It contains everything you
-                    need to get started including the{" "}
-                    <Link url="https://polaris.shopify.com/" external>
-                      Polaris design system
-                    </Link>
-                    ,{" "}
-                    <Link url="https://shopify.dev/api/admin-graphql" external>
-                      Shopify Admin API
-                    </Link>
-                    , and{" "}
-                    <Link
-                      url="https://shopify.dev/apps/tools/app-bridge"
-                      external
-                    >
-                      App Bridge
-                    </Link>{" "}
-                    UI library and components.
-                  </p>
-                  <p>
-                    Ready to go? Start populating your app with some sample
-                    products to view and test in your store.{" "}
-                  </p>
-                  <p>
-                    Learn more about building out your app in{" "}
-                    <Link
-                      url="https://shopify.dev/apps/getting-started/add-functionality"
-                      external
-                    >
-                      this Shopify tutorial
-                    </Link>{" "}
-                    📚{" "}
-                  </p>
-                </TextContainer>
-              </Stack.Item>
-              <Stack.Item>
-                <div style={{ padding: "0 20px" }}>
-                  <Image
-                    source={trophyImgUrl}
-                    alt="Nice work on building a Shopify app"
-                    width={120}
-                  />
-                </div>
-              </Stack.Item>
-            </Stack>
-          </Card>
-        </Layout.Section>
-        <Layout.Section secondary>
-          <ProductsCard />
-        </Layout.Section>
-      </Layout>
+      <Card sectioned>
+        {selectedProducts.length ? productList : emptyState}
+        <ResourcePicker
+          resourceType="Product"
+          open={resourcePickerOpen}
+          onSelection={(selectPayload) => {
+            console.log(selectPayload.selection);
+
+            setResourcePickerOpen(false);
+            setSelectedProducts(selectPayload.selection);
+          }}
+        />
+      </Card>
     </Page>
   );
 }
