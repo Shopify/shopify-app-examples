@@ -1,0 +1,17 @@
+{
+    "name": "node-cli-2.17-app",
+    "private": true,
+    "license": "UNLICENSED",
+    "scripts": {
+      "shopify": "shopify",
+      "build": "shopify app build",
+      "dev": "shopify app dev",
+      "info": "shopify app info",
+      "scaffold": "shopify app scaffold",
+      "deploy": "shopify app deploy"
+    },
+    "dependencies": {
+      "@shopify/app": "^3",
+      "@shopify/cli": "^3"
+    }
+  }
