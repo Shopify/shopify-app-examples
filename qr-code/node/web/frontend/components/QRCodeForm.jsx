@@ -206,7 +206,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
     data: discounts,
     isLoading: isLoadingDiscounts,
     isError: discountsError,
-    /* useShopifyQuery makes a query to `/api/discounts`, which the backend authenticates before fetching the data from the Shopify GraphQL Admin API */
+    /* useAppQuery makes a query to `/api/discounts`, which the backend authenticates before fetching the data from the Shopify GraphQL Admin API */
   } = useAppQuery({
     url: "/api/discounts",
   });
