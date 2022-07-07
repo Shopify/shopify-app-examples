@@ -21,8 +21,6 @@
     "@shopify/react-hooks": "^3.0.1",
     "@vitejs/plugin-react": "1.2.0",
     "dayjs": "^1.11.2",
-    "graphql": "^16.3.0",
-    "graphql-request": "^4.2.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-query": "^3.34.19",
