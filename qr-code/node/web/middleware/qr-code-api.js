@@ -6,6 +6,8 @@
   The authorization header is added by App Bridge in the frontend code.
 */
 
+import { Shopify } from "@shopify/shopify-api";
+
 import { QRCodesDB } from "../qr-codes-db.js";
 import {
   getQrCodeOr404,
@@ -14,7 +16,78 @@ import {
   formatQrCodeResponse,
 } from "../helpers/qr-codes.js";
 
+const DISCOUNTS_QUERY = `
+  query discounts($first: Int!) {
+    codeDiscountNodes(first: $first) {
+      edges {
+        node {
+          id
+          codeDiscount {
+            ... on DiscountCodeBasic {
+              codes(first: 1) {
+                edges {
+                  node {
+                    code
+                  }
+                }
+              }
+            }
+            ... on DiscountCodeBxgy {
+              codes(first: 1) {
+                edges {
+                  node {
+                    code
+                  }
+                }
+              }
+            }
+            ... on DiscountCodeFreeShipping {
+              codes(first: 1) {
+                edges {
+                  node {
+                    code
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 export default function applyQrCodeApiEndpoints(app) {
+  app.get("/api/discounts", async (req, res) => {
+    const session = await Shopify.Utils.loadCurrentSession(
+      req,
+      res,
+      app.get("use-online-tokens")
+    );
+
+    if (!session) {
+      res.status(401).send("Could not find a Shopify session");
+      return;
+    }
+
+    const client = new Shopify.Clients.Graphql(
+      session.shop,
+      session.accessToken
+    );
+
+    /* Fetch all available discounts to list in the QR code form */
+    const discounts = await client.query({
+      data: {
+        query: DISCOUNTS_QUERY,
+        variables: {
+          first: 25,
+        },
+      },
+    });
+
+    res.send(discounts.body.data);
+  });
+
   app.post("/api/qrcodes", async (req, res) => {
     try {
       const id = await QRCodesDB.create({

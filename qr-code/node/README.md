@@ -182,7 +182,3 @@ SHOPIFY_VITE_HMR_USE_POLLING=1 pnpm dev
   - [PHP backend](https://github.com/Shopify/shopify-app-template-php)
   - [Ruby backend](https://github.com/Shopify/shopify-app-template-ruby)
   - [React frontend](https://github.com/Shopify/shopify-frontend-template-react)
-
-```
-
-```

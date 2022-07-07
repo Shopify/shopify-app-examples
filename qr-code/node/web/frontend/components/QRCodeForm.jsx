@@ -29,50 +29,7 @@ import { useAuthenticatedFetch, useAppQuery } from "../hooks";
 /* Import custom hooks for forms */
 import { useForm, useField, notEmptyString } from "@shopify/react-form";
 
-import { gql } from "graphql-request";
-
 const NO_DISCOUNT_OPTION = { label: "No discount", value: "" };
-
-const DISCOUNTS_QUERY = gql`
-  query discounts($first: Int!) {
-    codeDiscountNodes(first: $first) {
-      edges {
-        node {
-          id
-          codeDiscount {
-            ... on DiscountCodeBasic {
-              codes(first: 1) {
-                edges {
-                  node {
-                    code
-                  }
-                }
-              }
-            }
-            ... on DiscountCodeBxgy {
-              codes(first: 1) {
-                edges {
-                  node {
-                    code
-                  }
-                }
-              }
-            }
-            ... on DiscountCodeFreeShipping {
-              codes(first: 1) {
-                edges {
-                  node {
-                    code
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
 
 const DISCOUNT_CODES = {};
 

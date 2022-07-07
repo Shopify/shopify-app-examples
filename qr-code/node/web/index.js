@@ -98,35 +98,6 @@ export async function createServer(
 
   app.use(express.json());
 
-  app.get("/api/discounts", async (req, res) => {
-    const session = await Shopify.Utils.loadCurrentSession(
-      req,
-      res,
-      USE_ONLINE_TOKENS
-    );
-
-    if (!session) {
-      res.status(401).send("Could not find a Shopify session");
-      return;
-    }
-
-    const client = new Shopify.Clients.Graphql(
-      session.shop,
-      session.accessToken
-    );
-
-    const discounts = await client.query({
-      data: {
-        query: DISCOUNTS_QUERY,
-        variables: {
-          first: 25,
-        },
-      },
-    });
-
-    res.send(discounts.body.data);
-  });
-
   applyQrCodeApiEndpoints(app);
 
   app.use((req, res, next) => {
@@ -180,44 +151,3 @@ export async function createServer(
 if (!isTest) {
   createServer().then(({ app }) => app.listen(PORT));
 }
-
-const DISCOUNTS_QUERY = `
-  query discounts($first: Int!) {
-    codeDiscountNodes(first: $first) {
-      edges {
-        node {
-          id
-          codeDiscount {
-            ... on DiscountCodeBasic {
-              codes(first: 1) {
-                edges {
-                  node {
-                    code
-                  }
-                }
-              }
-            }
-            ... on DiscountCodeBxgy {
-              codes(first: 1) {
-                edges {
-                  node {
-                    code
-                  }
-                }
-              }
-            }
-            ... on DiscountCodeFreeShipping {
-              codes(first: 1) {
-                edges {
-                  node {
-                    code
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
