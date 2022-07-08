@@ -3,7 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import {
   AppBridgeProvider,
-  GraphQLProvider,
+  QueryProvider,
   PolarisProvider,
 } from "./components";
 
@@ -16,9 +16,9 @@ export default function App() {
     <PolarisProvider>
       <BrowserRouter>
         <AppBridgeProvider>
-          <GraphQLProvider>
+          <QueryProvider>
             <Routes pages={pages} />
-          </GraphQLProvider>
+          </QueryProvider>
         </AppBridgeProvider>
       </BrowserRouter>
     </PolarisProvider>

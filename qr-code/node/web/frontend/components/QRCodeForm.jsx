@@ -24,55 +24,12 @@ import {
 import { ImageMajor, AlertMinor } from "@shopify/polaris-icons";
 
 /* Import the useAuthenticatedFetch hook included in the Node app template */
-import { useAuthenticatedFetch, useShopifyQuery } from "../hooks";
+import { useAuthenticatedFetch, useAppQuery } from "../hooks";
 
 /* Import custom hooks for forms */
 import { useForm, useField, notEmptyString } from "@shopify/react-form";
 
-import { gql } from "graphql-request";
-
 const NO_DISCOUNT_OPTION = { label: "No discount", value: "" };
-
-const DISCOUNTS_QUERY = gql`
-  query discounts($first: Int!) {
-    codeDiscountNodes(first: $first) {
-      edges {
-        node {
-          id
-          codeDiscount {
-            ... on DiscountCodeBasic {
-              codes(first: 1) {
-                edges {
-                  node {
-                    code
-                  }
-                }
-              }
-            }
-            ... on DiscountCodeBxgy {
-              codes(first: 1) {
-                edges {
-                  node {
-                    code
-                  }
-                }
-              }
-            }
-            ... on DiscountCodeFreeShipping {
-              codes(first: 1) {
-                edges {
-                  node {
-                    code
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
 
 const DISCOUNT_CODES = {};
 
@@ -206,13 +163,9 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
     data: discounts,
     isLoading: isLoadingDiscounts,
     isError: discountsError,
-    /* useShopifyQuery makes a query to `/api/graphql`, which the backend authenticates before proxying it to the Shopify GraphQL Admin API */
-  } = useShopifyQuery({
-    key: "discounts",
-    query: DISCOUNTS_QUERY,
-    variables: {
-      first: 25,
-    },
+    /* useAppQuery makes a query to `/api/discounts`, which the backend authenticates before fetching the data from the Shopify GraphQL Admin API */
+  } = useAppQuery({
+    url: "/api/discounts",
   });
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -258,7 +211,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
   const discountOptions = discounts
     ? [
         NO_DISCOUNT_OPTION,
-        ...discounts.data.codeDiscountNodes.edges.map(
+        ...discounts.codeDiscountNodes.edges.map(
           ({ node: { id, codeDiscount } }) => {
             DISCOUNT_CODES[id] = codeDiscount.codes.edges[0].node.code;
 
