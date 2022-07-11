@@ -69,7 +69,7 @@ export default function HomePage() {
     and include the empty state contents set above.
   */
   return (
-    <Page>
+    <Page fullWidth={!!qrCodesMarkup}>
       <TitleBar
         title="QR codes"
         primaryAction={{
