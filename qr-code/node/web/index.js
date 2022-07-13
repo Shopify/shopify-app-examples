@@ -11,7 +11,7 @@ import applyQrCodePublicEndpoints from "./middleware/qr-code-public.js";
 import { setupGDPRWebHooks } from "./gdpr.js";
 import { QRCodesDB } from "./qr-codes-db.js";
 
-const USE_ONLINE_TOKENS = true;
+const USE_ONLINE_TOKENS = false;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
@@ -96,15 +96,6 @@ export async function createServer(
   // All endpoints from this point on will require authentication, comment to disable authentication as a whole
   app.use("/api/*", verifyRequest(app));
 
-  app.post("/api/graphql", async (req, res) => {
-    try {
-      const response = await Shopify.Utils.graphqlProxy(req, res);
-      res.status(200).send(response.body);
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
-  });
-
   app.use(express.json());
 
   applyQrCodeApiEndpoints(app);
@@ -130,7 +121,7 @@ export async function createServer(
       ({ default: fn }) => fn
     );
     app.use(compression());
-    app.use(serveStatic(PROD_INDEX_PATH));
+    app.use(serveStatic(PROD_INDEX_PATH, { index: false }));
   }
 
   app.use("/*", async (req, res, next) => {
