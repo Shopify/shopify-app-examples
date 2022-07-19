@@ -26,9 +26,6 @@ import { ImageMajor, AlertMinor } from "@shopify/polaris-icons";
 /* Import the useAuthenticatedFetch hook included in the Node app template */
 import { useAuthenticatedFetch, useAppQuery } from "../hooks";
 
-/* Import custom hooks for forms */
-import { useForm, useField, notEmptyString } from "@shopify/react-form";
-
 const NO_DISCOUNT_OPTION = { label: "No discount", value: "" };
 
 const DISCOUNT_CODES = {};
@@ -42,83 +39,84 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
   const fetch = useAuthenticatedFetch();
   const deletedProduct = QRCode?.product?.title === "Deleted product";
 
-  const onSubmit = useCallback(
-    (body) => {
-      (async () => {
-        const parsedBody = body;
-        parsedBody.destination = parsedBody.destination[0];
-        const QRCodeId = QRCode?.id;
-        /* construct the appropriate URL to send the API request to based on whether the QR code is new or being updated */
-        const url = QRCodeId ? `/api/qrcodes/${QRCodeId}` : "/api/qrcodes";
-        /* a condition to select the appropriate HTTP method: PATCH to update a QR code or POST to create a new QR code */
-        const method = QRCodeId ? "PATCH" : "POST";
-        /* use (authenticated) fetch from App Bridge to send the request to the API and, if successful, clear the form to reset the ContextualSaveBar and parse the response JSON */
-        const response = await fetch(url, {
-          method,
-          body: JSON.stringify(parsedBody),
-          headers: { "Content-Type": "application/json" },
-        });
-        if (response.ok) {
-          makeClean();
-          const QRCode = await response.json();
-          /* if this is a new QR code, then save the QR code and navigate to the edit page; this behavior is the standard when saving resources in the Shopify admin */
-          if (!QRCodeId) {
-            navigate(`/qrcodes/${QRCode.id}`);
-            /* if this is a QR code update, update the QR code state in this component */
-          } else {
-            setQRCode(QRCode);
-          }
-        }
-      })();
-      return { status: "success" };
+  /*
+    Keep the state of form fields as we change them
+  */
+  const initialFormValues = formValuesFromQRCode(QRCode, deletedProduct);
+  const [formValues, setFormValues] = useState(initialFormValues);
+  const [formErrors, setFormErrors] = useState({});
+  const [dirty, setDirty] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const updateFormValues = (newValues) => {
+    const updatedValues = { ...formValues, ...newValues };
+
+    // This object is flat, so we can just compare the first level
+    const a = Object.entries(updatedValues).sort();
+    const b = Object.entries(initialFormValues).sort();
+    setDirty(JSON.stringify(a) != JSON.stringify(b));
+
+    setFormValues(updatedValues);
+  };
+
+  const reset = () => {
+    setFormValues(initialFormValues);
+    setFormErrors({});
+    setDirty(false);
+    setSubmitting(false);
+  };
+
+  const validate = useCallback(
+    (field) => {
+      const data = field ? { [field]: formValues[field] } : formValues;
+      const errors = validateFields(data);
+      setFormErrors({ ...formErrors, ...errors });
+
+      return errors;
     },
-    [QRCode, setQRCode]
+    [formErrors, formValues]
   );
 
-  /*
-    Sets up the form state with the useForm hook.
+  const submit = useCallback(() => {
+    const errors = validate();
+    if (Object.values(errors).filter((value) => !!value).length > 0) {
+      return { status: "error" };
+    }
 
-    Accepts a "fields" object that sets up each individual field with a default value and validation rules.
+    (async () => {
+      const parsedBody = formValues;
+      parsedBody.destination = parsedBody.destination[0];
+      const QRCodeId = QRCode?.id;
+      /* construct the appropriate URL to send the API request to based on whether the QR code is new or being updated */
+      const url = QRCodeId ? `/api/qrcodes/${QRCodeId}` : "/api/qrcodes";
+      /* a condition to select the appropriate HTTP method: PATCH to update a QR code or POST to create a new QR code */
+      const method = QRCodeId ? "PATCH" : "POST";
 
-    Returns a "fields" object that is destructured to access each of the fields individually, so they can be used in other parts of the component.
+      /* use (authenticated) fetch from App Bridge to send the request to the API and, if successful, clear the form to reset the ContextualSaveBar and parse the response JSON */
+      setSubmitting(true);
+      const response = await fetch(url, {
+        method,
+        body: JSON.stringify(parsedBody),
+        headers: { "Content-Type": "application/json" },
+      });
+      setSubmitting(false);
 
-    Returns helpers to manage the form state, as well as the component state that is based on the form state.
-  */
-  const {
-    fields: {
-      title,
-      productId,
-      variantId,
-      handle,
-      discountId,
-      discountCode,
-      destination,
-    },
-    dirty,
-    reset,
-    submitting,
-    submit,
-    makeClean,
-  } = useForm({
-    fields: {
-      title: useField({
-        value: QRCode?.title || "",
-        validates: [notEmptyString("Please name your QR code")],
-      }),
-      productId: useField({
-        value: deletedProduct ? "Deleted product" : QRCode?.product?.id || "",
-        validates: [notEmptyString("Please select a product")],
-      }),
-      variantId: useField(QRCode?.variantId || ""),
-      handle: useField(QRCode?.handle || ""),
-      destination: useField(
-        QRCode?.destination ? [QRCode.destination] : ["product"]
-      ),
-      discountId: useField(QRCode?.discountId || NO_DISCOUNT_OPTION.value),
-      discountCode: useField(QRCode?.discountCode || ""),
-    },
-    onSubmit,
-  });
+      if (response.ok) {
+        setDirty(false);
+        const QRCode = await response.json();
+        /* if this is a new QR code, then save the QR code and navigate to the edit page; this behavior is the standard when saving resources in the Shopify admin */
+        if (!QRCodeId) {
+          navigate(`/qrcodes/${QRCode.id}`);
+          /* if this is a QR code update, update the QR code state in this component */
+        } else {
+          setQRCode(QRCode);
+          setFormValues(formValuesFromQRCode(QRCode, deletedProduct));
+          setDirty(false);
+        }
+      }
+    })();
+    return { status: "success" };
+  }, [QRCode, setQRCode, formValues]);
 
   /*
     This function is called with the selected product whenever the user clicks "Add" in the ResourcePicker.
@@ -129,25 +127,36 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
 
     Finally, closes the ResourcePicker.
   */
-  const handleProductChange = useCallback(({ selection }) => {
-    setSelectedProduct({
-      title: selection[0].title,
-      images: selection[0].images,
-      handle: selection[0].handle,
-    });
-    productId.onChange(selection[0].id);
-    variantId.onChange(selection[0].variants[0].id);
-    handle.onChange(selection[0].handle);
-    setShowResourcePicker(false);
-  }, []);
+  const handleProductChange = useCallback(
+    ({ selection }) => {
+      setSelectedProduct({
+        title: selection[0].title,
+        images: selection[0].images,
+        handle: selection[0].handle,
+      });
+      updateFormValues({
+        productId: selection[0].id,
+        variantId: selection[0].variants[0].id,
+        handle: selection[0].handle,
+      });
+      validate("productId");
+      setShowResourcePicker(false);
+    },
+    [formValues, formErrors]
+  );
 
   /*
     This function updates the form state whenever a user selects a new discount option.
   */
-  const handleDiscountChange = useCallback((id) => {
-    discountId.onChange(id);
-    discountCode.onChange(DISCOUNT_CODES[id] || "");
-  }, []);
+  const handleDiscountChange = useCallback(
+    (id) => {
+      updateFormValues({
+        discountId: id,
+        discountCode: DISCOUNT_CODES[id] || "",
+      });
+    },
+    [formValues]
+  );
 
   /*
     This function is called when a user clicks "Select product" or cancels the ProductPicker.
@@ -192,18 +201,18 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
     if (!selectedProduct) return;
     const data = {
       host: appBridge.hostOrigin,
-      productHandle: handle.value || selectedProduct.handle,
-      discountCode: discountCode.value || undefined,
-      variantId: variantId.value,
+      productHandle: formValues.handle || selectedProduct.handle,
+      discountCode: formValues.discountCode || undefined,
+      variantId: formValues.variantId,
     };
 
     const targetURL =
-      deletedProduct || destination.value[0] === "product"
+      deletedProduct || formValues.destination[0] === "product"
         ? productViewURL(data)
         : productCheckoutURL(data);
 
     window.open(targetURL, "_blank", "noreferrer,noopener");
-  }, [QRCode, selectedProduct, destination, discountCode, handle, variantId]);
+  }, [QRCode, selectedProduct, formValues]);
 
   /*
     This array is used in a select field in the form to manage discount options
@@ -269,10 +278,13 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
             <FormLayout>
               <Card sectioned title="Title">
                 <TextField
-                  {...title}
                   label="Title"
                   labelHidden
                   helpText="Only store staff can see this title"
+                  value={formValues.title}
+                  error={formErrors.title}
+                  onChange={(value) => updateFormValues({ title: value })}
+                  onBlur={(event) => validate("title")}
                 />
               </Card>
 
@@ -280,7 +292,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
                 title="Product"
                 actions={[
                   {
-                    content: productId.value
+                    content: formValues.productId
                       ? "Change product"
                       : "Select product",
                     onAction: toggleResourcePicker,
@@ -298,7 +310,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
                       open
                     />
                   )}
-                  {productId.value ? (
+                  {formValues.productId ? (
                     <Stack alignment="center">
                       {imageSrc || originalImageSrc ? (
                         <Thumbnail
@@ -321,11 +333,11 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
                       <Button onClick={toggleResourcePicker}>
                         Select product
                       </Button>
-                      {productId.error && (
+                      {formErrors.productId && (
                         <Stack spacing="tight">
                           <Icon source={AlertMinor} color="critical" />
                           <TextStyle variation="negative">
-                            {productId.error}
+                            {formErrors.productId}
                           </TextStyle>
                         </Stack>
                       )}
@@ -343,8 +355,10 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
                         value: "checkout",
                       },
                     ]}
-                    selected={destination.value}
-                    onChange={destination.onChange}
+                    selected={formValues.destination}
+                    onChange={(value) =>
+                      updateFormValues({ destination: value })
+                    }
                   />
                 </Card.Section>
               </Card>
@@ -371,7 +385,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
                   label="discount code"
                   options={discountOptions}
                   onChange={handleDiscountChange}
-                  value={discountId.value}
+                  value={formValues.discountId}
                   disabled={isLoadingDiscounts || discountsError}
                   labelHidden
                 />
@@ -457,4 +471,42 @@ function productCheckoutURL({ host, variantId, quantity = 1, discountCode }) {
   }
 
   return url.toString();
+}
+
+/* Sets the form state from a QRCode object */
+function formValuesFromQRCode(QRCode, deletedProduct) {
+  return {
+    title: QRCode?.title || "",
+    productId: deletedProduct ? "Deleted product" : QRCode?.product?.id || "",
+    variantId: QRCode?.variantId || "",
+    handle: QRCode?.handle || "",
+    discountId: QRCode?.discountId || NO_DISCOUNT_OPTION.value,
+    discountCode: QRCode?.discountCode || "",
+    destination: QRCode?.destination ? [QRCode.destination] : ["product"],
+  };
+}
+
+/* Validates the given data */
+function validateFields(data) {
+  let errors = {};
+
+  Object.entries(data).forEach(([field, value]) => {
+    let message = undefined;
+    switch (field) {
+      case "title":
+        if (value.length === 0) {
+          message = "Please name your QR code";
+        }
+        break;
+      case "productId":
+        if (value.length === 0) {
+          message = "Please select a product";
+        }
+        break;
+    }
+
+    errors[field] = message;
+  });
+
+  return errors;
 }
