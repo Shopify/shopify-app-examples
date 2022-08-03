@@ -5,14 +5,22 @@ import topLevelAuthRedirect from "../helpers/top-level-auth-redirect.js";
 
 export default function applyAuthMiddleware(app) {
   app.get("/api/auth", async (req, res) => {
+    const shop = Shopify.Utils.sanitizeShop(req.query.shop);
+    if (!shop) {
+      res.status(500);
+      return res.send("No shop provided");
+    }
+
     if (!req.signedCookies[app.get("top-level-oauth-cookie")]) {
-      return res.redirect(`/api/auth/toplevel?shop=${req.query.shop}`);
+      return res.redirect(
+        `/api/auth/toplevel?shop=${encodeURIComponent(shop)}`
+      );
     }
 
     const redirectUrl = await Shopify.Auth.beginAuth(
       req,
       res,
-      req.query.shop,
+      shop,
       "/api/auth/callback",
       app.get("use-online-tokens")
     );
@@ -21,6 +29,12 @@ export default function applyAuthMiddleware(app) {
   });
 
   app.get("/api/auth/toplevel", (req, res) => {
+    const shop = Shopify.Utils.sanitizeShop(req.query.shop);
+    if (!shop) {
+      res.status(500);
+      return res.send("No shop provided");
+    }
+
     res.cookie(app.get("top-level-oauth-cookie"), "1", {
       signed: true,
       httpOnly: true,
@@ -33,7 +47,7 @@ export default function applyAuthMiddleware(app) {
       topLevelAuthRedirect({
         apiKey: Shopify.Context.API_KEY,
         hostName: Shopify.Context.HOST_NAME,
-        shop: req.query.shop,
+        shop,
       })
     );
   });
@@ -46,7 +60,8 @@ export default function applyAuthMiddleware(app) {
         req.query
       );
 
-      const host = req.query.host;
+      const host = Shopify.Utils.sanitizeHost(req.query.host, true);
+
       app.set(
         "active-shopify-shops",
         Object.assign(app.get("active-shopify-shops"), {
@@ -68,7 +83,11 @@ export default function applyAuthMiddleware(app) {
       });
 
       // Redirect to app with shop parameter upon auth
-      res.redirect(`/?shop=${session.shop}&host=${host}`);
+      res.redirect(
+        `/?shop=${encodeURIComponent(session.shop)}&host=${encodeURIComponent(
+          host
+        )}`
+      );
     } catch (e) {
       console.warn(e);
       switch (true) {
@@ -79,7 +98,13 @@ export default function applyAuthMiddleware(app) {
         case e instanceof Shopify.Errors.CookieNotFound:
         case e instanceof Shopify.Errors.SessionNotFound:
           // This is likely because the OAuth session cookie expired before the merchant approved the request
-          res.redirect(`/api/auth?shop=${req.query.shop}`);
+          const shop = Shopify.Utils.sanitizeShop(req.query.shop);
+          if (!shop) {
+            res.status(500);
+            return res.send("No shop provided");
+          }
+
+          res.redirect(`/api/auth?shop=${encodeURIComponent(shop)}`);
           break;
         default:
           res.status(500);

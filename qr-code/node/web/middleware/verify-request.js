@@ -15,11 +15,11 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
       app.get("use-online-tokens")
     );
 
-    let shop = req.query.shop;
+    let shop = Shopify.Utils.sanitizeShop(req.query.shop);
 
     if (session && shop && session.shop !== shop) {
       // The current request is for a different shop. Redirect gracefully.
-      return res.redirect(`/api/auth?shop=${shop}`);
+      return res.redirect(`/api/auth?shop=${encodeURIComponent(shop)}`);
     }
 
     if (session?.isActive()) {
@@ -42,6 +42,8 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
         }
       }
     }
+
+    const authUrl = `/api/auth?shop=${encodeURIComponent(shop)}`;
 
     if (returnHeader) {
       if (!shop) {
@@ -67,13 +69,10 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
 
       res.status(403);
       res.header("X-Shopify-API-Request-Failure-Reauthorize", "1");
-      res.header(
-        "X-Shopify-API-Request-Failure-Reauthorize-Url",
-        `/api/auth?shop=${shop}`
-      );
+      res.header("X-Shopify-API-Request-Failure-Reauthorize-Url", authUrl);
       res.end();
     } else {
-      res.redirect(`/api/auth?shop=${shop}`);
+      res.redirect(authUrl);
     }
   };
 }
