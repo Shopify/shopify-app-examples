@@ -24,7 +24,6 @@ The app is based on the [Shopify App Template for Node](https://github.com/Shopi
 This example app combines a number of third party open-source tools:
 
 - [Express](https://expressjs.com/) builds the backend.
-- [Vitest](https://vitest.dev/) tests the express backend.
 - [Vite](https://vitejs.dev/) builds the [React](https://reactjs.org/) frontend.
 - [React Router](https://reactrouter.com/) is used for routing. We wrap this with file-based routing.
 - [React Query](https://react-query.tanstack.com/) queries the Admin API.
