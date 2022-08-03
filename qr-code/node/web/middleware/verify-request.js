@@ -43,8 +43,6 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
       }
     }
 
-    const authUrl = `/api/auth?shop=${encodeURIComponent(shop)}`;
-
     if (returnHeader) {
       if (!shop) {
         if (session) {
@@ -69,10 +67,13 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
 
       res.status(403);
       res.header("X-Shopify-API-Request-Failure-Reauthorize", "1");
-      res.header("X-Shopify-API-Request-Failure-Reauthorize-Url", authUrl);
+      res.header(
+        "X-Shopify-API-Request-Failure-Reauthorize-Url",
+        `/api/auth?shop=${encodeURIComponent(shop)}`
+      );
       res.end();
     } else {
-      res.redirect(authUrl);
+      res.redirect(`/api/auth?shop=${encodeURIComponent(shop)}`);
     }
   };
 }

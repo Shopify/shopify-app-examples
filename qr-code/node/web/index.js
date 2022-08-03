@@ -9,6 +9,7 @@ import verifyRequest from "./middleware/verify-request.js";
 import applyQrCodeApiEndpoints from "./middleware/qr-code-api.js";
 import applyQrCodePublicEndpoints from "./middleware/qr-code-public.js";
 import { setupGDPRWebHooks } from "./gdpr.js";
+import { AppInstallations } from "./app_installations.js";
 import { QRCodesDB } from "./qr-codes-db.js";
 
 const USE_ONLINE_TOKENS = false;
@@ -47,13 +48,10 @@ Shopify.Context.initialize({
   SESSION_STORAGE: sessionDb,
 });
 
-// Storing the currently active shops in memory will force them to re-login when your server restarts. You should
-// persist this object in your app.
-const ACTIVE_SHOPIFY_SHOPS = {};
 Shopify.Webhooks.Registry.addHandler("APP_UNINSTALLED", {
   path: "/api/webhooks",
   webhookHandler: async (topic, shop, body) =>
-    delete ACTIVE_SHOPIFY_SHOPS[shop],
+    await AppInstallations.delete(shop),
 });
 
 // This sets up the mandatory GDPR webhooks. You’ll need to fill in the endpoint
@@ -71,7 +69,6 @@ export async function createServer(
 ) {
   const app = express();
   app.set("top-level-oauth-cookie", TOP_LEVEL_OAUTH_COOKIE);
-  app.set("active-shopify-shops", ACTIVE_SHOPIFY_SHOPS);
   app.set("use-online-tokens", USE_ONLINE_TOKENS);
 
   app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
@@ -132,12 +129,11 @@ export async function createServer(
       return res.send("No shop provided");
     }
 
-    // Detect whether we need to reinstall the app, any request from Shopify will
-    // include a shop in the query parameters.
-    if (app.get("active-shopify-shops")[shop] === undefined && shop) {
+    const appInstalled = await AppInstallations.includes(shop);
+
+    if (shop && !appInstalled) {
       res.redirect(`/api/auth?shop=${encodeURIComponent(shop)}`);
     } else {
-      // res.set('X-Shopify-App-Nothing-To-See-Here', '1');
       const fs = await import("fs");
       const fallbackFile = join(
         isProd ? PROD_INDEX_PATH : DEV_INDEX_PATH,
