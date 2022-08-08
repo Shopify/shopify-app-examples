@@ -62,13 +62,6 @@ export default function applyAuthMiddleware(app) {
 
       const host = Shopify.Utils.sanitizeHost(req.query.host, true);
 
-      app.set(
-        "active-shopify-shops",
-        Object.assign(app.get("active-shopify-shops"), {
-          [session.shop]: session.scope,
-        })
-      );
-
       const responses = await Shopify.Webhooks.Registry.registerAll({
         shop: session.shop,
         accessToken: session.accessToken,
