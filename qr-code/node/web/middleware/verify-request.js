@@ -1,4 +1,5 @@
 import { Shopify } from "@shopify/shopify-api";
+import redirectToAuth from "../helpers/redirect-to-auth.js";
 
 const TEST_GRAPHQL_QUERY = `
 {
@@ -19,7 +20,7 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
 
     if (session && shop && session.shop !== shop) {
       // The current request is for a different shop. Redirect gracefully.
-      return res.redirect(`/api/auth?shop=${encodeURIComponent(shop)}`);
+      return redirectToAuth(req, res, app);
     }
 
     if (session?.isActive()) {

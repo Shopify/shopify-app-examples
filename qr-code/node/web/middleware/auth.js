@@ -1,55 +1,11 @@
 import { Shopify } from "@shopify/shopify-api";
 import { gdprTopics } from "@shopify/shopify-api/dist/webhooks/registry.js";
 
-import topLevelAuthRedirect from "../helpers/top-level-auth-redirect.js";
+import redirectToAuth from "../helpers/redirect-to-auth.js";
 
 export default function applyAuthMiddleware(app) {
   app.get("/api/auth", async (req, res) => {
-    const shop = Shopify.Utils.sanitizeShop(req.query.shop);
-    if (!shop) {
-      res.status(500);
-      return res.send("No shop provided");
-    }
-
-    if (!req.signedCookies[app.get("top-level-oauth-cookie")]) {
-      return res.redirect(
-        `/api/auth/toplevel?shop=${encodeURIComponent(shop)}`
-      );
-    }
-
-    const redirectUrl = await Shopify.Auth.beginAuth(
-      req,
-      res,
-      shop,
-      "/api/auth/callback",
-      app.get("use-online-tokens")
-    );
-
-    res.redirect(redirectUrl);
-  });
-
-  app.get("/api/auth/toplevel", (req, res) => {
-    const shop = Shopify.Utils.sanitizeShop(req.query.shop);
-    if (!shop) {
-      res.status(500);
-      return res.send("No shop provided");
-    }
-
-    res.cookie(app.get("top-level-oauth-cookie"), "1", {
-      signed: true,
-      httpOnly: true,
-      sameSite: "strict",
-    });
-
-    res.set("Content-Type", "text/html");
-
-    res.send(
-      topLevelAuthRedirect({
-        apiKey: Shopify.Context.API_KEY,
-        hostName: Shopify.Context.HOST_NAME,
-        shop,
-      })
-    );
+    return redirectToAuth(req, res, app);
   });
 
   app.get("/api/auth/callback", async (req, res) => {
@@ -59,8 +15,6 @@ export default function applyAuthMiddleware(app) {
         res,
         req.query
       );
-
-      const host = Shopify.Utils.sanitizeHost(req.query.host, true);
 
       const responses = await Shopify.Webhooks.Registry.registerAll({
         shop: session.shop,
@@ -75,12 +29,13 @@ export default function applyAuthMiddleware(app) {
         }
       });
 
+      const host = Shopify.Utils.sanitizeHost(req.query.host);
+      const redirectUrl = Shopify.Context.IS_EMBEDDED_APP
+        ? Shopify.Utils.getEmbeddedAppUrl(req)
+        : `/?shop=${session.shop}&host=${encodeURIComponent(host)}`;
+
       // Redirect to app with shop parameter upon auth
-      res.redirect(
-        `/?shop=${encodeURIComponent(session.shop)}&host=${encodeURIComponent(
-          host
-        )}`
-      );
+      res.redirect(redirectUrl);
     } catch (e) {
       console.warn(e);
       switch (true) {
@@ -91,13 +46,7 @@ export default function applyAuthMiddleware(app) {
         case e instanceof Shopify.Errors.CookieNotFound:
         case e instanceof Shopify.Errors.SessionNotFound:
           // This is likely because the OAuth session cookie expired before the merchant approved the request
-          const shop = Shopify.Utils.sanitizeShop(req.query.shop);
-          if (!shop) {
-            res.status(500);
-            return res.send("No shop provided");
-          }
-
-          res.redirect(`/api/auth?shop=${encodeURIComponent(shop)}`);
+          redirectToAuth(req, res, app);
           break;
         default:
           res.status(500);

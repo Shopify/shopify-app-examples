@@ -1,5 +1,6 @@
 // @ts-check
 import { join } from "path";
+import { readFileSync } from "fs";
 import express from "express";
 import cookieParser from "cookie-parser";
 import { Shopify, ApiVersion } from "@shopify/shopify-api";
@@ -10,10 +11,10 @@ import applyQrCodeApiEndpoints from "./middleware/qr-code-api.js";
 import applyQrCodePublicEndpoints from "./middleware/qr-code-public.js";
 import { setupGDPRWebHooks } from "./gdpr.js";
 import { AppInstallations } from "./app_installations.js";
+import redirectToAuth from "./helpers/redirect-to-auth.js";
 import { QRCodesDB } from "./qr-codes-db.js";
 
 const USE_ONLINE_TOKENS = false;
-const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -68,9 +69,8 @@ export async function createServer(
   isProd = process.env.NODE_ENV === "production"
 ) {
   const app = express();
-  app.set("top-level-oauth-cookie", TOP_LEVEL_OAUTH_COOKIE);
-  app.set("use-online-tokens", USE_ONLINE_TOKENS);
 
+  app.set("use-online-tokens", USE_ONLINE_TOKENS);
   app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
 
   applyAuthMiddleware(app);
@@ -123,27 +123,33 @@ export async function createServer(
   }
 
   app.use("/*", async (req, res, next) => {
-    const shop = Shopify.Utils.sanitizeShop(req.query.shop);
-    if (!shop) {
+    if (typeof req.query.shop !== "string") {
       res.status(500);
       return res.send("No shop provided");
     }
 
+    const shop = Shopify.Utils.sanitizeShop(req.query.shop);
     const appInstalled = await AppInstallations.includes(shop);
 
-    if (shop && !appInstalled) {
-      res.redirect(`/api/auth?shop=${encodeURIComponent(shop)}`);
-    } else {
-      const fs = await import("fs");
-      const fallbackFile = join(
-        isProd ? PROD_INDEX_PATH : DEV_INDEX_PATH,
-        "index.html"
-      );
-      res
-        .status(200)
-        .set("Content-Type", "text/html")
-        .send(fs.readFileSync(fallbackFile));
+    if (!appInstalled) {
+      return redirectToAuth(req, res, app);
     }
+
+    if (Shopify.Context.IS_EMBEDDED_APP && req.query.embedded !== "1") {
+      const embeddedUrl = Shopify.Utils.getEmbeddedAppUrl(req);
+
+      return res.redirect(embeddedUrl + req.path);
+    }
+
+    const htmlFile = join(
+      isProd ? PROD_INDEX_PATH : DEV_INDEX_PATH,
+      "index.html"
+    );
+
+    return res
+      .status(200)
+      .set("Content-Type", "text/html")
+      .send(readFileSync(htmlFile));
   });
 
   return { app };
