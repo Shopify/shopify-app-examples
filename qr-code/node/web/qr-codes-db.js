@@ -4,7 +4,7 @@
 
 import sqlite3 from "sqlite3";
 import path from "path";
-import { Shopify } from "@shopify/shopify-api";
+import shopify from "./shopify.js";
 
 const DEFAULT_DB_FILE = path.join(process.cwd(), "qr_codes_db.sqlite");
 const DEFAULT_PURCHASE_QUANTITY = 1;
@@ -25,17 +25,6 @@ export const QRCodesDB = {
     destination,
   }) {
     await this.ready;
-
-    this.__validateQRCode({
-      shopDomain,
-      title,
-      productId,
-      variantId,
-      handle,
-      discountId,
-      discountCode,
-      destination,
-    });
 
     const query = `
       INSERT INTO ${this.qrCodesTableName}
@@ -71,17 +60,6 @@ export const QRCodesDB = {
     }
   ) {
     await this.ready;
-
-    this.__validateQRCode({
-      id,
-      title,
-      productId,
-      variantId,
-      handle,
-      discountId,
-      discountCode,
-      destination,
-    });
 
     const query = `
       UPDATE ${this.qrCodesTableName}
@@ -146,7 +124,7 @@ export const QRCodesDB = {
 
   /* The destination URL for a QR code is generated at query time */
   generateQrcodeDestinationUrl: function (qrcode) {
-    return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcodes/${qrcode.id}/scan`;
+    return `${shopify.api.config.hostScheme}://${shopify.api.config.hostName}/qrcodes/${qrcode.id}/scan`;
   },
 
   /* The behavior when a QR code is scanned */
@@ -169,7 +147,7 @@ export const QRCodesDB = {
     }
   },
 
-  // Private
+  /* Private */
 
   /*
     Used to check whether to create the database.
@@ -244,7 +222,7 @@ export const QRCodesDB = {
   },
 
   __generateQrcodeImageUrl: function (qrcode) {
-    return `${Shopify.Context.HOST_SCHEME}://${Shopify.Context.HOST_NAME}/qrcodes/${qrcode.id}/image`;
+    return `${shopify.api.config.hostScheme}://${shopify.api.config.hostName}/qrcodes/${qrcode.id}/image`;
   },
 
   __increaseScanCount: async function (qrcode) {
@@ -272,91 +250,7 @@ export const QRCodesDB = {
       quantity: DEFAULT_PURCHASE_QUANTITY,
     });
   },
-
-  __validateQRCode: function ({
-    id = null,
-    shopDomain = null,
-    title,
-    productId,
-    variantId,
-    handle,
-    destination,
-    discountId,
-    discountCode,
-  }) {
-    if (id && shopDomain) {
-      throw new QRCodeValidationError(
-        "Can't change the shopDomain of an existing code"
-      );
-    } else if (!id && !shopDomain) {
-      throw new QRCodeValidationError(
-        "Must pass in a shopDomain when creating a new code"
-      );
-    }
-
-    if (shopDomain) {
-      try {
-        const url = new URL(shopDomain);
-      } catch (e) {
-        throw new QRCodeValidationError(`Invalid shopDomain '${shopDomain}'`);
-      }
-    }
-
-    const missingRequired = [];
-    if (!title.length) {
-      missingRequired.push("title");
-    }
-    if (!productId.length) {
-      missingRequired.push("productId");
-    }
-    if (!variantId.length) {
-      missingRequired.push("variantId");
-    }
-    if (!handle.length) {
-      missingRequired.push("handle");
-    }
-    if (!destination.length) {
-      missingRequired.push("destination");
-    }
-
-    if (missingRequired.length) {
-      throw new QRCodeValidationError(
-        `Missing required fields: [${missingRequired.join(", ")}]`
-      );
-    }
-
-    const invalidIds = [];
-    if (!productId.match(/gid:\/\/shopify\/Product\/[0-9]+/)) {
-      invalidIds.push("productId");
-    }
-    if (!variantId.match(/gid:\/\/shopify\/ProductVariant\/[0-9]+/)) {
-      invalidIds.push("variantId");
-    }
-    if (
-      discountId &&
-      !discountId.match(/gid:\/\/shopify\/DiscountCodeNode\/[0-9]+/)
-    ) {
-      invalidIds.push("discountId");
-    }
-
-    if (invalidIds.length) {
-      throw new QRCodeValidationError(
-        `Invalid ids: [${invalidIds.join(", ")}]`
-      );
-    }
-
-    if (!["product", "checkout"].includes(destination)) {
-      throw new QRCodeValidationError(`Invalid destination '${destination}'`);
-    }
-  },
 };
-
-export class QRCodeValidationError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = "QRCodeValidationError";
-  }
-}
 
 /* Generate the URL to a product page */
 function productViewURL({ host, productHandle, discountCode }) {
@@ -382,7 +276,7 @@ function productCheckoutURL({ host, variantId, quantity = 1, discountCode }) {
     "$1"
   );
 
-  // The cart URL resolves to a checkout URL
+  /* The cart URL resolves to a checkout URL */
   url.pathname = `/cart/${id}:${quantity}`;
 
   if (discountCode) {

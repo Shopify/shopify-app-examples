@@ -5,6 +5,8 @@ import { useAppQuery } from "../../hooks";
 import { QRCodeForm } from "../../components";
 
 export default function QRCodeEdit() {
+  const breadcrumbs = [{ content: "QR codes", url: "/" }];
+
   const { id } = useParams();
 
   /*
@@ -23,8 +25,6 @@ export default function QRCodeEdit() {
       refetchOnReconnect: false,
     },
   });
-
-  const breadcrumbs = [{ content: "QR codes", url: "/" }];
 
   /* Loading action and markup that uses App Bridge and Polaris components */
   if (isLoading || isRefetching) {

@@ -1,5 +1,5 @@
 {
-  "name": "starter-react-frontend-app",
+  "name": "shopify-frontend-template-react",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -16,10 +16,10 @@
     "@shopify/app-bridge-react": "^3.1.0",
     "@shopify/app-bridge-utils": "^3.1.0",
     "@shopify/polaris": "^9.11.0",
-    "@shopify/react-form": "^1.1.19",
-    "@shopify/react-hooks": "^3.0.1",
+    "@shopify/react-form": "^2.4.1",
+    "@shopify/react-hooks": "^3.0.2",
     "@vitejs/plugin-react": "1.2.0",
-    "dayjs": "^1.11.2",
+    "dayjs": "^1.11.6",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-query": "^3.34.19",

@@ -31,6 +31,11 @@ import { useForm, useField, notEmptyString } from "@shopify/react-form";
 
 const NO_DISCOUNT_OPTION = { label: "No discount", value: "" };
 
+/*
+  The discount codes available in the store.
+
+  This variable will only have a value after retrieving discount codes from the API.
+*/
 const DISCOUNT_CODES = {};
 
 export function QRCodeForm({ QRCode: InitialQRCode }) {
@@ -82,7 +87,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
 
     Returns a "fields" object that is destructured to access each of the fields individually, so they can be used in other parts of the component.
 
-    Returns helpers to manage the form state, as well as the component state that is based on the form state.
+    Returns helpers to manage form state, as well as component state that is based on form state.
   */
   const {
     fields: {
@@ -164,9 +169,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
     isLoading: isLoadingDiscounts,
     isError: discountsError,
     /* useAppQuery makes a query to `/api/discounts`, which the backend authenticates before fetching the data from the Shopify GraphQL Admin API */
-  } = useAppQuery({
-    url: "/api/discounts",
-  });
+  } = useAppQuery({ url: "/api/discounts" });
 
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteQRCode = useCallback(async () => {
@@ -228,12 +231,15 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
     ? new URL(`/qrcodes/${QRCode.id}/image`, location.toString()).toString()
     : null;
 
+  /*
+    These variables are used to display product images, and will be populated when image URLs can be retrieved from the Admin.
+  */
   const imageSrc = selectedProduct?.images?.edges?.[0]?.node?.url;
   const originalImageSrc = selectedProduct?.images?.[0]?.originalSrc;
   const altText =
     selectedProduct?.images?.[0]?.altText || selectedProduct?.title;
 
-  /* The form layout, created using Polaris and App Bridge components */
+  /* The form layout, created using Polaris and App Bridge components. */
   return (
     <Stack vertical>
       {deletedProduct && (
@@ -430,7 +436,9 @@ function productViewURL({ host, productHandle, discountCode }) {
   const url = new URL(host);
   const productPath = `/products/${productHandle}`;
 
-  /* If a discount is selected, then build a URL to the selected discount that redirects to the selected product: /discount/{code}?redirect=/products/{product} */
+  /*
+    If a discount is selected, then build a URL to the selected discount that redirects to the selected product: /discount/{code}?redirect=/products/{product}
+  */
   if (discountCode) {
     url.pathname = `/discount/${discountCode}`;
     url.searchParams.append("redirect", productPath);
