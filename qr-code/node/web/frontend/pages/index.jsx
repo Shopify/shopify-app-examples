@@ -23,11 +23,11 @@ export default function HomePage() {
     isLoading,
 
     /*
-    react-query provides stale-while-revalidate caching.
-    By passing isRefetching to Index Tables we can show stale data and a loading state.
-    Once the query refetches, IndexTable updates and the loading state is removed.
-    This ensures a performant UX.
-  */
+      react-query provides stale-while-revalidate caching.
+      By passing isRefetching to Index Tables we can show stale data and a loading state.
+      Once the query refetches, IndexTable updates and the loading state is removed.
+      This ensures a performant UX.
+    */
     isRefetching,
   } = useAppQuery({
     url: "/api/qrcodes",

@@ -56,14 +56,14 @@ export async function getShopUrlFromSession(req, res) {
 }
 
 /*
-Expect body to contain
-title: string
-productId: string
-variantId: string
-handle: string
-discountId: string
-discountCode: string
-destination: string
+  Expect body to contain
+  title: string
+  productId: string
+  variantId: string
+  handle: string
+  discountId: string
+  discountCode: string
+  destination: string
 */
 export async function parseQrCodeBody(req, res) {
   return {
