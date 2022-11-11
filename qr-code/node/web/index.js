@@ -25,13 +25,13 @@ app.use("/api", shopify.app({ webhookHandlers: GDPRWebhookHandlers }));
 applyQrCodePublicEndpoints(app);
 
 // All endpoints after this point will require an active session
-app.use("/api/*", shopify.authenticatedRequest());
+app.use("/api/*", shopify.validateAuthenticatedSession());
 
 applyQrCodeApiEndpoints(app);
 
 app.use(serveStatic(STATIC_PATH, { index: false }));
 
-app.use("/*", shopify.ensureInstalled(), async (_req, res, _next) => {
+app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
   return res
     .status(200)
     .set("Content-Type", "text/html")
