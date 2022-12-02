@@ -18,6 +18,13 @@ const shopify = shopifyApp({
   api: {
     restResources,
   },
+  auth: {
+    path: "/api/auth",
+    callbackPath: "/api/auth/callback",
+  },
+  webhooks: {
+    path: "/api/webhooks",
+  },
   sessionStorage: sessionDb,
 });
 

@@ -1,5 +1,7 @@
 import { DeliveryMethod } from "@shopify/shopify-api";
 
+import shopify from "./shopify.js";
+
 export default {
   /**
    * Customers can request their data from a store owner. When this happens,
@@ -9,6 +11,7 @@ export default {
    */
   CUSTOMERS_DATA_REQUEST: {
     deliveryMethod: DeliveryMethod.Http,
+    callbackUrl: shopify.config.webhooks.path,
     callback: async (topic, shop, body) => {
       const payload = JSON.parse(body);
       // Payload has the following shape:
@@ -40,6 +43,7 @@ export default {
    */
   CUSTOMERS_REDACT: {
     deliveryMethod: DeliveryMethod.Http,
+    callbackUrl: shopify.config.webhooks.path,
     callback: async (topic, shop, body) => {
       const payload = JSON.parse(body);
       // Payload has the following shape:
@@ -68,6 +72,7 @@ export default {
    */
   SHOP_REDACT: {
     deliveryMethod: DeliveryMethod.Http,
+    callbackUrl: shopify.config.webhooks.path,
     callback: async (topic, shop, body) => {
       const payload = JSON.parse(body);
       // Payload has the following shape:
