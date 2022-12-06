@@ -1,5 +1,4 @@
-import { Shopify } from "@shopify/shopify-api";
-
+import shopify from "../shopify.js";
 import { QRCodesDB } from "../qr-codes-db.js";
 
 /*
@@ -34,13 +33,8 @@ const QR_CODE_ADMIN_QUERY = `
 `;
 
 export async function getQrCodeOr404(req, res, checkDomain = true) {
-  const id = req.params.id;
-  if (!id.match(/[0-9]+/)) {
-    res.status(404).send();
-  }
-
   try {
-    const response = await QRCodesDB.read(id);
+    const response = await QRCodesDB.read(req.params.id);
     if (
       response === undefined ||
       (checkDomain &&
@@ -58,8 +52,7 @@ export async function getQrCodeOr404(req, res, checkDomain = true) {
 }
 
 export async function getShopUrlFromSession(req, res) {
-  const session = await Shopify.Utils.loadCurrentSession(req, res, false);
-  return `https://${session.shop}`;
+  return `https://${res.locals.shopify.session.shop}`;
 }
 
 /*
@@ -101,8 +94,9 @@ export async function formatQrCodeResponse(req, res, rawCodeData) {
   });
 
   /* Instantiate a new GraphQL client to query the Shopify GraphQL Admin API */
-  const session = await Shopify.Utils.loadCurrentSession(req, res, false);
-  const client = new Shopify.Clients.Graphql(session.shop, session.accessToken);
+  const client = new shopify.api.clients.Graphql({
+    session: res.locals.shopify.session,
+  });
 
   /* Query the Shopify GraphQL Admin API */
   const adminData = await client.query({

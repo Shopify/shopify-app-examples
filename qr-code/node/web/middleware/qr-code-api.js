@@ -6,8 +6,9 @@
   The authorization header is added by App Bridge in the frontend code.
 */
 
-import { Shopify } from "@shopify/shopify-api";
+import express from "express";
 
+import shopify from "../shopify.js";
 import { QRCodesDB } from "../qr-codes-db.js";
 import {
   getQrCodeOr404,
@@ -58,22 +59,12 @@ const DISCOUNTS_QUERY = `
 `;
 
 export default function applyQrCodeApiEndpoints(app) {
+  app.use(express.json());
+
   app.get("/api/discounts", async (req, res) => {
-    const session = await Shopify.Utils.loadCurrentSession(
-      req,
-      res,
-      app.get("use-online-tokens")
-    );
-
-    if (!session) {
-      res.status(401).send("Could not find a Shopify session");
-      return;
-    }
-
-    const client = new Shopify.Clients.Graphql(
-      session.shop,
-      session.accessToken
-    );
+    const client = new shopify.api.clients.Graphql({
+      session: res.locals.shopify.session,
+    });
 
     /* Fetch all available discounts to list in the QR code form */
     const discounts = await client.query({

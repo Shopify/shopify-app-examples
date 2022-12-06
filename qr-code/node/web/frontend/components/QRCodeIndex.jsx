@@ -159,6 +159,7 @@ export function QRCodeIndex({ QRCodes, loading }) {
   );
 }
 
+/* A function to truncate long strings */
 function truncate(str, n) {
   return str.length > n ? str.substr(0, n - 1) + "…" : str;
 }
