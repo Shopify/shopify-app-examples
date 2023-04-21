@@ -18,7 +18,6 @@ import {
 import {
   ContextualSaveBar,
   ResourcePicker,
-  useAppBridge,
   useNavigate,
 } from "@shopify/app-bridge-react";
 import { ImageMajor, AlertMinor } from "@shopify/polaris-icons";
@@ -43,7 +42,6 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
   const [showResourcePicker, setShowResourcePicker] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(QRCode?.product);
   const navigate = useNavigate();
-  const appBridge = useAppBridge();
   const fetch = useAuthenticatedFetch();
   const deletedProduct = QRCode?.product?.title === "Deleted product";
 
@@ -165,11 +163,30 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
   );
 
   const {
-    data: discounts,
-    isLoading: isLoadingDiscounts,
-    isError: discountsError,
-    /* useAppQuery makes a query to `/api/discounts`, which the backend authenticates before fetching the data from the Shopify GraphQL Admin API */
-  } = useAppQuery({ url: "/api/discounts" });
+    data: shopData,
+    isLoading: isLoadingShopData,
+    isError: shopDataError,
+    /* useAppQuery makes a query to `/api/shop-data`, which the backend authenticates before fetching the data from the Shopify GraphQL Admin API */
+  } = useAppQuery({ url: "/api/shop-data" });
+
+  /*
+    This array is used in a select field in the form to manage discount options
+  */
+  const discountOptions = shopData
+    ? [
+        NO_DISCOUNT_OPTION,
+        ...shopData.codeDiscountNodes.edges.map(
+          ({ node: { id, codeDiscount } }) => {
+            DISCOUNT_CODES[id] = codeDiscount.codes.edges[0].node.code;
+
+            return {
+              label: codeDiscount.codes.edges[0].node.code,
+              value: id,
+            };
+          }
+        ),
+      ]
+    : [];
 
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteQRCode = useCallback(async () => {
@@ -194,7 +211,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
   const goToDestination = useCallback(() => {
     if (!selectedProduct) return;
     const data = {
-      host: appBridge.hostOrigin,
+      shopUrl: shopData?.shop.url,
       productHandle: handle.value || selectedProduct.handle,
       discountCode: discountCode.value || undefined,
       variantId: variantId.value,
@@ -206,26 +223,15 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
         : productCheckoutURL(data);
 
     window.open(targetURL, "_blank", "noreferrer,noopener");
-  }, [QRCode, selectedProduct, destination, discountCode, handle, variantId]);
-
-  /*
-    This array is used in a select field in the form to manage discount options
-  */
-  const discountOptions = discounts
-    ? [
-        NO_DISCOUNT_OPTION,
-        ...discounts.codeDiscountNodes.edges.map(
-          ({ node: { id, codeDiscount } }) => {
-            DISCOUNT_CODES[id] = codeDiscount.codes.edges[0].node.code;
-
-            return {
-              label: codeDiscount.codes.edges[0].node.code,
-              value: id,
-            };
-          }
-        ),
-      ]
-    : [];
+  }, [
+    QRCode,
+    selectedProduct,
+    destination,
+    discountCode,
+    handle,
+    variantId,
+    shopData,
+  ]);
 
   const QRCodeURL = QRCode
     ? new URL(`/qrcodes/${QRCode.id}/image`, location.toString()).toString()
@@ -378,7 +384,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
                   options={discountOptions}
                   onChange={handleDiscountChange}
                   value={discountId.value}
-                  disabled={isLoadingDiscounts || discountsError}
+                  disabled={isLoadingShopData || shopDataError}
                   labelHidden
                 />
               </Card>
@@ -407,7 +413,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
               <Button
                 fullWidth
                 onClick={goToDestination}
-                disabled={!selectedProduct}
+                disabled={!selectedProduct || isLoadingShopData}
               >
                 Go to destination
               </Button>
@@ -432,8 +438,8 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
 }
 
 /* Builds a URL to the selected product */
-function productViewURL({ host, productHandle, discountCode }) {
-  const url = new URL(host);
+function productViewURL({ shopUrl, productHandle, discountCode }) {
+  const url = new URL(shopUrl);
   const productPath = `/products/${productHandle}`;
 
   /*
@@ -450,8 +456,13 @@ function productViewURL({ host, productHandle, discountCode }) {
 }
 
 /* Builds a URL to a checkout that contains the selected product */
-function productCheckoutURL({ host, variantId, quantity = 1, discountCode }) {
-  const url = new URL(host);
+function productCheckoutURL({
+  shopUrl,
+  variantId,
+  quantity = 1,
+  discountCode,
+}) {
+  const url = new URL(shopUrl);
   const id = variantId.replace(
     /gid:\/\/shopify\/ProductVariant\/([0-9]+)/,
     "$1"

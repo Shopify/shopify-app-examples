@@ -17,8 +17,11 @@ import {
   formatQrCodeResponse,
 } from "../helpers/qr-codes.js";
 
-const DISCOUNTS_QUERY = `
-  query discounts($first: Int!) {
+const SHOP_DATA_QUERY = `
+  query shopData($first: Int!) {
+    shop {
+      url
+    }
     codeDiscountNodes(first: $first) {
       edges {
         node {
@@ -61,22 +64,22 @@ const DISCOUNTS_QUERY = `
 export default function applyQrCodeApiEndpoints(app) {
   app.use(express.json());
 
-  app.get("/api/discounts", async (req, res) => {
+  app.get("/api/shop-data", async (req, res) => {
     const client = new shopify.api.clients.Graphql({
       session: res.locals.shopify.session,
     });
 
-    /* Fetch all available discounts to list in the QR code form */
-    const discounts = await client.query({
+    /* Fetch shop data, including all available discounts to list in the QR code form */
+    const shopData = await client.query({
       data: {
-        query: DISCOUNTS_QUERY,
+        query: SHOP_DATA_QUERY,
         variables: {
           first: 25,
         },
       },
     });
 
-    res.send(discounts.body.data);
+    res.send(shopData.body.data);
   });
 
   app.post("/api/qrcodes", async (req, res) => {
