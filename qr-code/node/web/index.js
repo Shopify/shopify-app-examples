@@ -10,7 +10,10 @@ import GDPRWebhookHandlers from "./gdpr.js";
 import applyQrCodeApiEndpoints from "./middleware/qr-code-api.js";
 import applyQrCodePublicEndpoints from "./middleware/qr-code-public.js";
 
-const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
+const PORT = parseInt(
+  process.env.BACKEND_PORT || process.env.PORT || "3000",
+  10
+);
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
