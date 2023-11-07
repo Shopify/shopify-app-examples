@@ -5,7 +5,7 @@ import express from "express";
 import serveStatic from "serve-static";
 
 import shopify from "./shopify.js";
-import GDPRWebhookHandlers from "./gdpr.js";
+import PrivacyWebhookHandlers from "./privacy.js";
 
 import applyQrCodeApiEndpoints from "./middleware/qr-code-api.js";
 import applyQrCodePublicEndpoints from "./middleware/qr-code-public.js";
@@ -31,7 +31,7 @@ app.get(
 );
 app.post(
   shopify.config.webhooks.path,
-  shopify.processWebhooks({ webhookHandlers: GDPRWebhookHandlers })
+  shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
 );
 
 applyQrCodePublicEndpoints(app);
